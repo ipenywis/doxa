@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react"
-import { usePathname } from "next/navigation"
+import { useLocation } from "@tanstack/react-router"
 import { LuChevronDown, LuChevronRight } from "react-icons/lu"
 
 import { Paths } from "@/lib/pageroutes"
@@ -22,7 +22,8 @@ function isRoute(
 export default function SubLink(
   props: Paths & { level: number; isSheet: boolean }
 ) {
-  const path = usePathname()
+  const location = useLocation()
+  const path = location.pathname
   const [isOpen, setIsOpen] = useState(true)
 
   useEffect(() => {

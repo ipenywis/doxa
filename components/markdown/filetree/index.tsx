@@ -1,10 +1,15 @@
 "use client"
 
-import dynamic from "next/dynamic"
+import { lazy, Suspense } from "react"
 
-export const FileTree = dynamic(
-  () => import("@/components/markdown/filetree/component"),
-  {
-    ssr: false,
-  }
+const FileTreeComponent = lazy(
+  () => import("@/components/markdown/filetree/component")
 )
+
+export function FileTree(props: any) {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <FileTreeComponent {...props} />
+    </Suspense>
+  )
+}

@@ -1,7 +1,7 @@
-import Link from "next/link"
 import { GitHubLink, Navigations } from "@/settings/navigation"
 import { LuArrowUpRight, LuGithub } from "react-icons/lu"
 
+import { Link } from "@/lib/transition"
 import { buttonVariants } from "@/components/ui/button"
 import { SheetClose } from "@/components/ui/sheet"
 import Anchor from "@/components/anchor"
@@ -29,7 +29,7 @@ export function Navbar() {
         <Search />
         <div className="flex gap-2 sm:ml-0">
           {GitHubLink.href && (
-            <Link
+            <a
               href={GitHubLink.href}
               className={buttonVariants({ variant: "outline", size: "icon" })}
               target="_blank"
@@ -38,7 +38,7 @@ export function Navbar() {
               aria-label="View the repository on GitHub"
             >
               <LuGithub className="h-[1.1rem] w-[1.1rem]" />
-            </Link>
+            </a>
           )}
           <ModeToggle />
         </div>

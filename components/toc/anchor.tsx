@@ -1,6 +1,5 @@
 "use client"
 
-import Link from "next/link"
 import clsx from "clsx"
 
 import { ScrollArea } from "@/components/ui/scroll-area"
@@ -33,12 +32,11 @@ export function TableAnchor({ tocs }: TableAnchorProps) {
       <ScrollArea className="pt-0.5 pb-4">
         <div className="flex flex-col gap-2.5 text-sm text-foreground">
           {tocs.map(({ href, level, text }) => (
-            <Link
+            <a
               key={href}
               href={href}
               title={text}
               aria-label={text}
-              scroll={false}
               onClick={(e) => handleSmoothScroll(e, href)}
               className={clsx({
                 "pl-0": level == 2,
@@ -47,7 +45,7 @@ export function TableAnchor({ tocs }: TableAnchorProps) {
               })}
             >
               {text}
-            </Link>
+            </a>
           ))}
         </div>
       </ScrollArea>
