@@ -1,80 +1,63 @@
-import { startTransition, useCallback, useMemo } from "react"
-import {
-  AppRouterInstance,
-  NavigateOptions,
-} from "next/dist/shared/lib/app-router-context.shared-runtime"
-import { useRouter as useNextRouter } from "next/navigation"
+import { useCallback } from "react"
+import { useNavigate } from "@tanstack/react-router"
 
-import { useSetFinishViewTransition } from "./transition-context"
-
-export interface TransitionOptions {
-  onTransitionReady?: () => void
-}
-
-type NavigateOptionsWithTransition = NavigateOptions & TransitionOptions
-
-export type TransitionRouter = AppRouterInstance & {
-  push: (href: string, options?: NavigateOptionsWithTransition) => void
-  replace: (href: string, options?: NavigateOptionsWithTransition) => void
+interface NavigateOptions {
+  scroll?: boolean
 }
 
 export function useTransitionRouter() {
-  const router = useNextRouter()
-  const finishViewTransition = useSetFinishViewTransition()
-
-  const triggerTransition = useCallback(
-    (cb: () => void, { onTransitionReady }: TransitionOptions = {}) => {
-      if ("startViewTransition" in document) {
-        const transition = document.startViewTransition(
-          () =>
-            new Promise<void>((resolve) => {
-              startTransition(() => {
-                cb()
-                finishViewTransition(() => resolve)
-              })
-            })
-        )
-
-        if (onTransitionReady) {
-          transition.ready.then(onTransitionReady)
-        }
-      } else {
-        cb()
-      }
-    },
-    [finishViewTransition]
-  )
+  const navigate = useNavigate()
 
   const push = useCallback(
-    (
-      href: string,
-      { onTransitionReady, ...options }: NavigateOptionsWithTransition = {}
-    ) => {
-      triggerTransition(() => router.push(href, options), {
-        onTransitionReady,
-      })
+    (href: string, options?: NavigateOptions) => {
+      if ("startViewTransition" in document) {
+        ;(document as any).startViewTransition(() => {
+          navigate({ to: href })
+        })
+      } else {
+        navigate({ to: href })
+      }
     },
-    [triggerTransition, router]
+    [navigate]
   )
 
   const replace = useCallback(
-    (
-      href: string,
-      { onTransitionReady, ...options }: NavigateOptionsWithTransition = {}
-    ) => {
-      triggerTransition(() => router.replace(href, options), {
-        onTransitionReady,
-      })
+    (href: string, options?: NavigateOptions) => {
+      if ("startViewTransition" in document) {
+        ;(document as any).startViewTransition(() => {
+          navigate({ to: href, replace: true })
+        })
+      } else {
+        navigate({ to: href, replace: true })
+      }
     },
-    [triggerTransition, router]
+    [navigate]
   )
 
-  return useMemo<TransitionRouter>(
-    () => ({
-      ...router,
-      push,
-      replace,
-    }),
-    [push, replace, router]
-  )
+  const back = useCallback(() => {
+    if ("startViewTransition" in document) {
+      ;(document as any).startViewTransition(() => {
+        window.history.back()
+      })
+    } else {
+      window.history.back()
+    }
+  }, [])
+
+  const forward = useCallback(() => {
+    if ("startViewTransition" in document) {
+      ;(document as any).startViewTransition(() => {
+        window.history.forward()
+      })
+    } else {
+      window.history.forward()
+    }
+  }, [])
+
+  return {
+    push,
+    replace,
+    back,
+    forward,
+  }
 }

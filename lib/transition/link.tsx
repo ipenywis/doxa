@@ -1,9 +1,5 @@
-import { type UrlObject } from "url"
-
 import { useCallback, type ComponentProps, type MouseEvent } from "react"
-import NextLink from "next/link"
-
-import { useTransitionRouter } from "./use-transition-router"
+import { Link as RouterLink, useNavigate } from "@tanstack/react-router"
 
 function isModifiedEvent(event: MouseEvent): boolean {
   const eventTarget = event.currentTarget as HTMLAnchorElement | SVGAElement
@@ -30,15 +26,30 @@ function shouldPreserveDefault(e: MouseEvent<HTMLAnchorElement>): boolean {
   return false
 }
 
-const formatUrl = (url: string | UrlObject): string =>
-  typeof url === "string"
-    ? url
-    : new URL(url.pathname || "", window.location.href).toString()
+interface LinkProps extends Omit<ComponentProps<"a">, "href"> {
+  href: string
+  replace?: boolean
+  scroll?: boolean
+}
 
-export function Link(props: ComponentProps<typeof NextLink>) {
-  const router = useTransitionRouter()
+export function Link({
+  href,
+  onClick,
+  replace,
+  scroll,
+  children,
+  ...rest
+}: LinkProps) {
+  const navigate = useNavigate()
 
-  const { as, href, onClick, replace, scroll, ...rest } = props
+  // Handle external links
+  if (href.startsWith("http") || href.startsWith("//")) {
+    return (
+      <a href={href} {...rest}>
+        {children}
+      </a>
+    )
+  }
 
   const handleClick = useCallback(
     (e: MouseEvent<HTMLAnchorElement>) => {
@@ -57,12 +68,20 @@ export function Link(props: ComponentProps<typeof NextLink>) {
 
         e.preventDefault()
 
-        const navigate = replace ? router.replace : router.push
-        navigate(formatUrl(as ?? href), { scroll: scroll ?? true })
+        const viewTransition = (document as any).startViewTransition(() => {
+          navigate({
+            to: href,
+            replace,
+          })
+        })
       }
     },
-    [onClick, href, as, replace, scroll, router]
+    [onClick, href, replace, navigate]
   )
 
-  return <NextLink {...rest} href={href} onClick={handleClick} as={as} />
+  return (
+    <RouterLink to={href} onClick={handleClick} {...rest}>
+      {children}
+    </RouterLink>
+  )
 }

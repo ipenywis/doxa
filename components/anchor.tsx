@@ -1,9 +1,9 @@
 "use client"
 
 import { ComponentProps } from "react"
-import { usePathname } from "next/navigation"
-import { Link } from "lib/transition"
+import { useLocation } from "@tanstack/react-router"
 
+import { Link } from "@/lib/transition"
 import { cn } from "@/lib/utils"
 
 type AnchorProps = ComponentProps<typeof Link> & {
@@ -20,7 +20,9 @@ export default function Anchor({
   children,
   ...props
 }: AnchorProps) {
-  const path = usePathname()
+  const location = useLocation()
+  const path = location.pathname
+
   let isMatch = absolute
     ? props.href.toString().split("/")[1] == path.split("/")[1]
     : path === props.href

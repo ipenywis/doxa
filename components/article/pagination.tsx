@@ -1,7 +1,22 @@
-import { Link } from "lib/transition"
 import { LuChevronLeft, LuChevronRight } from "react-icons/lu"
 
-import { getPreviousNext } from "@/lib/markdown"
+import { PageRoutes } from "@/lib/pageroutes"
+import { Link } from "@/lib/transition"
+
+function getPreviousNext(path: string) {
+  const index = PageRoutes.findIndex(
+    (route) => route.href === `/${path.replace("docs/", "")}`
+  )
+
+  if (index === -1) {
+    return { prev: null, next: null }
+  }
+
+  const prev = index > 0 ? PageRoutes[index - 1] : null
+  const next = index < PageRoutes.length - 1 ? PageRoutes[index + 1] : null
+
+  return { prev, next }
+}
 
 export function Pagination({ pathname }: { pathname: string }) {
   const res = getPreviousNext(pathname)

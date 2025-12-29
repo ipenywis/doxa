@@ -1,8 +1,8 @@
 import { PropsWithChildren } from "react"
-import Image from "next/image"
 import { iconMap } from "@/settings/icons"
 import clsx from "clsx"
-import { Link } from "lib/transition"
+
+import { Link } from "@/lib/transition"
 
 type CardProps = PropsWithChildren & {
   subtitle?: string
@@ -63,11 +63,12 @@ export function Card({
           </p>
         )}
         {image && variant === "image" && (
-          <Image
+          <img
             src={image}
             alt={title}
             width={400}
             height={400}
+            loading="lazy"
             className="m-0! h-[180px] w-full rounded-none! border-0 object-cover object-center"
           />
         )}

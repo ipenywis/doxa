@@ -1,4 +1,3 @@
-import Link from "next/link"
 import { GitHubLink } from "@/settings/navigation"
 import { LuArrowUpRight } from "react-icons/lu"
 
@@ -17,7 +16,7 @@ export default function RightSideBar({ slug, title }: SideBarEdit) {
     <div className="flex flex-col gap-3 pl-2">
       <h3 className="text-sm font-semibold">Content</h3>
       <div className="flex flex-col gap-2">
-        <Link
+        <a
           href={feedbackUrl}
           title="Give Feedback"
           aria-label="Give Feedback"
@@ -27,8 +26,8 @@ export default function RightSideBar({ slug, title }: SideBarEdit) {
         >
           <LuArrowUpRight className="mr-1 inline-block h-4 w-4" />
           <span>Feedback</span>
-        </Link>
-        <Link
+        </a>
+        <a
           href={editUrl}
           title="Edit this page"
           aria-label="Edit this page"
@@ -38,7 +37,7 @@ export default function RightSideBar({ slug, title }: SideBarEdit) {
         >
           <LuArrowUpRight className="mr-1 inline-block h-4 w-4" />
           <span>Edit page</span>
-        </Link>
+        </a>
       </div>
     </div>
   )

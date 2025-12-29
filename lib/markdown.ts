@@ -1,9 +1,12 @@
 import { createReadStream, promises as fs } from "fs"
 import path from "path"
 
+import { createElement } from "react"
+import * as runtime from "react/jsx-runtime"
 import { GitHubLink } from "@/settings/navigation"
+import { compile, run } from "@mdx-js/mdx"
+import matter from "gray-matter"
 import type { Element, Text } from "hast"
-import { compileMDX } from "next-mdx-remote/rsc"
 import rehypeAutolinkHeadings from "rehype-autolink-headings"
 import rehypeCodeTitles from "rehype-code-titles"
 import rehypeKatex from "rehype-katex"
@@ -30,25 +33,31 @@ interface BaseMdxFrontmatter {
 }
 
 async function parseMdx<Frontmatter>(rawMdx: string) {
-  return await compileMDX<Frontmatter>({
-    source: rawMdx,
-    options: {
-      parseFrontmatter: true,
-      mdxOptions: {
-        rehypePlugins: [
-          preCopy,
-          rehypeCodeTitles,
-          rehypeKatex,
-          rehypePrism,
-          rehypeSlug,
-          rehypeAutolinkHeadings,
-          postCopy,
-        ],
-        remarkPlugins: [remarkGfm],
-      },
-    },
-    components,
+  const { content, data } = matter(rawMdx)
+
+  const compiledMdx = await compile(content, {
+    outputFormat: "function-body",
+    rehypePlugins: [
+      preCopy,
+      rehypeCodeTitles,
+      rehypeKatex,
+      rehypePrism,
+      rehypeSlug,
+      rehypeAutolinkHeadings,
+      postCopy,
+    ],
+    remarkPlugins: [remarkGfm],
   })
+
+  const { default: MDXContent } = await run(String(compiledMdx), {
+    ...runtime,
+    baseUrl: import.meta.url,
+  })
+
+  return {
+    frontmatter: data as Frontmatter,
+    content: createElement(MDXContent, { components }),
+  }
 }
 
 const documentPath = (slug: string) => {

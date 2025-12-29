@@ -1,6 +1,6 @@
 /* eslint-disable react-hooks/refs */
 import { use, useEffect, useRef, useState } from "react"
-import { usePathname } from "next/navigation"
+import { useLocation } from "@tanstack/react-router"
 
 import { useHash } from "./use-hash"
 
@@ -8,7 +8,8 @@ const suspenseBoundaries = new Set<string>()
 let suspenseResolve: (() => void) | null = null
 
 export function useBrowserNativeTransitions() {
-  const pathname = usePathname()
+  const location = useLocation()
+  const pathname = location.pathname
   const currentPathname = useRef(pathname)
 
   const [currentViewTransition, setCurrentViewTransition] = useState<
@@ -28,7 +29,7 @@ export function useBrowserNativeTransitions() {
       })
 
       const pendingStartViewTransition = new Promise<void>((resolve) => {
-        document.startViewTransition(() => {
+        ;(document as any).startViewTransition(() => {
           resolve()
           return pendingViewTransition
         })

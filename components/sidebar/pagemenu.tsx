@@ -1,13 +1,14 @@
 "use client"
 
-import { usePathname } from "next/navigation"
+import { useLocation } from "@tanstack/react-router"
 
 import { Routes } from "@/lib/pageroutes"
 import { Separator } from "@/components/ui/separator"
 import SubLink from "@/components/sidebar/sublink"
 
 export function PageMenu({ isSheet = false }) {
-  const pathname = usePathname()
+  const location = useLocation()
+  const pathname = location.pathname
   if (!pathname.startsWith("/docs")) return null
 
   return (
