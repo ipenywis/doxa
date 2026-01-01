@@ -1,11 +1,10 @@
 "use client"
 
+import { ArticleBreadcrumb } from "@/src/components/article/breadcrumb"
+import { Pagination } from "@/src/components/article/pagination"
+import { TableOfContents } from "@/src/components/toc"
+import { PageRoutes } from "@/src/lib/pageroutes"
 import { createFileRoute } from "@tanstack/react-router"
-
-import { PageRoutes } from "@/lib/pageroutes"
-import { ArticleBreadcrumb } from "@/components/article/breadcrumb"
-import { Pagination } from "@/components/article/pagination"
-import { TableOfContents } from "@/components/toc"
 
 export const Route = createFileRoute("/docs/$")({
   component: DocsContent,

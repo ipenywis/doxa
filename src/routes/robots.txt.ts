@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router"
 
-import { Settings } from "@/types/settings"
+import { Settings } from "@/src/types/settings"
 
 export const Route = createFileRoute("/robots/txt")({
   server: {
