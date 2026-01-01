@@ -1,6 +1,8 @@
 /// <reference types="vite/client" />
 import type { ReactNode } from "react"
-import { Providers } from "@/providers"
+import { Footer } from "@/src/components/navigation/footer"
+import { Navbar } from "@/src/components/navigation/navbar"
+import { Providers } from "@/src/providers"
 import {
   createRootRoute,
   HeadContent,
@@ -8,11 +10,9 @@ import {
   Scripts,
 } from "@tanstack/react-router"
 
-import { Settings } from "@/types/settings"
-import { Footer } from "@/components/navigation/footer"
-import { Navbar } from "@/components/navigation/navbar"
+import { Settings } from "@/src/types/settings"
 
-import "@/styles/globals.css"
+import "@/src/styles/globals.css"
 
 export const Route = createRootRoute({
   head: () => ({

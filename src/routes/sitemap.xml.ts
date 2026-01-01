@@ -1,7 +1,7 @@
+import { PageRoutes } from "@/src/lib/pageroutes"
 import { createFileRoute } from "@tanstack/react-router"
 
-import { Settings } from "@/types/settings"
-import { PageRoutes } from "@/lib/pageroutes"
+import { Settings } from "@/src/types/settings"
 
 export const Route = createFileRoute("/sitemap/xml")({
   server: {

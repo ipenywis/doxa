@@ -1,10 +1,10 @@
-import { GitHubLink } from "@/settings/navigation"
+import { buttonVariants } from "@/src/components/ui/button"
+import { PageRoutes } from "@/src/lib/pageroutes"
+import { Link } from "@/src/lib/transition"
+import { GitHubLink } from "@/src/settings/navigation"
 import { createFileRoute } from "@tanstack/react-router"
 
-import { Settings } from "@/types/settings"
-import { PageRoutes } from "@/lib/pageroutes"
-import { Link } from "@/lib/transition"
-import { buttonVariants } from "@/components/ui/button"
+import { Settings } from "@/src/types/settings"
 
 export const Route = createFileRoute("/")({
   component: Home,
