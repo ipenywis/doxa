@@ -3,12 +3,12 @@ name: Documents Search CI
 permissions:
   contents: read
 
-on:
-  push:
-    branches:
-      # - main
-  pull_request:
-    branches:
+# on:
+#   push:
+#     branches:
+#       # - main
+#   pull_request:
+#     branches:
       # - main
 
 jobs:
