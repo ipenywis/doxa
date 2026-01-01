@@ -1,4 +1,4 @@
-import { Documents } from "@/src/settings/documents"
+import { Documents } from "@/src/contents/settings/documents"
 
 export type Paths =
   | {

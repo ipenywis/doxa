@@ -13,7 +13,7 @@ import {
 import { Input } from "@/src/components/ui/input"
 import { ScrollArea } from "@/src/components/ui/scroll-area"
 import { advanceSearch, cn, debounce, highlight, search } from "@/src/lib/utils"
-import { Documents } from "@/src/settings/documents"
+import { Documents } from "@/src/contents/settings/documents"
 import { LuFileText, LuSearch } from "react-icons/lu"
 
 interface Document {
