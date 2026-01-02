@@ -17,6 +17,16 @@ export default defineConfig({
       prerender: {
         enabled: true,
         crawlLinks: true,
+        autoSubfolderIndex: true,
+        autoStaticPathsDiscovery: true,
+        concurrency: 14,
+        retryCount: 2,
+        retryDelay: 1000,
+        maxRedirects: 5,
+        failOnError: true,
+        onSuccess: ({ page }) => {
+          console.log("Prerendered path:", page.path)
+        }
       },
     }),
     viteReact(),

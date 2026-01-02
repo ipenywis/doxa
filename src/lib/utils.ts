@@ -1,4 +1,3 @@
-import searchJson from "@/public/search-data/documents.json"
 import { Paths } from "@/src/lib/pageroutes"
 import { clsx, type ClassValue } from "clsx"
 import { twMerge } from "tailwind-merge"
@@ -25,7 +24,25 @@ export interface search {
   relevance?: number
 }
 
-const searchData = searchJson as SearchDocument[]
+// Cache for search data loaded at runtime
+let searchDataCache: SearchDocument[] | null = null
+
+async function getSearchData(): Promise<SearchDocument[]> {
+  if (searchDataCache) return searchDataCache
+
+  try {
+    const response = await fetch("/search-data/documents.json")
+    if (!response.ok) {
+      console.warn("Failed to load search data")
+      return []
+    }
+    searchDataCache = await response.json()
+    return searchDataCache || []
+  } catch {
+    console.warn("Failed to load search data")
+    return []
+  }
+}
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function memoize<T extends (...args: any[]) => any>(fn: T): T {
@@ -272,12 +289,13 @@ function extractSnippet(content: string, query: string): string {
   return snippet
 }
 
-export function advanceSearch(query: string) {
+export async function advanceSearch(query: string) {
   const lowerQuery = query.toLowerCase().trim()
   const queryWords = lowerQuery.split(/\s+/).filter((word) => word.length >= 3)
 
   if (queryWords.length === 0) return []
 
+  const searchData = await getSearchData()
   const chunks = chunkArray(searchData, 100)
 
   const results = chunks.flatMap((chunk) =>

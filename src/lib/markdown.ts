@@ -1,12 +1,7 @@
-import { createReadStream, promises as fs } from "fs"
-import path from "path"
-
-import { createElement } from "react"
-import * as runtime from "react/jsx-runtime"
-import { components } from "@/src/lib/components"
 import { PageRoutes } from "@/src/lib/pageroutes"
 import { GitHubLink } from "@/src/settings/navigation"
-import { compile, run } from "@mdx-js/mdx"
+import { compile } from "@mdx-js/mdx"
+import { createServerFn } from "@tanstack/react-start"
 import matter from "gray-matter"
 import type { Element, Text } from "hast"
 import rehypeAutolinkHeadings from "rehype-autolink-headings"
@@ -26,13 +21,13 @@ declare module "hast" {
   }
 }
 
-interface BaseMdxFrontmatter {
+export interface BaseMdxFrontmatter {
   title: string
   description: string
   keywords: string
 }
 
-async function parseMdx<Frontmatter>(rawMdx: string) {
+async function compileMdx<Frontmatter>(rawMdx: string) {
   const { content, data } = matter(rawMdx)
 
   const compiledMdx = await compile(content, {
@@ -49,35 +44,22 @@ async function parseMdx<Frontmatter>(rawMdx: string) {
     remarkPlugins: [remarkGfm],
   })
 
-  const { default: MDXContent } = await run(String(compiledMdx), {
-    ...runtime,
-    baseUrl: import.meta.url,
-  })
-
   return {
     frontmatter: data as Frontmatter,
-    content: createElement(MDXContent, { components }),
+    code: String(compiledMdx),
   }
 }
 
-const documentPath = (slug: string) => {
+const getDocumentPath = (slug: string) => {
   return Settings.gitload
-    ? `${GitHubLink.href}/raw/main/contents/docs/${slug}/index.mdx`
-    : path.join(process.cwd(), "/contents/docs/", `${slug}/index.mdx`)
+    ? `${GitHubLink.href}/raw/main/src/contents/docs/${slug}/index.mdx`
+    : `${process.cwd()}/src/contents/docs/${slug}/index.mdx`
 }
 
-const getDocumentPath = (() => {
-  const cache = new Map<string, string>()
-  return (slug: string) => {
-    if (!cache.has(slug)) {
-      cache.set(slug, documentPath(slug))
-    }
-    return cache.get(slug)!
-  }
-})()
-
-export async function getDocument(slug: string) {
-  try {
+// Server function to read file content
+const readFileContent = createServerFn({ method: "GET" })
+  .inputValidator((slug: string) => slug)
+  .handler(async ({ data: slug }) => {
     const contentPath = getDocumentPath(slug)
     let rawMdx = ""
     let lastUpdated: string | null = null
@@ -92,17 +74,26 @@ export async function getDocument(slug: string) {
       rawMdx = await response.text()
       lastUpdated = response.headers.get("Last-Modified") ?? null
     } else {
+      // Dynamic import for server-only modules
+      const fs = await import("fs/promises")
       rawMdx = await fs.readFile(contentPath, "utf-8")
       const stats = await fs.stat(contentPath)
       lastUpdated = stats.mtime.toISOString()
     }
 
-    const parsedMdx = await parseMdx<BaseMdxFrontmatter>(rawMdx)
+    return { rawMdx, lastUpdated }
+  })
+
+export async function getDocument(slug: string) {
+  try {
+    const { rawMdx, lastUpdated } = await readFileContent({ data: slug })
+
+    const compiled = await compileMdx<BaseMdxFrontmatter>(rawMdx)
     const tocs = await getTable(slug)
 
     return {
-      frontmatter: parsedMdx.frontmatter,
-      content: parsedMdx.content,
+      frontmatter: compiled.frontmatter,
+      code: compiled.code,
       tocs,
       lastUpdated,
     }
@@ -112,7 +103,66 @@ export async function getDocument(slug: string) {
   }
 }
 
+// Server function that can be called from client components
+export const fetchDocument = createServerFn({ method: "GET" })
+  .inputValidator((slug: string) => slug)
+  .handler(async ({ data: slug }) => {
+    try {
+      const { rawMdx, lastUpdated } = await readFileContent({ data: slug })
+
+      const compiled = await compileMdx<BaseMdxFrontmatter>(rawMdx)
+
+      // Get table of contents inline to avoid nested server function calls
+      const extractedHeadings: { level: number; text: string; href: string }[] = []
+      const headingsRe = /^(#{2,4})\s(.+)$/gm
+      let match
+      while ((match = headingsRe.exec(rawMdx)) !== null) {
+        const level = match[1].length
+        const text = match[2].trim()
+        extractedHeadings.push({
+          level,
+          text,
+          href: `#${text.trim().toLowerCase().replace(/\s+/g, "-").replace(/[^a-zA-Z0-9\u4e00-\u9fa5\-_]/g, "")}`,
+        })
+      }
+
+      return {
+        frontmatter: compiled.frontmatter,
+        code: compiled.code,
+        tocs: extractedHeadings,
+        lastUpdated,
+      }
+    } catch (err) {
+      console.error(err)
+      return null
+    }
+  })
+
 const headingsRegex = /^(#{2,4})\s(.+)$/gm
+
+// Server function to get raw MDX for table of contents
+const readRawMdx = createServerFn({ method: "GET" })
+  .inputValidator((slug: string) => slug)
+  .handler(async ({ data: slug }) => {
+    let rawMdx = ""
+
+    if (Settings.gitload) {
+      const contentPath = `${GitHubLink.href}/raw/main/src/contents/docs/${slug}/index.mdx`
+      const response = await fetch(contentPath)
+      if (!response.ok) {
+        throw new Error(
+          `Failed to fetch content from GitHub: ${response.statusText}`
+        )
+      }
+      rawMdx = await response.text()
+    } else {
+      const contentPath = `${process.cwd()}/src/contents/docs/${slug}/index.mdx`
+      const fs = await import("fs/promises")
+      rawMdx = await fs.readFile(contentPath, "utf-8")
+    }
+
+    return rawMdx
+  })
 
 export async function getTable(
   slug: string
@@ -122,48 +172,23 @@ export async function getTable(
     text: string
     href: string
   }[] = []
-  let rawMdx = ""
 
-  if (Settings.gitload) {
-    const contentPath = `${GitHubLink.href}/raw/main/contents/docs/${slug}/index.mdx`
-    try {
-      const response = await fetch(contentPath)
-      if (!response.ok) {
-        throw new Error(
-          `Failed to fetch content from GitHub: ${response.statusText}`
-        )
-      }
-      rawMdx = await response.text()
-    } catch (error) {
-      console.error("Error fetching content from GitHub:", error)
-      return []
-    }
-  } else {
-    const contentPath = path.join(
-      process.cwd(),
-      "/contents/docs/",
-      `${slug}/index.mdx`
-    )
-    try {
-      const stream = createReadStream(contentPath, { encoding: "utf-8" })
-      for await (const chunk of stream) {
-        rawMdx += chunk
-      }
-    } catch (error) {
-      console.error("Error reading local file:", error)
-      return []
-    }
-  }
+  try {
+    const rawMdx = await readRawMdx({ data: slug })
 
-  let match
-  while ((match = headingsRegex.exec(rawMdx)) !== null) {
-    const level = match[1].length
-    const text = match[2].trim()
-    extractedHeadings.push({
-      level: level,
-      text: text,
-      href: `#${innerslug(text)}`,
-    })
+    let match
+    while ((match = headingsRegex.exec(rawMdx)) !== null) {
+      const level = match[1].length
+      const text = match[2].trim()
+      extractedHeadings.push({
+        level: level,
+        text: text,
+        href: `#${innerslug(text)}`,
+      })
+    }
+  } catch (error) {
+    console.error("Error reading file:", error)
+    return []
   }
 
   return extractedHeadings
