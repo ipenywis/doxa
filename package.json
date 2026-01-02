@@ -15,6 +15,8 @@
     "update": "pnpm update --latest --recursive && pnpm install && pnpm prune && pnpm dedupe && pnpm run clean",
     "generate-content-json": "ts-node scripts/content.ts",
     "generate-content-json:ide": "node -r esbuild-register scripts/content.ts",
+    "generate:docs": "tsx scripts/docs-generator/generator.ts",
+    "generate:docs:watch": "tsx scripts/docs-generator/generator.ts --watch",
     "prepare": "husky"
   },
   "dependencies": {
@@ -68,6 +70,8 @@
     "@types/unist": "^3.0.3",
     "@typescript-eslint/parser": "^8.50.0",
     "@vitejs/plugin-react": "^4.4.1",
+    "esbuild": "^0.27.2",
+    "esbuild-register": "^3.6.0",
     "eslint": "^9.39.2",
     "husky": "^9.1.7",
     "postcss": "^8.5.6",
@@ -75,6 +79,7 @@
     "prettier-plugin-tailwindcss": "^0.7.2",
     "tailwindcss": "^4.1.18",
     "ts-node": "^10.9.2",
+    "tsx": "^4.21.0",
     "typescript": "^5.9.3",
     "typescript-eslint": "^8.50.0",
     "vite": "^7.3.0",
