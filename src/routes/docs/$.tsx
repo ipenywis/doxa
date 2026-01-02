@@ -6,22 +6,54 @@ import { ArticleBreadcrumb } from "@/src/components/article/breadcrumb"
 import { Pagination } from "@/src/components/article/pagination"
 import { TableOfContents } from "@/src/components/toc"
 import { components } from "@/src/lib/components"
-import { fetchDocument } from "@/src/lib/markdown"
+import { fetchDocumentFromServer } from "@/src/lib/markdown"
 import { PageRoutes } from "@/src/lib/pageroutes"
-import type { BaseMdxFrontmatter } from "@/src/lib/markdown"
+// import type { BaseMdxFrontmatter } from "@/src/lib/markdown"
 import { run } from "@mdx-js/mdx"
 import { createFileRoute } from "@tanstack/react-router"
+import { z } from "zod"
 
 export const Route = createFileRoute("/docs/$")({
+  // Tell the router that loader data depends on the slug param
+  // This ensures different slugs have different cache entries
+  validateSearch: z.object({
+    _splat: z.string().optional(),
+  }),
+  loader: async ({ params }) => {
+    const slug = params._splat || "basic-setup"
+    const document = await fetchDocumentFromServer({ data: slug })
+    return { slug, document }
+  },
+  preload: true,
   component: DocsContent,
+  // ssr: true,
+  // Disable caching for navigation - always use fresh data
+  // staleTime: 0,
+  // shouldReload: () => true,
+  // preloadStaleTime: 0,
+  // preloadGcTime: 0,
+  // gcTime: 0,
+  // preload: true,
+  // params: {
+  //   parse: (rawParams) => {
+  //     return {
+  //       _splat: rawParams._splat,
+  //     }
+  //   },
+  //   stringify: (params) => {
+  //     return {
+  //       _splat: params._splat,
+  //     }
+  //   },
+  // },
 })
 
-interface DocumentData {
-  frontmatter: BaseMdxFrontmatter
-  code: string
-  tocs: { level: number; text: string; href: string }[]
-  lastUpdated: string | null
-}
+// interface DocumentData {
+//   frontmatter: BaseMdxFrontmatter
+//   code: string
+//   tocs: { level: number; text: string; href: string }[]
+//   lastUpdated: string | null
+// }
 
 function MdxContent({ code }: { code: string }) {
   const [content, setContent] = useState<React.ReactNode>(null)
@@ -50,30 +82,9 @@ function MdxContent({ code }: { code: string }) {
 }
 
 function DocsContent() {
-  const { _splat } = Route.useParams()
-  const slug = _splat || "basic-setup"
+  const { slug, document } = Route.useLoaderData({ structuralSharing: true })
   const paths = slug.split("/")
   const pathName = `docs/${slug}`
-
-  const [document, setDocument] = useState<DocumentData | null>(null)
-  const [isLoading, setIsLoading] = useState(true)
-
-  // Fetch document when slug changes
-  useEffect(() => {
-    let cancelled = false
-    setIsLoading(true)
-
-    fetchDocument({ data: slug }).then((doc) => {
-      if (!cancelled) {
-        setDocument(doc)
-        setIsLoading(false)
-      }
-    })
-
-    return () => {
-      cancelled = true
-    }
-  }, [slug])
 
   // Find the current route to get its title
   const currentRoute = PageRoutes.find((r) => r.href === `/${slug}`)
@@ -82,22 +93,6 @@ function DocsContent() {
     currentRoute?.title ||
     slug.split("/").pop() ||
     "Documentation"
-
-  if (isLoading) {
-    return (
-      <div className="flex items-start gap-14">
-        <article className="prose-code:font-code prose-inline-code:before:content-[''] prose-inline-code:after:content-[''] prose flex-1 prose-zinc dark:prose-invert prose-headings:scroll-m-20 prose-pre:border prose-pre:bg-muted/25 prose-img:rounded-md">
-          <ArticleBreadcrumb paths={paths} />
-          <div className="animate-pulse">
-            <div className="h-10 w-3/4 rounded bg-muted mb-4"></div>
-            <div className="h-4 w-full rounded bg-muted mb-2"></div>
-            <div className="h-4 w-full rounded bg-muted mb-2"></div>
-            <div className="h-4 w-2/3 rounded bg-muted"></div>
-          </div>
-        </article>
-      </div>
-    )
-  }
 
   if (!document) {
     return (

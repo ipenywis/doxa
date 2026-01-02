@@ -104,7 +104,7 @@ export async function getDocument(slug: string) {
 }
 
 // Server function that can be called from client components
-export const fetchDocument = createServerFn({ method: "GET" })
+export const fetchDocumentFromServer = createServerFn({ method: "GET" })
   .inputValidator((slug: string) => slug)
   .handler(async ({ data: slug }) => {
     try {
