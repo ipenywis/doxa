@@ -25,6 +25,7 @@ export const Route = createFileRoute("/docs/$")({
     return { slug, document }
   },
   preload: true,
+  staleTime: Infinity,
   component: DocsContent,
   // ssr: true,
   // Disable caching for navigation - always use fresh data
@@ -82,7 +83,7 @@ function MdxContent({ code }: { code: string }) {
 }
 
 function DocsContent() {
-  const { slug, document } = Route.useLoaderData({ structuralSharing: true })
+  const { slug, document } = Route.useLoaderData()
   const paths = slug.split("/")
   const pathName = `docs/${slug}`
 
