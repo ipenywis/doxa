@@ -4,7 +4,7 @@ import Feedback from "@/src/components/toc/feedback"
 
 import { Settings } from "@/src/types/settings"
 
-interface TableProps {  
+interface TableProps {
   tocs: TableAnchorProps
   pathName: string
   frontmatter: { title: string }
@@ -15,7 +15,7 @@ export function TableOfContents({ tocs, pathName, frontmatter }: TableProps) {
     <>
       {Settings.rightbar && (
         <aside
-          className="toc sticky top-26 hidden h-screen min-w-[230px] gap-3 xl:flex xl:flex-col"
+          className="toc sticky top-16 hidden h-[calc(100vh-4rem)] min-w-[200px] max-w-[220px] gap-4 pt-6 xl:flex xl:flex-col"
           aria-label="Table of contents"
         >
           {Settings.toc && <TableAnchor tocs={tocs.tocs} />}

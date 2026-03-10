@@ -84,15 +84,12 @@ export function helperSearch(
   query: string,
   node: Paths,
   prefix: string,
-  currentLevel: number,
-  maxLevel?: number
 ) {
   const res: Paths[] = []
-  let parentHas = false
   const lowerQuery = query.toLowerCase()
 
   if (isRoute(node)) {
-    const nextLink = `${prefix}${node.href}`
+    const fullHref = `${prefix}${node.href}`
 
     const titleMatch = node.title.toLowerCase().includes(lowerQuery)
     const titleDistance = memoizedSearchMatch(
@@ -101,27 +98,7 @@ export function helperSearch(
     )
 
     if (titleMatch || titleDistance <= 2) {
-      res.push({ ...node, items: undefined, href: nextLink })
-      parentHas = true
-    }
-
-    const goNext = maxLevel ? currentLevel < maxLevel : true
-
-    if (goNext && node.items) {
-      node.items.forEach((item) => {
-        const innerRes = helperSearch(
-          query,
-          item,
-          nextLink,
-          currentLevel + 1,
-          maxLevel
-        )
-        if (innerRes.length && !parentHas && !node.noLink) {
-          res.push({ ...node, items: undefined, href: nextLink })
-          parentHas = true
-        }
-        res.push(...innerRes)
-      })
+      res.push({ ...node, items: undefined, href: fullHref })
     }
   }
 

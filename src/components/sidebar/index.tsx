@@ -17,10 +17,10 @@ import { LuAlignLeft } from "react-icons/lu"
 export function Sidebar() {
   return (
     <aside
-      className="sticky top-26 hidden h-screen min-w-[230px] flex-1 flex-col overflow-y-auto md:flex"
+      className="sticky top-16 hidden h-[calc(100vh-4rem)] min-w-[240px] max-w-[240px] flex-col overflow-y-auto md:flex"
       aria-label="Page navigation"
     >
-      <ScrollArea>
+      <ScrollArea className="pr-3 pt-6">
         <PageMenu />
       </ScrollArea>
     </aside>

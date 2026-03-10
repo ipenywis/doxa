@@ -5,111 +5,35 @@ import { Paths } from "@/src/lib/pageroutes"
 // Configure in src/contents/settings/docs.config.ts
 
 export const Documents: Paths[] = [
-  {
-    heading: "Introduction",
-    title: "Basic Setup",
-    href: "/basic-setup",
-    items: [
-      {
-        title: "Installation",
-        href: "/installation",
-      },
-      {
-        title: "Setup",
-        href: "/setup",
-      },
-      {
-        title: "Changelog",
-        href: "/changelog",
-      },
-      {
-        title: "New mage",
-        href: "/new-page",
-      },
-    ],
-  },
-  {
-    spacer: true,
-  },
-  {
-    heading: "Documents",
-    title: "Navigation",
-    href: "/navigation",
-  },
-  {
-    title: "Structure",
-    href: "/structure",
-    items: [
-      {
-        title: "Deep",
-        href: "/deep",
-        items: [
-          {
-            title: "Deeper",
-            href: "/deeper",
-            items: [
-              {
-                title: "Even deeper",
-                href: "/even-deeper",
-              },
-            ],
-          },
-        ],
-      },
-    ],
-  },
-  {
-    spacer: true,
-  },
-  {
-    heading: "Components",
-    title: "Markdown",
-    href: "/markdown",
-    items: [
-      {
-        title: "Cards",
-        href: "/cards",
-      },
-      {
-        title: "Diagrams",
-        href: "/diagrams",
-      },
-      {
-        title: "Filetree",
-        href: "/filetree",
-      },
-      {
-        title: "Lists",
-        href: "/lists",
-      },
-      {
-        title: "Maths",
-        href: "/maths",
-      },
-      {
-        title: "Notes",
-        href: "/notes",
-      },
-      {
-        title: "Steps",
-        href: "/steps",
-      },
-      {
-        title: "Table",
-        href: "/table",
-      },
-      {
-        title: "Tabs",
-        href: "/tabs",
-      },
-    ],
-  },
-  {
-    title: "Random",
-    href: "/random",
-  },
-  {
-    title: "Another Page",
-    href: "/another-page",
-  },
+  { heading: "Introduction" },
+  { title: "Basic Setup", href: "/basic-setup" },
+  { title: "Installation", href: "/basic-setup/installation" },
+  { title: "Setup", href: "/basic-setup/setup" },
+  { title: "Changelog", href: "/basic-setup/changelog" },
+  { title: "New Page", href: "/basic-setup/new-page" },
+
+  { spacer: true },
+
+  { heading: "Documents" },
+  { title: "Navigation", href: "/navigation" },
+  { title: "Structure", href: "/structure" },
+  { title: "Deep", href: "/structure/deep" },
+  { title: "Deeper", href: "/structure/deep/deeper" },
+  { title: "Even Deeper", href: "/structure/deep/deeper/even-deeper" },
+
+  { spacer: true },
+
+  { heading: "Components" },
+  { title: "Markdown", href: "/markdown" },
+  { title: "Cards", href: "/markdown/cards" },
+  { title: "Diagrams", href: "/markdown/diagrams" },
+  { title: "Filetree", href: "/markdown/filetree" },
+  { title: "Lists", href: "/markdown/lists" },
+  { title: "Maths", href: "/markdown/maths" },
+  { title: "Notes", href: "/markdown/notes" },
+  { title: "Steps", href: "/markdown/steps" },
+  { title: "Table", href: "/markdown/table" },
+  { title: "Tabs", href: "/markdown/tabs" },
+  { title: "Random", href: "/random" },
+  { title: "Another Page", href: "/another-page" },
 ]

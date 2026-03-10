@@ -6,7 +6,14 @@ export type Paths =
       href: string
       noLink?: true
       heading?: string
+      /**
+       * Nesting is temporarily disabled in the sidebar.
+       * Items are kept in the type for backward compatibility.
+       */
       items?: Paths[]
+    }
+  | {
+      heading: string
     }
   | {
       spacer: true
@@ -14,34 +21,23 @@ export type Paths =
 
 export const Routes: Paths[] = [...Documents]
 
-interface Page {
-  title: string
-  href: string
-}
-
-function isRoute(
+export function isRoute(
   node: Paths
 ): node is Extract<Paths, { title: string; href: string }> {
   return "title" in node && "href" in node
 }
 
-function getAllLinks(node: Paths): Page[] {
-  const pages: Page[] = []
-
-  if (isRoute(node) && !node.noLink) {
-    pages.push({ title: node.title, href: node.href })
-  }
-
-  if (isRoute(node) && node.items) {
-    node.items.forEach((subNode) => {
-      if (isRoute(subNode)) {
-        const temp = { ...subNode, href: `${node.href}${subNode.href}` }
-        pages.push(...getAllLinks(temp))
-      }
-    })
-  }
-
-  return pages
+export function isHeading(
+  node: Paths
+): node is Extract<Paths, { heading: string }> {
+  return "heading" in node && !("title" in node)
 }
 
-export const PageRoutes = Routes.map((it) => getAllLinks(it)).flat()
+interface Page {
+  title: string
+  href: string
+}
+
+export const PageRoutes: Page[] = Routes.filter(isRoute)
+  .filter((node) => !node.noLink)
+  .map((node) => ({ title: node.title, href: node.href }))

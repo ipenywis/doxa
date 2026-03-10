@@ -17,6 +17,9 @@ export type Paths =
       items?: Paths[]
     }
   | {
+      heading: string
+    }
+  | {
       spacer: true
     }
 

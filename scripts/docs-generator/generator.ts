@@ -3,9 +3,11 @@
  *
  * This script scans the src/contents/docs folder and generates the navigation
  * configuration file based on:
- * 1. The folder structure (nested directories = nested menu items)
+ * 1. The folder structure (directories = nav items with full hrefs)
  * 2. Frontmatter from index.mdx files (title, description, etc.)
  * 3. Configuration from docs.config.ts (ordering, headings, spacers)
+ *
+ * Output is a flat list of headings, nav items, and spacers (no nesting).
  *
  * Usage:
  *   pnpm generate:docs          # Generate once
@@ -151,7 +153,6 @@ function sortNodes(nodes: DocNode[], order: string[] | undefined): DocNode[] {
     const bOrder = orderMap.get(b.name) ?? Infinity
 
     if (aOrder === bOrder) {
-      // Both are not in order list, sort alphabetically
       return a.name.localeCompare(b.name)
     }
     return aOrder - bOrder
@@ -161,52 +162,50 @@ function sortNodes(nodes: DocNode[], order: string[] | undefined): DocNode[] {
 }
 
 /**
- * Convert DocNode tree to Paths array
+ * Flatten a DocNode tree into a flat Paths array.
+ * Each node becomes a nav item with a full href path.
+ * Headings and spacers are inserted based on config.
  */
-function nodesToPaths(
+function nodesToFlatPaths(
   nodes: DocNode[],
   config: DocsGeneratorConfig,
-  _parentPath: string = ""
+  parentHref: string = ""
 ): Paths[] {
   const paths: Paths[] = []
 
   for (const node of nodes) {
     const itemConfig = config.items?.[node.path] as DocItemConfig | undefined
+    const fullHref = `${parentHref}/${node.name}`
 
     // Check if we need a spacer before this item
     if (config.spacersBefore?.includes(node.path)) {
       paths.push({ spacer: true })
     }
 
-    // Build the path item
-    const pathItem: Paths = {
-      title: itemConfig?.title || node.title,
-      href: `/${node.name}`,
-    }
-
-    // Add heading if specified
+    // Add heading if specified (as standalone heading entry)
     const heading = itemConfig?.heading || node.frontmatter.heading
     if (heading) {
-      ;(pathItem as Extract<Paths, { title: string }>).heading = heading
+      paths.push({ heading })
     }
 
-    // Add noLink if specified
+    // Build the nav item
+    const pathItem: Extract<Paths, { title: string }> = {
+      title: itemConfig?.title || node.title,
+      href: fullHref,
+    }
+
     if (itemConfig?.noLink) {
-      ;(pathItem as Extract<Paths, { title: string }>).noLink = true
-    }
-
-    // Process children
-    if (node.children.length > 0) {
-      // Sort children based on config
-      const sortedChildren = sortNodes(node.children, itemConfig?.order)
-      const childPaths = nodesToPaths(sortedChildren, config, node.path)
-
-      if (childPaths.length > 0) {
-        ;(pathItem as Extract<Paths, { title: string }>).items = childPaths
-      }
+      pathItem.noLink = true
     }
 
     paths.push(pathItem)
+
+    // Flatten children directly into the same list
+    if (node.children.length > 0) {
+      const sortedChildren = sortNodes(node.children, itemConfig?.order)
+      const childPaths = nodesToFlatPaths(sortedChildren, config, fullHref)
+      paths.push(...childPaths)
+    }
   }
 
   return paths
@@ -216,28 +215,23 @@ function nodesToPaths(
  * Generate the documents.ts file content
  */
 function generateDocumentsFile(paths: Paths[]): string {
-  const formatPath = (p: Paths, indent: number = 2): string => {
-    const spaces = " ".repeat(indent)
+  const formatPath = (p: Paths): string => {
     if ("spacer" in p) {
-      return `${spaces}{\n${spaces}  spacer: true,\n${spaces}}`
+      return `  { spacer: true }`
+    }
+    if ("heading" in p && !("title" in p)) {
+      return `  { heading: "${(p as { heading: string }).heading}" }`
     }
 
-    let result = `${spaces}{\n`
-    if (p.heading) {
-      result += `${spaces}  heading: "${p.heading}",\n`
+    const route = p as Extract<Paths, { title: string }>
+    const parts: string[] = []
+    parts.push(`title: "${route.title}"`)
+    parts.push(`href: "${route.href}"`)
+    if (route.noLink) {
+      parts.push(`noLink: true`)
     }
-    result += `${spaces}  title: "${p.title}",\n`
-    result += `${spaces}  href: "${p.href}",\n`
-    if (p.noLink) {
-      result += `${spaces}  noLink: true,\n`
-    }
-    if (p.items && p.items.length > 0) {
-      result += `${spaces}  items: [\n`
-      result += p.items.map((item) => formatPath(item, indent + 4)).join(",\n")
-      result += `,\n${spaces}  ],\n`
-    }
-    result += `${spaces}}`
-    return result
+
+    return `  { ${parts.join(", ")} }`
   }
 
   const pathsStr = paths.map((p) => formatPath(p)).join(",\n")
@@ -268,10 +262,7 @@ async function loadConfig(): Promise<DocsGeneratorConfig> {
     )
 
     if (configMatch) {
-      // Parse the config object
-      // This is a simple parser that handles the specific format we use
       const configStr = configMatch[1]
-      // Use eval in a controlled way (this is safe as we control the config file)
       // eslint-disable-next-line no-eval
       const config = eval(`(${configStr})`) as DocsGeneratorConfig
       return config
@@ -307,8 +298,8 @@ export async function generateDocs(): Promise<void> {
   // Sort root nodes
   const sortedNodes = sortNodes(nodes, config.order)
 
-  // Convert to Paths
-  const paths = nodesToPaths(sortedNodes, config)
+  // Convert to flat Paths
+  const paths = nodesToFlatPaths(sortedNodes, config)
 
   // Generate the file content
   const content = generateDocumentsFile(paths)

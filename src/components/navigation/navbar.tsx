@@ -5,32 +5,29 @@ import { SheetLeft } from "@/src/components/sidebar"
 import { ModeToggle } from "@/src/components/theme-toggle"
 import { buttonVariants } from "@/src/components/ui/button"
 import { SheetClose } from "@/src/components/ui/sheet"
-import { Link } from "@/src/lib/transition"
 import { GitHubLink, Navigations } from "@/src/settings/navigation"
 import { LuArrowUpRight, LuGithub } from "react-icons/lu"
 
 export function Navbar() {
   return (
-    <nav className="bg-opacity-5 sticky top-0 z-50 mx-auto flex h-16 w-full items-center justify-between border-b p-1 px-2 backdrop-blur-xl backdrop-filter sm:p-3 md:gap-2 md:px-4">
-      <div className="flex items-center gap-5">
+    <nav className="sticky top-0 z-50 mx-auto flex h-16 w-full items-center justify-between border-b bg-background/80 px-4 backdrop-blur-xl sm:px-6 md:px-8">
+      <div className="flex items-center gap-6">
         <SheetLeft />
-        <div className="flex items-center gap-6">
-          <div className="hidden md:flex">
-            <Logo />
-          </div>
-          <div className="hidden items-center gap-5 text-sm font-medium text-muted-foreground md:flex">
-            <NavMenu />
-          </div>
+        <div className="hidden md:flex">
+          <Logo />
+        </div>
+        <div className="hidden items-center gap-5 text-sm font-medium text-muted-foreground md:flex">
+          <NavMenu />
         </div>
       </div>
 
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-3">
         <Search />
-        <div className="flex gap-2 sm:ml-0">
+        <div className="flex items-center gap-1">
           {GitHubLink.href && (
             <a
               href={GitHubLink.href}
-              className={buttonVariants({ variant: "outline", size: "icon" })}
+              className={buttonVariants({ variant: "ghost", size: "icon" })}
               target="_blank"
               rel="noopener noreferrer"
               title="View the repository on GitHub"
@@ -54,8 +51,8 @@ export function NavMenu({ isSheet = false }) {
           <Anchor
             key={item.title + item.href}
             absolute
-            activeClassName="font-bold text-primary"
-            className="flex items-center gap-1 text-sm"
+            activeClassName="font-semibold text-primary"
+            className="flex items-center gap-1 text-sm transition-colors hover:text-foreground"
             href={item.href}
             target={item.external ? "_blank" : undefined}
             rel={item.external ? "noopener noreferrer" : undefined}

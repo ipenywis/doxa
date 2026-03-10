@@ -25,7 +25,7 @@ export function ArticleBreadcrumb({ paths }: { paths: string[] }) {
                 aria-label="Documentation Home"
                 href={`/docs${PageRoutes[0].href}`}
               >
-                <LuHouse className="h-4" />
+                <LuHouse className="h-3.5 w-3.5" />
               </Link>
             </BreadcrumbLink>
           </BreadcrumbItem>
@@ -69,7 +69,7 @@ export function ArticleBreadcrumb({ paths }: { paths: string[] }) {
                           </Link>
                         </BreadcrumbLink>
                       ) : (
-                        <BreadcrumbPage className="b">
+                        <BreadcrumbPage>
                           {toTitleCase(path)}
                         </BreadcrumbPage>
                       )}
@@ -97,7 +97,7 @@ export function ArticleBreadcrumb({ paths }: { paths: string[] }) {
                         </Link>
                       </BreadcrumbLink>
                     ) : (
-                      <BreadcrumbPage className="b">
+                      <BreadcrumbPage>
                         {toTitleCase(path)}
                       </BreadcrumbPage>
                     )}

@@ -7,15 +7,12 @@ import { Pagination } from "@/src/components/article/pagination"
 import { TableOfContents } from "@/src/components/toc"
 import { components } from "@/src/lib/components"
 import { fetchDocumentFromServer } from "@/src/lib/markdown"
-import { PageRoutes } from "@/src/lib/pageroutes"
-// import type { BaseMdxFrontmatter } from "@/src/lib/markdown"
+import { PageRoutes, Routes, isHeading, isRoute } from "@/src/lib/pageroutes"
 import { run } from "@mdx-js/mdx"
 import { createFileRoute } from "@tanstack/react-router"
 import { z } from "zod"
 
 export const Route = createFileRoute("/docs/$")({
-  // Tell the router that loader data depends on the slug param
-  // This ensures different slugs have different cache entries
   validateSearch: z.object({
     _splat: z.string().optional(),
   }),
@@ -27,34 +24,7 @@ export const Route = createFileRoute("/docs/$")({
   preload: true,
   staleTime: Infinity,
   component: DocsContent,
-  // ssr: true,
-  // Disable caching for navigation - always use fresh data
-  // staleTime: 0,
-  // shouldReload: () => true,
-  // preloadStaleTime: 0,
-  // preloadGcTime: 0,
-  // gcTime: 0,
-  // preload: true,
-  // params: {
-  //   parse: (rawParams) => {
-  //     return {
-  //       _splat: rawParams._splat,
-  //     }
-  //   },
-  //   stringify: (params) => {
-  //     return {
-  //       _splat: params._splat,
-  //     }
-  //   },
-  // },
 })
-
-// interface DocumentData {
-//   frontmatter: BaseMdxFrontmatter
-//   code: string
-//   tocs: { level: number; text: string; href: string }[]
-//   lastUpdated: string | null
-// }
 
 function MdxContent({ code }: { code: string }) {
   const [content, setContent] = useState<React.ReactNode>(null)
@@ -82,12 +52,24 @@ function MdxContent({ code }: { code: string }) {
   return <>{content}</>
 }
 
+function findSectionHeading(slug: string): string | undefined {
+  const targetHref = `/${slug}`
+  let currentHeading: string | undefined
+  for (const route of Routes) {
+    if (isHeading(route)) {
+      currentHeading = route.heading
+    } else if (isRoute(route) && route.href === targetHref) {
+      return currentHeading
+    }
+  }
+  return undefined
+}
+
 function DocsContent() {
   const { slug, document } = Route.useLoaderData()
   const paths = slug.split("/")
   const pathName = `docs/${slug}`
 
-  // Find the current route to get its title
   const currentRoute = PageRoutes.find((r) => r.href === `/${slug}`)
   const title =
     document?.frontmatter?.title ||
@@ -95,10 +77,13 @@ function DocsContent() {
     slug.split("/").pop() ||
     "Documentation"
 
+  const description = document?.frontmatter?.description
+  const sectionHeading = findSectionHeading(slug)
+
   if (!document) {
     return (
-      <div className="flex items-start gap-14">
-        <article className="prose-code:font-code prose-inline-code:before:content-[''] prose-inline-code:after:content-[''] prose flex-1 prose-zinc dark:prose-invert prose-headings:scroll-m-20 prose-pre:border prose-pre:bg-muted/25 prose-img:rounded-md">
+      <div className="flex items-start gap-10">
+        <article className="prose-code:font-code prose-code:before:content-none prose-code:after:content-none prose max-w-3xl flex-1 prose-zinc dark:prose-invert prose-headings:scroll-m-20 prose-pre:border prose-pre:bg-muted/25 prose-img:rounded-md">
           <ArticleBreadcrumb paths={paths} />
           <h1 className="text-3xl font-bold tracking-tight lg:text-4xl">
             Document Not Found
@@ -120,13 +105,22 @@ function DocsContent() {
   }
 
   return (
-    <div className="flex items-start gap-14">
-      <article className="prose-code:font-code prose-inline-code:before:content-[''] prose-inline-code:after:content-[''] prose flex-1 prose-zinc dark:prose-invert prose-headings:scroll-m-20 prose-pre:border prose-pre:bg-muted/25 prose-img:rounded-md">
-        <ArticleBreadcrumb paths={paths} />
-        <h1 className="text-3xl font-bold tracking-tight lg:text-4xl">
+    <div className="flex items-start gap-10">
+      <article className="prose-code:font-code prose-code:before:content-none prose-code:after:content-none prose max-w-3xl flex-1 prose-zinc dark:prose-invert prose-headings:scroll-m-20 prose-pre:border prose-pre:bg-muted/25 prose-img:rounded-md">
+        {sectionHeading && (
+          <p className="not-prose mb-2 text-sm font-medium text-primary">
+            {sectionHeading}
+          </p>
+        )}
+        <h1 className="not-prose text-3xl font-bold tracking-tight lg:text-4xl">
           {title}
         </h1>
-        <div className="prose-content">
+        {description && (
+          <p className="not-prose mt-3 text-lg text-muted-foreground">
+            {description}
+          </p>
+        )}
+        <div className="prose-content mt-8">
           <MdxContent code={document.code} />
         </div>
         <Pagination pathname={pathName} />
