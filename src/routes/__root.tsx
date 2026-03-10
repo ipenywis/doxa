@@ -123,7 +123,7 @@ function RootDocument({ children }: Readonly<{ children: ReactNode }>) {
       <body className="font-regular">
         <Providers>
           <Navbar />
-          <main className="h-auto px-5 sm:px-8">{children}</main>
+          <main className="mx-auto h-auto max-w-[1440px] px-4 sm:px-6 md:px-8">{children}</main>
           <Footer />
         </Providers>
         <Scripts />

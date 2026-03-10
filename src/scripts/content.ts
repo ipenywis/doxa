@@ -11,7 +11,7 @@ import { unified } from "unified"
 import { Node, Parent } from "unist"
 import { visit } from "unist-util-visit"
 
-const docsDir = path.join(process.cwd(), "contents/docs")
+const docsDir = path.join(process.cwd(), "src/contents/docs")
 const outputDir = path.join(process.cwd(), "public", "search-data")
 
 interface MdxJsxFlowElement extends Node {
@@ -45,20 +45,12 @@ function createSlug(filePath: string): string {
 }
 
 function findDocumentBySlug(slug: string): Paths | null {
-  function searchDocs(docs: Paths[], currentPath = ""): Paths | null {
-    for (const doc of docs) {
-      if (isRoute(doc)) {
-        const fullPath = currentPath + doc.href
-        if (fullPath === slug) return doc
-        if (doc.items) {
-          const found: Paths | null = searchDocs(doc.items, fullPath)
-          if (found) return found
-        }
-      }
+  for (const doc of Documents) {
+    if (isRoute(doc) && doc.href === slug) {
+      return doc
     }
-    return null
   }
-  return searchDocs(Documents)
+  return null
 }
 
 async function ensureDirectoryExists(dir: string) {

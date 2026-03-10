@@ -21,27 +21,39 @@ export function Pagination({ pathname }: { pathname: string }) {
   const res = getPreviousNext(pathname)
 
   return (
-    <div className="flex items-center justify-between py-5 sm:py-7">
-      {res.prev && (
+    <div className="mt-12 flex items-center justify-between gap-4 border-t pt-6 pb-4">
+      {res.prev ? (
         <Link
           rel="prev"
           href={`/docs${res.prev.href}`}
           title={`Previous: ${res.prev.title}`}
-          className="inline-flex h-9 items-center justify-center rounded-md border border-input bg-background px-4 py-2 text-sm font-medium whitespace-nowrap no-underline! shadow-sm transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:ring-1 focus-visible:ring-ring focus-visible:outline-none disabled:pointer-events-none disabled:opacity-50"
+          className="group flex flex-col items-start gap-1 no-underline! transition-colors"
         >
-          <LuChevronLeft className="mr-1 h-4 w-4" />
-          <span>{res.prev.title}</span>
+          <span className="flex items-center text-xs text-muted-foreground">
+            <LuChevronLeft className="mr-0.5 h-3 w-3" />
+            Previous
+          </span>
+          <span className="text-sm font-medium text-foreground group-hover:text-primary">
+            {res.prev.title}
+          </span>
         </Link>
+      ) : (
+        <div />
       )}
       {res.next && (
         <Link
           rel="next"
           href={`/docs${res.next.href}`}
           title={`Next: ${res.next.title}`}
-          className="ml-auto inline-flex h-9 items-center justify-center rounded-md border border-input bg-background px-4 py-2 text-sm font-medium whitespace-nowrap no-underline! shadow-sm transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:ring-1 focus-visible:ring-ring focus-visible:outline-none disabled:pointer-events-none disabled:opacity-50"
+          className="group ml-auto flex flex-col items-end gap-1 no-underline! transition-colors"
         >
-          <span>{res.next.title}</span>
-          <LuChevronRight className="ml-1 h-4 w-4" />
+          <span className="flex items-center text-xs text-muted-foreground">
+            Next
+            <LuChevronRight className="ml-0.5 h-3 w-3" />
+          </span>
+          <span className="text-sm font-medium text-foreground group-hover:text-primary">
+            {res.next.title}
+          </span>
         </Link>
       )}
     </div>

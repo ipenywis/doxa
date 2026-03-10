@@ -1,5 +1,16 @@
 [
   {
+    "slug": "/another-page",
+    "title": "Another Page",
+    "description": "",
+    "content": "Hey there!\n\nI love this new system!\n",
+    "_searchMeta": {
+      "cleanContent": "hey there i love this new system",
+      "headings": [],
+      "keywords": []
+    }
+  },
+  {
     "slug": "/basic-setup/changelog",
     "title": "Changelog",
     "description": "Changelogs and improvements to the Documents projects.",
@@ -100,6 +111,22 @@
         "Optional",
         "Important Information",
         "search-data/documents.json"
+      ]
+    }
+  },
+  {
+    "slug": "/basic-setup/new-page",
+    "title": "New mage",
+    "description": "This section provides an overview of how to get started with the Documents, Next.js Document Starter Kit.",
+    "content": "YOO!!\n",
+    "_searchMeta": {
+      "cleanContent": "yoo",
+      "headings": [],
+      "keywords": [
+        "introduction",
+        "guide",
+        "nextjs",
+        "documents"
       ]
     }
   },
@@ -442,9 +469,9 @@
     "slug": "/structure/deep",
     "title": "Introduction",
     "description": "This section provides an overview of Introduction.",
-    "content": "Lorem ipsum dolor sit amet consectetur adipisicing elit. Numquam iste dolorum tempore consectetur explicabo tempora provident quia maxime, molestiae, facilis aperiam et, error illum vel ullam? Quis architecto dolore ullam\n\n* \\[x] Write the press release\n* \\[ ] Update the website\n* \\[ ] Contact the media\n\n| Syntax        | Description |   Test Text |\r\n| :------------ | :---------: | ----------: |\r\n| Header        |    Title    | Here's this |\r\n| Paragraph     |    Text     |    And more |\r\n| Strikethrough |             |    ~~Text~~ |\n\n## Getting Started\n\nTo begin using the Documentation Template, follow these simple steps:\n\n* Start by cloning the repository to your local machine.\n\nLorem ipsum dolor sit amet consectetur adipisicing elit. Reprehenderit quae iure nulla deserunt dolore quam pariatur minus sapiente accusantium. Optio, necessitatibus sequi. Veritatis, aspernatur? Possimus quis repellat eum vitae eveniet.\n\n## Blockquotes\n\nBlockquotes are useful for emphasizing key points or quoting external sources:\n\n> \"Documentation is a love letter that you write to your future self.\" - Damian Conway\n\nFeel free to use blockquotes to highlight important information or quotes relevant to your documentation.\n\n## Code Examples with switch\n\nHere a custom tab component from shadcn ui is used.\n\n## Conclusion\n\nThank you for choosing the Documentation Template for your project. Whether you're documenting software, APIs, or processes, we're here to support you in creating clear and effective documentation. Happy documenting!\n\n## Tabs Example\n",
+    "content": "Lorem ipsum dolor sit amet consectetur adipisicing elit. Numquam iste dolorum tempore consectetur explicabo tempora provident quia maxime, molestiae, facilis aperiam et, error illum vel ullam? Quis architecto dolore ullam\n\n* \\[x] Write the press release\n* \\[ ] Update the website\n* \\[ ] Contact the media\n\n| Syntax        | Description |   Test Text |\n| :------------ | :---------: | ----------: |\n| Header        |    Title    | Here's this |\n| Paragraph     |    Text     |    And more |\n| Strikethrough |             |    ~~Text~~ |\n\n## Getting Started\n\nTo begin using the Documentation Template, follow these simple steps:\n\n* Start by cloning the repository to your local machine.\n\nLorem ipsum dolor sit amet consectetur adipisicing elit. Reprehenderit quae iure nulla deserunt dolore quam pariatur minus sapiente accusantium. Optio, necessitatibus sequi. Veritatis, aspernatur? Possimus quis repellat eum vitae eveniet.\n\n## Blockquotes\n\nBlockquotes are useful for emphasizing key points or quoting external sources:\n\n> \"Documentation is a love letter that you write to your future self.\" - Damian Conway\n\nFeel free to use blockquotes to highlight important information or quotes relevant to your documentation.\n\n## Code Examples with switch\n\nHere a custom tab component from shadcn ui is used.\n\n## Conclusion\n\nThank you for choosing the Documentation Template for your project. Whether you're documenting software, APIs, or processes, we're here to support you in creating clear and effective documentation. Happy documenting!\n\n## Tabs Example\n",
     "_searchMeta": {
-      "cleanContent": "lorem ipsum dolor sit amet consectetur adipisicing elit numquam iste dolorum tempore consectetur explicabo tempora provident quia maxime molestiae facilis aperiam et error illum vel ullam quis architecto dolore ullam x write the press release update the website contact the media syntax description test text :------------ :---------: ----------: header title here s this paragraph text and more strikethrough text getting started to begin using the documentation template follow these simple steps: start by cloning the repository to your local machine lorem ipsum dolor sit amet consectetur adipisicing elit reprehenderit quae iure nulla deserunt dolore quam pariatur minus sapiente accusantium optio necessitatibus sequi veritatis aspernatur possimus quis repellat eum vitae eveniet blockquotes blockquotes are useful for emphasizing key points or quoting external sources: documentation is a love letter that you write to your future self - damian conway feel free to use blockquotes to highlight important information or quotes relevant to your documentation code examples with switch here a custom tab component from shadcn ui is used conclusion thank you for choosing the documentation template for your project whether you re documenting software apis or processes we re here to support you in creating clear and effective documentation happy documenting tabs example",
+      "cleanContent": "lorem ipsum dolor sit amet consectetur adipisicing elit numquam iste dolorum tempore consectetur explicabo tempora provident quia maxime molestiae facilis aperiam et error illum vel ullam quis architecto dolore ullam x write the press release update the website contact the media syntax description test text:------------ :---------: ----------:header title here s thisparagraph text and morestrikethrough text getting started to begin using the documentation template follow these simple steps: start by cloning the repository to your local machine lorem ipsum dolor sit amet consectetur adipisicing elit reprehenderit quae iure nulla deserunt dolore quam pariatur minus sapiente accusantium optio necessitatibus sequi veritatis aspernatur possimus quis repellat eum vitae eveniet blockquotes blockquotes are useful for emphasizing key points or quoting external sources: documentation is a love letter that you write to your future self - damian conway feel free to use blockquotes to highlight important information or quotes relevant to your documentation code examples with switch here a custom tab component from shadcn ui is used conclusion thank you for choosing the documentation template for your project whether you re documenting software apis or processes we re here to support you in creating clear and effective documentation happy documenting tabs example",
       "headings": [
         "Getting Started",
         "Blockquotes",

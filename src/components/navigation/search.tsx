@@ -10,19 +10,11 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/src/components/ui/dialog"
-import { Input } from "@/src/components/ui/input"
 import { ScrollArea } from "@/src/components/ui/scroll-area"
 import { advanceSearch, cn, debounce, highlight, search } from "@/src/lib/utils"
 import { Documents } from "@/src/contents/settings/documents"
+import { isRoute } from "@/src/lib/pageroutes"
 import { LuFileText, LuSearch } from "react-icons/lu"
-
-interface Document {
-  title?: string
-  href?: string
-  spacer?: boolean
-  items?: Document[]
-  noLink?: boolean
-}
 
 export default function Search() {
   const [searchedInput, setSearchedInput] = useState("")
@@ -41,9 +33,23 @@ export default function Search() {
     []
   )
 
+  // ⌘K / Ctrl+K keyboard shortcut to open search
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
-      if (isOpen && event.key === "Enter" && filteredResults.length > 2) {
+      if ((event.metaKey || event.ctrlKey) && event.key === "k") {
+        event.preventDefault()
+        setIsOpen((prev) => !prev)
+      }
+    }
+
+    window.addEventListener("keydown", handleKeyDown)
+    return () => window.removeEventListener("keydown", handleKeyDown)
+  }, [])
+
+  // Enter key to navigate to first result
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (isOpen && event.key === "Enter" && filteredResults.length > 0) {
         const selected = filteredResults[0]
         if ("href" in selected) {
           window.location.href = `/docs${selected.href}`
@@ -68,41 +74,25 @@ export default function Search() {
     debouncedSearch(searchedInput)
   }, [searchedInput, debouncedSearch])
 
-  function renderDocuments(
-    documents: Document[],
-    parentHref = "/docs"
-  ): React.ReactNode[] {
-    if (!Array.isArray(documents) || documents.length === 0) {
-      return []
-    }
+  function renderDocuments(): React.ReactNode[] {
+    return Documents.flatMap((doc) => {
+      if (!isRoute(doc) || doc.noLink) return []
 
-    return documents.flatMap((doc) => {
-      if ("spacer" in doc && doc.spacer) {
-        return []
-      }
-
-      const href = doc.href ? `${parentHref}${doc.href}` : ""
+      const href = `/docs${doc.href}`
 
       return [
-        !doc.noLink && doc.href && (
-          <DialogClose key={href} asChild>
-            <Anchor
-              className={cn(
-                "flex w-full items-center gap-2.5 rounded-sm px-3 text-[15px] transition-all duration-300 hover:bg-neutral-100 dark:hover:bg-neutral-900"
-              )}
-              href={href}
-            >
-              <div className="flex h-full w-fit items-center gap-1.5 py-3 whitespace-nowrap">
-                <LuFileText className="h-[1.1rem] w-[1.1rem]" /> {doc.title}
-              </div>
-            </Anchor>
-          </DialogClose>
-        ),
-
-        ...renderDocuments(
-          doc.items?.filter((item) => !item.noLink) || [],
-          `${href}`
-        ),
+        <DialogClose key={href} asChild>
+          <Anchor
+            className={cn(
+              "flex w-full items-center gap-2.5 rounded-sm px-3 text-[15px] transition-all duration-300 hover:bg-neutral-100 dark:hover:bg-neutral-900"
+            )}
+            href={href}
+          >
+            <div className="flex h-full w-fit items-center gap-1.5 py-3 whitespace-nowrap">
+              <LuFileText className="h-[1.1rem] w-[1.1rem]" /> {doc.title}
+            </div>
+          </Anchor>
+        </DialogClose>,
       ]
     })
   }
@@ -121,11 +111,12 @@ export default function Search() {
         <DialogTrigger asChild>
           <div className="relative max-w-md flex-1 cursor-pointer">
             <LuSearch className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-neutral-500 dark:text-neutral-400" />
-            <Input
-              className="h-9 w-full rounded-md border bg-background pr-4 pl-10 text-sm shadow md:w-full"
-              placeholder="Search"
-              type="search"
-            />
+            <div className="flex h-9 w-full items-center rounded-md border bg-background pr-2 pl-10 text-sm text-muted-foreground shadow-sm md:w-[200px] lg:w-[260px]">
+              <span className="flex-1">Search...</span>
+              <kbd className="pointer-events-none hidden h-5 items-center gap-1 rounded border bg-muted px-1.5 font-mono text-[10px] font-medium text-muted-foreground sm:flex">
+                <span className="text-xs">⌘</span>K
+              </kbd>
+            </div>
           </div>
         </DialogTrigger>
         <DialogContent className="top-[45%] max-w-xs p-0 sm:top-[38%] sm:max-w-lg">
@@ -134,7 +125,7 @@ export default function Search() {
             <input
               value={searchedInput}
               onChange={(e) => setSearchedInput(e.target.value)}
-              placeholder="Search..."
+              placeholder="Search documentation..."
               autoFocus
               className="h-14 border-b bg-transparent px-4 text-[15px] outline-none"
             />
@@ -191,7 +182,7 @@ export default function Search() {
                     }
                     return null
                   })
-                : renderDocuments(Documents)}
+                : renderDocuments()}
             </div>
           </ScrollArea>
         </DialogContent>
