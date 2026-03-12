@@ -3,7 +3,7 @@ import { PageRoutes } from "@/src/lib/pageroutes"
 export const Navigations = [
   {
     title: "Docs",
-    href: `/docs${PageRoutes[0].href}`,
+    href: `/docs${PageRoutes[0]?.href ?? ""}`,
   },
   {
     title: "Rubix",
