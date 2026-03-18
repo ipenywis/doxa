@@ -23,7 +23,7 @@ export function ArticleBreadcrumb({ paths }: { paths: string[] }) {
               <Link
                 title="Documentation Home"
                 aria-label="Documentation Home"
-                href={`/docs${PageRoutes[0].href}`}
+                href={`/docs${PageRoutes[0]?.href ?? ""}`}
               >
                 <LuHouse className="h-3.5 w-3.5" />
               </Link>
