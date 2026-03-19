@@ -67,15 +67,18 @@ const readFileContent = createServerFn({ method: "GET" })
     if (Settings.gitload) {
       const response = await fetch(contentPath)
       if (!response.ok) {
-        throw new Error(
-          `Failed to fetch content from GitHub: ${response.statusText}`
-        )
+        return null
       }
       rawMdx = await response.text()
       lastUpdated = response.headers.get("Last-Modified") ?? null
     } else {
       // Dynamic import for server-only modules
       const fs = await import("fs/promises")
+      try {
+        await fs.access(contentPath)
+      } catch {
+        return null
+      }
       rawMdx = await fs.readFile(contentPath, "utf-8")
       const stats = await fs.stat(contentPath)
       lastUpdated = stats.mtime.toISOString()
@@ -86,16 +89,17 @@ const readFileContent = createServerFn({ method: "GET" })
 
 export async function getDocument(slug: string) {
   try {
-    const { rawMdx, lastUpdated } = await readFileContent({ data: slug })
+    const result = await readFileContent({ data: slug })
+    if (!result) return null
 
-    const compiled = await compileMdx<BaseMdxFrontmatter>(rawMdx)
+    const compiled = await compileMdx<BaseMdxFrontmatter>(result.rawMdx)
     const tocs = await getTable(slug)
 
     return {
       frontmatter: compiled.frontmatter,
       code: compiled.code,
       tocs,
-      lastUpdated,
+      lastUpdated: result.lastUpdated,
     }
   } catch (err) {
     console.error(err)
@@ -108,15 +112,16 @@ export const fetchDocumentFromServer = createServerFn({ method: "GET" })
   .inputValidator((slug: string) => slug)
   .handler(async ({ data: slug }) => {
     try {
-      const { rawMdx, lastUpdated } = await readFileContent({ data: slug })
+      const result = await readFileContent({ data: slug })
+      if (!result) return null
 
-      const compiled = await compileMdx<BaseMdxFrontmatter>(rawMdx)
+      const compiled = await compileMdx<BaseMdxFrontmatter>(result.rawMdx)
 
       // Get table of contents inline to avoid nested server function calls
       const extractedHeadings: { level: number; text: string; href: string }[] = []
       const headingsRe = /^(#{2,4})\s(.+)$/gm
       let match
-      while ((match = headingsRe.exec(rawMdx)) !== null) {
+      while ((match = headingsRe.exec(result.rawMdx)) !== null) {
         const level = match[1].length
         const text = match[2].trim()
         extractedHeadings.push({
@@ -130,7 +135,7 @@ export const fetchDocumentFromServer = createServerFn({ method: "GET" })
         frontmatter: compiled.frontmatter,
         code: compiled.code,
         tocs: extractedHeadings,
-        lastUpdated,
+        lastUpdated: result.lastUpdated,
       }
     } catch (err) {
       console.error(err)
@@ -150,14 +155,17 @@ const readRawMdx = createServerFn({ method: "GET" })
       const contentPath = `${GitHubLink.href}/raw/main/src/contents/docs/${slug}/index.mdx`
       const response = await fetch(contentPath)
       if (!response.ok) {
-        throw new Error(
-          `Failed to fetch content from GitHub: ${response.statusText}`
-        )
+        return null
       }
       rawMdx = await response.text()
     } else {
       const contentPath = `${process.cwd()}/src/contents/docs/${slug}/index.mdx`
       const fs = await import("fs/promises")
+      try {
+        await fs.access(contentPath)
+      } catch {
+        return null
+      }
       rawMdx = await fs.readFile(contentPath, "utf-8")
     }
 
@@ -175,6 +183,7 @@ export async function getTable(
 
   try {
     const rawMdx = await readRawMdx({ data: slug })
+    if (!rawMdx) return []
 
     let match
     while ((match = headingsRegex.exec(rawMdx)) !== null) {
