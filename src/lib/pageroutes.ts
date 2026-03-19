@@ -19,12 +19,17 @@ export type Paths =
       spacer: true
     }
 
-function flattenRoutes(routes: Paths[]): Paths[] {
+function flattenRoutes(routes: Paths[], parentHref = ""): Paths[] {
   const result: Paths[] = []
   for (const route of routes) {
-    result.push(route)
-    if ("items" in route && route.items) {
-      result.push(...flattenRoutes(route.items))
+    if ("title" in route && "href" in route) {
+      const fullHref = parentHref + route.href
+      result.push({ ...route, href: fullHref })
+      if (route.items) {
+        result.push(...flattenRoutes(route.items, fullHref))
+      }
+    } else {
+      result.push(route)
     }
   }
   return result
