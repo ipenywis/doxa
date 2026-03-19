@@ -19,7 +19,18 @@ export type Paths =
       spacer: true
     }
 
-export const Routes: Paths[] = [...Documents]
+function flattenRoutes(routes: Paths[]): Paths[] {
+  const result: Paths[] = []
+  for (const route of routes) {
+    result.push(route)
+    if ("items" in route && route.items) {
+      result.push(...flattenRoutes(route.items))
+    }
+  }
+  return result
+}
+
+export const Routes: Paths[] = flattenRoutes(Documents)
 
 export function isRoute(
   node: Paths

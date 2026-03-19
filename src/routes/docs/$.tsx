@@ -17,9 +17,17 @@ export const Route = createFileRoute("/docs/$")({
     _splat: z.string().optional(),
   }),
   loader: async ({ params }) => {
-    const slug = params._splat || "basic-setup"
-    const document = await fetchDocumentFromServer({ data: slug })
-    return { slug, document }
+    const firstRoute = PageRoutes[0]?.href?.replace(/^\//, "")
+    const slug = params._splat || firstRoute || ""
+    if (!slug) {
+      return { slug: "", document: null }
+    }
+    try {
+      const document = await fetchDocumentFromServer({ data: slug })
+      return { slug, document }
+    } catch {
+      return { slug, document: null }
+    }
   },
   preload: true,
   staleTime: Infinity,
@@ -82,7 +90,7 @@ function DocsContent() {
 
   if (!document) {
     return (
-      <div className="flex items-start gap-10">
+      <div key={slug} className="flex animate-in fade-in duration-300 items-start gap-10">
         <article className="prose-code:font-code prose-code:before:content-none prose-code:after:content-none prose max-w-3xl flex-1 prose-zinc dark:prose-invert prose-headings:scroll-m-20 prose-pre:border prose-pre:bg-muted/25 prose-img:rounded-md">
           <ArticleBreadcrumb paths={paths} />
           <h1 className="text-3xl font-bold tracking-tight lg:text-4xl">
@@ -105,7 +113,7 @@ function DocsContent() {
   }
 
   return (
-    <div className="flex items-start gap-10">
+    <div key={slug} className="flex animate-in fade-in duration-300 items-start gap-10">
       <article className="prose-code:font-code prose-code:before:content-none prose-code:after:content-none prose max-w-3xl flex-1 prose-zinc dark:prose-invert prose-headings:scroll-m-20 prose-pre:border prose-pre:bg-muted/25 prose-img:rounded-md">
         {sectionHeading && (
           <p className="not-prose mb-2 text-sm font-medium text-primary">
