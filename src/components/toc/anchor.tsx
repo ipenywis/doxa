@@ -40,7 +40,7 @@ export function TableAnchor({ tocs }: TableAnchorProps) {
                 "border-l-2 py-1.5 text-sm transition-colors hover:text-foreground",
                 levelPadding[level],
                 activeId === hrefToId(href)
-                  ? "border-primary text-primary font-medium"
+                  ? "border-primary text-primary hover:text-primary font-medium"
                   : "border-transparent text-muted-foreground"
               )}
             >
