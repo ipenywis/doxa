@@ -13,7 +13,7 @@ export function PageMenu({ isSheet = false }) {
     <div className="flex flex-col gap-1 pb-6">
       {Routes.map((item, index) => {
         if ("spacer" in item) {
-          return <div key={`spacer-${index}`} className="mt-4" />
+          return <div key={`spacer-${index}`} className="mt-5" />
         }
         if (isHeading(item)) {
           return (
