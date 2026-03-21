@@ -1,4 +1,5 @@
 import { ViewTransitions } from "@/src/lib/transition"
+import { ColorProvider } from "@/src/providers/color"
 import { ThemeProvider } from "@/src/providers/theme"
 
 export const Providers: React.FC<{ children: React.ReactNode }> = ({
@@ -6,7 +7,9 @@ export const Providers: React.FC<{ children: React.ReactNode }> = ({
 }) => {
   return (
     <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
-      <ViewTransitions>{children}</ViewTransitions>
+      <ColorProvider>
+        <ViewTransitions>{children}</ViewTransitions>
+      </ColorProvider>
     </ThemeProvider>
   )
 }
