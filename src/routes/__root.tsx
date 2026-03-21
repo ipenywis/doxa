@@ -92,18 +92,18 @@ export const Route = createRootRoute({
         href: Settings.siteicon,
       },
     ],
-//     scripts: Settings.gtmconnected
-//       ? [
-//           {
-//             type: "text/javascript",
-//             children: `(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
-// new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
-// j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
-// 'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
-// })(window,document,'script','dataLayer','${Settings.gtm}');`,
-//           },
-//         ]
-//       : [],
+    //     scripts: Settings.gtmconnected
+    //       ? [
+    //           {
+    //             type: "text/javascript",
+    //             children: `(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+    // new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+    // j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+    // 'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+    // })(window,document,'script','dataLayer','${Settings.gtm}');`,
+    //           },
+    //         ]
+    //       : [],
   }),
   component: RootComponent,
   notFoundComponent: NotFoundComponent,
@@ -127,7 +127,9 @@ function RootDocument({ children }: Readonly<{ children: ReactNode }>) {
       <body className="font-regular">
         <Providers>
           <Navbar />
-          <main className="mx-auto h-auto max-w-[1440px] px-4 sm:px-6 md:px-8">{children}</main>
+          <main className="mx-auto h-auto max-w-[1440px] px-4 sm:px-6 md:px-8">
+            {children}
+          </main>
           <Footer />
         </Providers>
         <Scripts />
