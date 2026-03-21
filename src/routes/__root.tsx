@@ -119,6 +119,12 @@ function RootDocument({ children }: Readonly<{ children: ReactNode }>) {
     <html lang="en" suppressHydrationWarning>
       <head>
         <HeadContent />
+        <script
+          dangerouslySetInnerHTML={{
+            __html:
+              "document.documentElement.style.visibility='hidden'",
+          }}
+        />
       </head>
       <body className="font-regular">
         <Providers>
