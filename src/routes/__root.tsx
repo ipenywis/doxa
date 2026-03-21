@@ -12,7 +12,7 @@ import {
 
 import { Settings } from "@/src/types/settings"
 
-import "@/src/styles/globals.css"
+import globalsCss from "@/src/styles/globals.css?url"
 
 export const Route = createRootRoute({
   head: () => ({
@@ -80,6 +80,10 @@ export const Route = createRootRoute({
     ],
     links: [
       {
+        rel: "stylesheet",
+        href: globalsCss,
+      },
+      {
         rel: "canonical",
         href: Settings.canonical,
       },
@@ -119,12 +123,6 @@ function RootDocument({ children }: Readonly<{ children: ReactNode }>) {
     <html lang="en" suppressHydrationWarning>
       <head>
         <HeadContent />
-        <script
-          dangerouslySetInnerHTML={{
-            __html:
-              "document.documentElement.style.visibility='hidden'",
-          }}
-        />
       </head>
       <body className="font-regular">
         <Providers>
