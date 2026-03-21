@@ -183,6 +183,11 @@ pre > code {
   display: grid;
   max-width: inherit !important;
   padding: 14px 0 !important;
+  color: #1f2328;
+}
+
+.dark pre > code {
+  color: #e6edf3;
 }
 
 .contains-task-list {
@@ -232,56 +237,134 @@ pre > code {
   background-color: transparent !important;
 }
 
-.attr-name {
-  color: #414141;
+/* GitHub Light syntax theme */
+.comment,
+.prolog,
+.doctype,
+.cdata {
+  color: #6e7781;
 }
 
-.dark .attr-name {
-  color: #cacaca;
+.punctuation {
+  color: #1f2328;
 }
 
-.punctuation,
-.comment {
-  color: gray;
+.keyword,
+.operator {
+  color: #cf222e;
 }
 
 .attr-name,
+.tag {
+  color: #116329;
+}
+
+.function,
+.builtin {
+  color: #8250df;
+}
+
+.string,
+.attr-value,
+.char {
+  color: #0a3069;
+}
+
 .number,
-.tag,
-.property-access,
-.keyword {
-  color: hsla(335, 73%, 53%, 1);
+.constant,
+.symbol {
+  color: #0550ae;
+}
+
+.boolean,
+.annotation {
+  color: #0550ae;
+}
+
+.property,
+.property-access {
+  color: #0550ae;
+}
+
+.selector {
+  color: #116329;
+}
+
+.class-name {
+  color: #953800;
+}
+
+.regex {
+  color: #116329;
+}
+
+.variable {
+  color: #953800;
+}
+
+/* GitHub Dark syntax theme */
+.dark .comment,
+.dark .prolog,
+.dark .doctype,
+.dark .cdata {
+  color: #8b949e;
+}
+
+.dark .punctuation {
+  color: #e6edf3;
+}
+
+.dark .keyword,
+.dark .operator {
+  color: #ff7b72;
 }
 
 .dark .attr-name,
-.dark .tag,
-.dark .keyword,
-.dark .property-access,
-.dark .number {
-  color: hsla(335, 76%, 59%, 1);
+.dark .tag {
+  color: #7ee787;
 }
 
-.at.operator,
-.builtin,
-.function {
-  color: hsla(210, 100%, 66%, 1);
+.dark .function,
+.dark .builtin {
+  color: #d2a8ff;
 }
 
-.attr-value,
-.string {
-  color: hsla(131, 43%, 57%, 1);
+.dark .string,
+.dark .attr-value,
+.dark .char {
+  color: #a5d6ff;
 }
 
-.constant,
-.annotation,
-.boolean {
-  color: hsl(0, 0%, 29%);
-}
-
+.dark .number,
 .dark .constant,
-.dark .annotation,
-.dark .boolean {
-  color: hsl(0, 0%, 71%);
+.dark .symbol {
+  color: #79c0ff;
+}
+
+.dark .boolean,
+.dark .annotation {
+  color: #79c0ff;
+}
+
+.dark .property,
+.dark .property-access {
+  color: #79c0ff;
+}
+
+.dark .selector {
+  color: #7ee787;
+}
+
+.dark .class-name {
+  color: #ffa657;
+}
+
+.dark .regex {
+  color: #7ee787;
+}
+
+.dark .variable {
+  color: #ffa657;
 }
 
 span.katex-display {
