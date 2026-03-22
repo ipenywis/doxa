@@ -90,6 +90,20 @@ export const Route = createRootRoute({
       {
         rel: "icon",
         href: Settings.siteicon,
+        type: "image/svg+xml",
+      },
+      {
+        rel: "preconnect",
+        href: "https://fonts.googleapis.com",
+      },
+      {
+        rel: "preconnect",
+        href: "https://fonts.gstatic.com",
+        crossOrigin: "anonymous",
+      },
+      {
+        rel: "stylesheet",
+        href: "https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700&display=swap",
       },
     ],
     //     scripts: Settings.gtmconnected

@@ -1,3 +1,4 @@
+import { Logo } from "@/src/components/navigation/logo"
 import { Settings } from "@/src/types/settings"
 
 export function Footer() {
@@ -19,23 +20,7 @@ export function Footer() {
       </p>
       {Settings.branding !== false && (
         <div className="hidden items-center md:block">
-          <a
-            className="font-semibold"
-            href="https://rubixstudios.com.au"
-            title="Rubix Studios"
-            aria-label="Rubix Studios"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <img
-              src="/logo.svg"
-              alt="Rubix Studios logo"
-              title="Rubix Studios logo"
-              aria-label="Rubix Studios logo"
-              width={30}
-              height={30}
-            />
-          </a>
+          <Logo variant="full" size={16} />
         </div>
       )}
     </footer>

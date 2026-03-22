@@ -1,12 +1,12 @@
 export const url = "https://rubix-documents.vercel.app"
-export const siteicon = "/icon.png"
+export const siteicon = "/favicon.svg"
 
 export const gtm = "GTM-XXXXXXX"
 export const gtmconnected = true
 
-export const sitename = "Documents"
+export const sitename = "doxa"
 export const description =
-  "This comprehensive documentation template, crafted with Next.js and available as open-source, delivers a sleek and responsive design, tailored to meet all your project documentation requirements."
+  "Beautiful, fast documentation that stays out of your way. Built for developers who care about the reading experience as much as the writing."
 export const keywords = [
   "Next.js",
   "documentation",
