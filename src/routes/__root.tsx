@@ -11,8 +11,13 @@ import {
 } from "@tanstack/react-router"
 
 import { Settings } from "@/src/types/settings"
+import { getColorPreset } from "@/src/lib/colors"
+import { primaryColor } from "@/src/contents/settings/color"
 
 import globalsCss from "@/src/styles/globals.css?url"
+
+const colorPreset = getColorPreset(primaryColor)
+const colorCss = `:root { --primary: ${colorPreset.light.primary}; --primary-foreground: ${colorPreset.light.primaryForeground}; } .dark { --primary: ${colorPreset.dark.primary}; --primary-foreground: ${colorPreset.dark.primaryForeground}; }`
 
 export const Route = createRootRoute({
   head: () => ({
@@ -137,6 +142,7 @@ function RootDocument({ children }: Readonly<{ children: ReactNode }>) {
     <html lang="en" suppressHydrationWarning>
       <head>
         <HeadContent />
+        <style dangerouslySetInnerHTML={{ __html: colorCss }} />
       </head>
       <body className="font-regular">
         <Providers>

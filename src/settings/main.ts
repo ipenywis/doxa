@@ -1,4 +1,4 @@
-export const url = "https://rubix-documents.vercel.app"
+export const url = "https://doxa-docs.vercel.app"
 export const siteicon = "/favicon.svg"
 
 export const gtm = "GTM-XXXXXXX"
@@ -8,18 +8,17 @@ export const sitename = "doxa"
 export const description =
   "Beautiful, fast documentation that stays out of your way. Built for developers who care about the reading experience as much as the writing."
 export const keywords = [
-  "Next.js",
+  "doxa",
   "documentation",
-  "Rubix Studios",
   "open source",
   "SEO",
 ]
 export const urlimage = "/images/og-image.png"
-export const imagealt = "Rubix Studios Documentation"
-export const twitterhandle = "@RubixStudios"
+export const imagealt = "doxa documentation"
+export const twitterhandle = ""
 
-export const companyname = "Rubix Studios"
-export const companylink = "https://rubixstudios.com.au"
+export const companyname = "doxa"
+export const companylink = "https://doxa-docs.vercel.app"
 
 export const branding = true
 export const rightsidebar = true

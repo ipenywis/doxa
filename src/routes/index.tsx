@@ -1,4 +1,4 @@
-import { LogoMark } from "@/src/components/navigation/logo"
+import { Logo } from "@/src/components/navigation/logo"
 import { buttonVariants } from "@/src/components/ui/button"
 import { PageRoutes } from "@/src/lib/pageroutes"
 import { Link } from "@/src/lib/transition"
@@ -15,15 +15,8 @@ function Home() {
     <main className="flex min-h-[88vh] flex-col items-center justify-center px-4">
       <div className="flex max-w-2xl flex-col items-center text-center">
         <div className="mb-8">
-          <LogoMark size={64} />
+          <Logo variant="full" size={48} as="h1" className="gap-3 text-5xl lg:text-7xl" />
         </div>
-
-        <h1
-          className="mb-3 text-5xl font-bold tracking-tight lg:text-7xl"
-          style={{ fontFamily: "'Sora', sans-serif" }}
-        >
-          doxa
-        </h1>
 
         <p className="mb-4 text-lg text-muted-foreground sm:text-xl">
           Beautiful, fast documentation that stays out of your way.
