@@ -1,4 +1,5 @@
 import Anchor from "@/src/components/anchor"
+import { ChatButton } from "@/src/components/chat/chat-button"
 import { Logo } from "@/src/components/navigation/logo"
 import Search from "@/src/components/navigation/search"
 import { SheetLeft } from "@/src/components/sidebar"
@@ -6,6 +7,7 @@ import { ModeToggle } from "@/src/components/theme-toggle"
 import { buttonVariants } from "@/src/components/ui/button"
 import { SheetClose } from "@/src/components/ui/sheet"
 import { GitHubLink, Navigations } from "@/src/settings/navigation"
+import { Settings } from "@/src/types/settings"
 import { LuArrowUpRight, LuGithub } from "react-icons/lu"
 
 export function Navbar() {
@@ -36,6 +38,7 @@ export function Navbar() {
               <LuGithub className="h-[1.1rem] w-[1.1rem]" />
             </a>
           )}
+          {Settings.chat && <ChatButton />}
           <ModeToggle />
         </div>
       </div>

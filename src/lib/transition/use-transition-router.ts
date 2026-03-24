@@ -1,6 +1,8 @@
 import { useCallback } from "react"
 import { useNavigate } from "@tanstack/react-router"
 
+import { startViewTransitionIfSupported } from "@/src/lib/transition/document-view-transition"
+
 interface NavigateOptions {
   scroll?: boolean
 }
@@ -9,9 +11,9 @@ export function useTransitionRouter() {
   const navigate = useNavigate()
 
   const push = useCallback(
-    (href: string, options?: NavigateOptions) => {
+    (href: string, _options?: NavigateOptions) => {
       if ("startViewTransition" in document) {
-        ;(document as any).startViewTransition(() => {
+        startViewTransitionIfSupported(() => {
           navigate({ to: href })
         })
       } else {
@@ -22,9 +24,9 @@ export function useTransitionRouter() {
   )
 
   const replace = useCallback(
-    (href: string, options?: NavigateOptions) => {
+    (href: string, _options?: NavigateOptions) => {
       if ("startViewTransition" in document) {
-        ;(document as any).startViewTransition(() => {
+        startViewTransitionIfSupported(() => {
           navigate({ to: href, replace: true })
         })
       } else {
@@ -36,7 +38,7 @@ export function useTransitionRouter() {
 
   const back = useCallback(() => {
     if ("startViewTransition" in document) {
-      ;(document as any).startViewTransition(() => {
+      startViewTransitionIfSupported(() => {
         window.history.back()
       })
     } else {
@@ -46,7 +48,7 @@ export function useTransitionRouter() {
 
   const forward = useCallback(() => {
     if ("startViewTransition" in document) {
-      ;(document as any).startViewTransition(() => {
+      startViewTransitionIfSupported(() => {
         window.history.forward()
       })
     } else {

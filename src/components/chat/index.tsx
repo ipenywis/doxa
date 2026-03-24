@@ -1,0 +1,286 @@
+"use client"
+
+import { useCallback, useEffect, useRef, useState } from "react"
+import { ChatDrawer } from "@/src/components/chat/chat-drawer"
+import { ChatInput } from "@/src/components/chat/chat-input"
+import { HistoryPanel } from "@/src/components/chat/history-panel"
+import { MessageList } from "@/src/components/chat/message-list"
+import { useConversationHistory } from "@/src/components/chat/use-conversation-history"
+import { chatWithDocsStream } from "@/src/lib/chat-api"
+
+export interface ChatMessage {
+  id: string
+  role: "user" | "assistant"
+  content: string
+}
+
+let msgCounter = 0
+
+export function ChatWithDocs() {
+  const [messages, setMessages] = useState<ChatMessage[]>([])
+  const [isLoading, setIsLoading] = useState(false)
+  const [isStreaming, setIsStreaming] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+  const [showHistory, setShowHistory] = useState(false)
+  const [scrollToMsgId, setScrollToMsgId] = useState<string | null>(null)
+  const abortRef = useRef<AbortController | null>(null)
+  const conversationIdRef = useRef<string | null>(null)
+  const bufferRef = useRef("")
+  const drainRef = useRef<ReturnType<typeof setInterval> | null>(null)
+
+  const history = useConversationHistory()
+
+  // Initialize conversation ID on first mount
+  useEffect(() => {
+    if (!conversationIdRef.current) {
+      conversationIdRef.current = history.generateId()
+    }
+  }, [history.generateId])
+
+  // Persist messages to history when they change
+  useEffect(() => {
+    if (conversationIdRef.current && messages.length > 0 && !isStreaming) {
+      history.saveConversation(conversationIdRef.current, messages)
+    }
+  }, [messages, isStreaming, history.saveConversation])
+
+  // Clear scrollToMsgId after MessageList processes it
+  useEffect(() => {
+    if (scrollToMsgId) {
+      const timer = setTimeout(() => setScrollToMsgId(null), 200)
+      return () => clearTimeout(timer)
+    }
+  }, [scrollToMsgId])
+
+  // Cleanup drain interval on unmount
+  useEffect(() => {
+    return () => {
+      if (drainRef.current) clearInterval(drainRef.current)
+    }
+  }, [])
+
+  const handleSend = useCallback(
+    async (text: string) => {
+      const userMsg: ChatMessage = {
+        id: `msg-${++msgCounter}`,
+        role: "user",
+        content: text,
+      }
+
+      const assistantMsgId = `msg-${++msgCounter}`
+      const assistantMsg: ChatMessage = {
+        id: assistantMsgId,
+        role: "assistant",
+        content: "",
+      }
+
+      setMessages((prev) => [...prev, userMsg, assistantMsg])
+      setIsLoading(true)
+      setIsStreaming(true)
+      setError(null)
+      setScrollToMsgId(userMsg.id)
+
+      // Reset buffer & start smooth drain
+      bufferRef.current = ""
+      if (drainRef.current) clearInterval(drainRef.current)
+      drainRef.current = setInterval(() => {
+        if (bufferRef.current.length === 0) return
+        const len = bufferRef.current.length
+        const chunkSize =
+          len > 80
+            ? Math.ceil(len / 4)
+            : len > 20
+              ? Math.ceil(len / 2)
+              : Math.min(3, len)
+        const chunk = bufferRef.current.slice(0, chunkSize)
+        bufferRef.current = bufferRef.current.slice(chunkSize)
+        setMessages((prev) =>
+          prev.map((m) =>
+            m.id === assistantMsgId
+              ? { ...m, content: m.content + chunk }
+              : m
+          )
+        )
+      }, 30)
+
+      const controller = new AbortController()
+      abortRef.current = controller
+
+      try {
+        const allMessages = [...messages, userMsg].map((m) => ({
+          role: m.role,
+          content: m.content,
+        }))
+
+        const response = (await chatWithDocsStream({
+          data: { messages: allMessages },
+          signal: controller.signal,
+        })) as Response
+
+        if (!response.ok || !response.body) {
+          const text = await response.text().catch(() => "")
+          let errorMsg = `Request failed with status ${response.status}`
+          try {
+            const parsed = JSON.parse(text)
+            if (parsed.error) errorMsg = parsed.error
+          } catch {
+            // not JSON
+          }
+          throw new Error(errorMsg)
+        }
+
+        const reader = response.body.getReader()
+        if (!reader) throw new Error("No response body")
+
+        const decoder = new TextDecoder()
+        let sseBuffer = ""
+
+        while (true) {
+          const { done, value } = await reader.read()
+          if (done) break
+
+          sseBuffer += decoder.decode(value, { stream: true })
+          const events = sseBuffer.split("\n\n")
+          sseBuffer = events.pop() || ""
+
+          for (const event of events) {
+            const lines = event.split("\n")
+            for (const line of lines) {
+              if (!line.startsWith("data: ")) continue
+              const payload = line.slice(6)
+              if (payload === "[DONE]") continue
+
+              try {
+                const parsed = JSON.parse(payload)
+                if (
+                  parsed.type === "TEXT_MESSAGE_CONTENT" &&
+                  parsed.delta
+                ) {
+                  bufferRef.current += parsed.delta
+                }
+              } catch {
+                // Skip malformed JSON
+              }
+            }
+          }
+        }
+
+        // Wait for buffer to drain before finishing
+        await new Promise<void>((resolve) => {
+          const check = () => {
+            if (bufferRef.current.length === 0) {
+              resolve()
+            } else {
+              setTimeout(check, 50)
+            }
+          }
+          check()
+        })
+      } catch (err: unknown) {
+        const isAbort =
+          err instanceof Error && err.name === "AbortError"
+        if (isAbort) {
+          if (drainRef.current) clearInterval(drainRef.current)
+          bufferRef.current = ""
+          return
+        }
+        const message =
+          err instanceof Error ? err.message : "Something went wrong"
+        setError(message)
+        setMessages((prev) =>
+          prev.filter(
+            (m) => !(m.id === assistantMsgId && m.content === "")
+          )
+        )
+      } finally {
+        if (drainRef.current) {
+          clearInterval(drainRef.current)
+          drainRef.current = null
+        }
+        if (bufferRef.current.length > 0) {
+          const remaining = bufferRef.current
+          bufferRef.current = ""
+          setMessages((prev) =>
+            prev.map((m) =>
+              m.id === assistantMsgId
+                ? { ...m, content: m.content + remaining }
+                : m
+            )
+          )
+        }
+        setIsLoading(false)
+        setIsStreaming(false)
+        abortRef.current = null
+      }
+    },
+    [messages]
+  )
+
+  const handleNewConversation = useCallback(() => {
+    if (abortRef.current) abortRef.current.abort()
+    if (drainRef.current) clearInterval(drainRef.current)
+    bufferRef.current = ""
+    conversationIdRef.current = history.generateId()
+    setMessages([])
+    setError(null)
+    setIsLoading(false)
+    setIsStreaming(false)
+  }, [history.generateId])
+
+  const handleLoadConversation = useCallback(
+    (id: string) => {
+      if (abortRef.current) abortRef.current.abort()
+      if (drainRef.current) clearInterval(drainRef.current)
+      bufferRef.current = ""
+      const loaded = history.loadConversation(id)
+      if (loaded) {
+        conversationIdRef.current = id
+        setMessages(loaded)
+        setError(null)
+        setIsLoading(false)
+        setIsStreaming(false)
+      }
+    },
+    [history.loadConversation]
+  )
+
+  const handleDeleteConversation = useCallback(
+    (id: string) => {
+      history.deleteConversation(id)
+      if (conversationIdRef.current === id) {
+        handleNewConversation()
+      }
+    },
+    [history.deleteConversation, handleNewConversation]
+  )
+
+  return (
+    <ChatDrawer
+      onHistoryClick={() => setShowHistory(true)}
+      onNewChat={handleNewConversation}
+    >
+      {showHistory && (
+        <HistoryPanel
+          conversations={history.conversations}
+          activeConversationId={conversationIdRef.current}
+          onLoadConversation={handleLoadConversation}
+          onNewConversation={handleNewConversation}
+          onDeleteConversation={handleDeleteConversation}
+          onClose={() => setShowHistory(false)}
+        />
+      )}
+      <MessageList
+        messages={messages}
+        isLoading={isLoading}
+        isStreaming={isStreaming}
+        scrollToMsgId={scrollToMsgId}
+      />
+      {error && (
+        <div className="px-4 pb-2">
+          <p className="text-xs text-destructive">Error: {error}</p>
+        </div>
+      )}
+      <ChatInput onSend={handleSend} isLoading={isLoading} />
+    </ChatDrawer>
+  )
+}

@@ -24,7 +24,7 @@ export default function Search() {
 
   const debouncedSearch = useMemo(
     () =>
-      debounce(async (input) => {
+      debounce(async (input: string) => {
         setIsLoading(true)
         const results = await advanceSearch(input.trim())
         setFilteredResults(results)

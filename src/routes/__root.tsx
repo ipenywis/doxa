@@ -2,6 +2,8 @@
 import type { ReactNode } from "react"
 import { Footer } from "@/src/components/navigation/footer"
 import { Navbar } from "@/src/components/navigation/navbar"
+import { ChatWithDocs } from "@/src/components/chat"
+import { ChatProvider } from "@/src/components/chat/chat-context"
 import { Providers } from "@/src/providers"
 import {
   createRootRoute,
@@ -146,11 +148,18 @@ function RootDocument({ children }: Readonly<{ children: ReactNode }>) {
       </head>
       <body className="font-regular">
         <Providers>
-          <Navbar />
-          <main className="mx-auto h-auto max-w-[1440px] px-4 sm:px-6 md:px-8">
-            {children}
-          </main>
-          <Footer />
+          <ChatProvider>
+            <div className="flex min-h-screen">
+              <div className="min-w-0 flex-1">
+                <Navbar />
+                <main className="mx-auto h-auto max-w-[1440px] px-4 sm:px-6 md:px-8">
+                  {children}
+                </main>
+                <Footer />
+              </div>
+              {Settings.chat && <ChatWithDocs />}
+            </div>
+          </ChatProvider>
         </Providers>
         <Scripts />
       </body>
