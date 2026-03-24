@@ -44,11 +44,10 @@ async function getSearchData(): Promise<SearchDocument[]> {
   }
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-function memoize<T extends (...args: any[]) => any>(fn: T): T {
-  const cache = new Map<string, ReturnType<T>>()
+function memoize<A extends unknown[], R>(fn: (...args: A) => R): (...args: A) => R {
+  const cache = new Map<string, R>()
 
-  return ((...args: Parameters<T>): ReturnType<T> => {
+  return (...args: A) => {
     const key = JSON.stringify(args)
 
     if (cache.has(key)) {
@@ -65,7 +64,7 @@ function memoize<T extends (...args: any[]) => any>(fn: T): T {
     }
 
     return result
-  }) as T
+  }
 }
 
 const memoizedSearchMatch = memoize(searchMatch)
@@ -343,14 +342,13 @@ export function stringToDate(date: string) {
   return new Date(year, month - 1, day)
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export function debounce<T extends (...args: any[]) => any>(
-  func: T,
+export function debounce<A extends unknown[], R>(
+  func: (...args: A) => R,
   wait: number,
   immediate = false
-): (...args: Parameters<T>) => void {
+): (...args: A) => void {
   let timeout: ReturnType<typeof setTimeout> | null = null
-  let lastArgs: Parameters<T> | null = null
+  let lastArgs: A | null = null
   let rafId: number | null = null
   let lastCallTime: number | null = null
 
@@ -365,7 +363,7 @@ export function debounce<T extends (...args: any[]) => any>(
         cancelAnimationFrame(rafId)
         rafId = null
       }
-      func(...(lastArgs as Parameters<T>))
+      if (lastArgs) func(...lastArgs)
       lastArgs = null
       lastCallTime = null
     } else {
@@ -373,7 +371,7 @@ export function debounce<T extends (...args: any[]) => any>(
     }
   }
 
-  return (...args: Parameters<T>) => {
+  return (...args: A) => {
     lastArgs = args
     lastCallTime = performance.now()
     const callNow = immediate && !timeout

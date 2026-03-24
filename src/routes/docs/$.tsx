@@ -2,6 +2,7 @@
 
 import { createElement, useEffect, useState } from "react"
 import * as runtime from "react/jsx-runtime"
+import { useChatContext } from "@/src/components/chat/chat-context"
 import { ArticleBreadcrumb } from "@/src/components/article/breadcrumb"
 import { Pagination } from "@/src/components/article/pagination"
 import { TableOfContents } from "@/src/components/toc"
@@ -74,6 +75,7 @@ function findSectionHeading(slug: string): string | undefined {
 }
 
 function DocsContent() {
+  const { isOpen: chatOpen } = useChatContext()
   const { slug, document } = Route.useLoaderData()
   const paths = slug.split("/")
   const pathName = `docs/${slug}`
@@ -133,11 +135,13 @@ function DocsContent() {
         </div>
         <Pagination pathname={pathName} />
       </article>
-      <TableOfContents
-        tocs={{ tocs: document.tocs }}
-        pathName={slug}
-        frontmatter={document.frontmatter}
-      />
+      {!chatOpen && (
+        <TableOfContents
+          tocs={{ tocs: document.tocs }}
+          pathName={slug}
+          frontmatter={document.frontmatter}
+        />
+      )}
     </div>
   )
 }

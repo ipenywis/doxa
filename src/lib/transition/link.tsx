@@ -1,6 +1,8 @@
 import { useCallback, type ComponentProps, type MouseEvent } from "react"
 import { Link as RouterLink, useNavigate } from "@tanstack/react-router"
 
+import { startViewTransitionIfSupported } from "@/src/lib/transition/document-view-transition"
+
 function isModifiedEvent(event: MouseEvent): boolean {
   const eventTarget = event.currentTarget as HTMLAnchorElement | SVGAElement
   const target = eventTarget.getAttribute("target")
@@ -68,7 +70,7 @@ export function Link({
 
         e.preventDefault()
 
-        const viewTransition = (document as any).startViewTransition(() => {
+        startViewTransitionIfSupported(() => {
           navigate({
             to: href,
             replace,

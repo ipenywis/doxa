@@ -416,3 +416,50 @@ span.katex-html {
     height: 0;
   }
 }
+
+/* Chat drawer — subtle scrollbar */
+.chat-drawer-scroll::-webkit-scrollbar {
+  width: 3px;
+}
+
+.chat-drawer-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.chat-drawer-scroll::-webkit-scrollbar-thumb {
+  background: oklch(0.75 0 0 / 0.15);
+  border-radius: 9999px;
+}
+
+.chat-drawer-scroll::-webkit-scrollbar-thumb:hover {
+  background: oklch(0.65 0 0 / 0.3);
+}
+
+.dark .chat-drawer-scroll::-webkit-scrollbar-thumb {
+  background: oklch(0.45 0 0 / 0.15);
+}
+
+.dark .chat-drawer-scroll::-webkit-scrollbar-thumb:hover {
+  background: oklch(0.55 0 0 / 0.3);
+}
+
+/* Firefox */
+.chat-drawer-scroll {
+  scrollbar-width: thin;
+  scrollbar-color: oklch(0.75 0 0 / 0.15) transparent;
+}
+
+/* Streaming cursor blink */
+.streaming-cursor {
+  animation: cursorBlink 1s steps(2, start) infinite;
+}
+
+@keyframes cursorBlink {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0;
+  }
+}

@@ -26,4 +26,6 @@ export const feedbackedit = true
 export const tableofcontent = true
 export const totopscroll = true
 
+export const chatwithdocs = true
+
 export const loadfromgithub = false

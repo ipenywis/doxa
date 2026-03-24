@@ -2,6 +2,8 @@
 import { use, useEffect, useRef, useState } from "react"
 import { useLocation } from "@tanstack/react-router"
 
+import { startViewTransitionIfSupported } from "@/src/lib/transition/document-view-transition"
+
 import { useHash } from "./use-hash"
 
 const suspenseBoundaries = new Set<string>()
@@ -29,7 +31,7 @@ export function useBrowserNativeTransitions() {
       })
 
       const pendingStartViewTransition = new Promise<void>((resolve) => {
-        ;(document as any).startViewTransition(() => {
+        startViewTransitionIfSupported(() => {
           resolve()
           return pendingViewTransition
         })

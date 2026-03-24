@@ -1,12 +1,16 @@
 "use client"
 
-import { lazy, Suspense } from "react"
+import { lazy, Suspense, type ReactNode } from "react"
 
 const FileTreeComponent = lazy(
   () => import("@/src/components/markdown/filetree/component")
 )
 
-export function FileTree(props: any) {
+interface FileTreeProps {
+  children: ReactNode
+}
+
+export function FileTree(props: FileTreeProps) {
   return (
     <Suspense fallback={<div>Loading...</div>}>
       <FileTreeComponent {...props} />

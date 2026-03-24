@@ -1,6 +1,5 @@
 "use client"
 
-import * as React from "react"
 import { Button } from "@/src/components/ui/button"
 import { useTheme } from "next-themes"
 import { RxMoon, RxSun } from "react-icons/rx"

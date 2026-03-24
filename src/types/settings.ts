@@ -1,5 +1,6 @@
 import {
   branding,
+  chatwithdocs,
   companylink,
   companyname,
   description,
@@ -31,6 +32,7 @@ interface AppSettings {
   toc: boolean
   feedback: boolean
   totop: boolean
+  chat: boolean
   gitload: boolean
   title: string
   metadataBase: string
@@ -52,6 +54,7 @@ export const Settings: AppSettings = {
   toc: tableofcontent,
   feedback: feedbackedit,
   totop: totopscroll,
+  chat: chatwithdocs,
   gitload: loadfromgithub,
 
   title: sitename,
