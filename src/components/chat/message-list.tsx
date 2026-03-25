@@ -2,12 +2,15 @@ import { useCallback, useEffect, useRef } from "react"
 import Markdown, { type Components } from "react-markdown"
 import remarkGfm from "remark-gfm"
 import type { ChatMessage } from "@/src/components/chat"
+import { ToolCallList, type ToolCallStep } from "@/src/components/chat/tool-call-display"
 
 interface MessageListProps {
   messages: ChatMessage[]
   isLoading: boolean
   isStreaming: boolean
   scrollToMsgId: string | null
+  /** Live tool call steps for the current streaming response. */
+  activeToolSteps?: ToolCallStep[]
 }
 
 function DocLink({
@@ -100,6 +103,7 @@ export function MessageList({
   isLoading,
   isStreaming,
   scrollToMsgId,
+  activeToolSteps = [],
 }: MessageListProps) {
   const scrollRef = useRef<HTMLDivElement>(null)
   const contentEndRef = useRef<HTMLDivElement>(null)
@@ -167,7 +171,7 @@ export function MessageList({
     })
   }, [scrollToMsgId, scrollTo])
 
-  // 2) Auto-follow streaming content
+  // 2) Auto-follow streaming content (including tool steps)
   useEffect(() => {
     if (scrollModeRef.current !== "follow") return
     if (!isStreaming && !isLoading) return
@@ -185,7 +189,7 @@ export function MessageList({
         markerRect.bottom - containerRect.top + el.scrollTop
       scrollTo(relativeBottom - el.clientHeight + 16)
     }
-  }, [messages, isStreaming, isLoading, scrollTo])
+  }, [messages, isStreaming, isLoading, activeToolSteps, scrollTo])
 
   // 3) When streaming ends, snap to the real bottom (spacer collapses)
   useEffect(() => {
@@ -225,6 +229,10 @@ export function MessageList({
   const streamingMsgId =
     isStreaming && lastMsg?.role === "assistant" ? lastMsg.id : null
 
+  // Show active tool steps when streaming and no text content yet
+  const showActiveToolSteps =
+    isStreaming && activeToolSteps.length > 0
+
   return (
     <div
       ref={scrollRef}
@@ -249,32 +257,51 @@ export function MessageList({
 
           if (msg.role === "assistant") {
             const isCurrentlyStreaming = msg.id === streamingMsgId
-            if (isCurrentlyStreaming && !msg.content) {
-              return (
-                <div key={msg.id} className="flex justify-start">
-                  <LoadingDots />
-                </div>
-              )
-            }
+
+            // Show persisted tool steps for completed messages
+            const persistedSteps = msg.toolSteps && msg.toolSteps.length > 0
+
             return (
-              <div key={msg.id} className="flex justify-start">
-                <div className="max-w-[85%] rounded-2xl rounded-bl-sm bg-muted px-4 py-2 text-sm">
-                  {isCurrentlyStreaming ? (
-                    <>
-                      <p className="whitespace-pre-wrap wrap-break-word leading-relaxed">
-                        {msg.content}
-                      </p>
-                      <StreamingCursor />
-                    </>
-                  ) : (
-                    <Markdown
-                      remarkPlugins={[remarkGfm]}
-                      components={markdownComponents}
-                    >
-                      {msg.content}
-                    </Markdown>
-                  )}
-                </div>
+              <div key={msg.id} className="flex flex-col gap-1">
+                {/* Persisted tool steps (from history or after streaming completes) */}
+                {persistedSteps && !isCurrentlyStreaming && (
+                  <ToolCallList steps={msg.toolSteps!} />
+                )}
+
+                {/* Active tool steps during streaming */}
+                {isCurrentlyStreaming && showActiveToolSteps && (
+                  <ToolCallList steps={activeToolSteps} />
+                )}
+
+                {/* Loading dots while waiting for first content */}
+                {isCurrentlyStreaming && !msg.content && activeToolSteps.length === 0 && (
+                  <div className="flex justify-start">
+                    <LoadingDots />
+                  </div>
+                )}
+
+                {/* Message content */}
+                {msg.content && (
+                  <div className="flex justify-start">
+                    <div className="max-w-[85%] rounded-2xl rounded-bl-sm bg-muted px-4 py-2 text-sm">
+                      {isCurrentlyStreaming ? (
+                        <>
+                          <p className="whitespace-pre-wrap wrap-break-word leading-relaxed">
+                            {msg.content}
+                          </p>
+                          <StreamingCursor />
+                        </>
+                      ) : (
+                        <Markdown
+                          remarkPlugins={[remarkGfm]}
+                          components={markdownComponents}
+                        >
+                          {msg.content}
+                        </Markdown>
+                      )}
+                    </div>
+                  </div>
+                )}
               </div>
             )
           }
