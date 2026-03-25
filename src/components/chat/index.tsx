@@ -5,6 +5,7 @@ import { ChatDrawer } from "@/src/components/chat/chat-drawer"
 import { ChatInput } from "@/src/components/chat/chat-input"
 import { HistoryPanel } from "@/src/components/chat/history-panel"
 import { MessageList } from "@/src/components/chat/message-list"
+import type { ToolCallStep } from "@/src/components/chat/tool-call-display"
 import { useConversationHistory } from "@/src/components/chat/use-conversation-history"
 import { chatWithDocsStream } from "@/src/lib/chat-api"
 
@@ -12,6 +13,8 @@ export interface ChatMessage {
   id: string
   role: "user" | "assistant"
   content: string
+  /** Tool call steps that occurred before this assistant message. */
+  toolSteps?: ToolCallStep[]
 }
 
 let msgCounter = 0
@@ -23,10 +26,16 @@ export function ChatWithDocs() {
   const [error, setError] = useState<string | null>(null)
   const [showHistory, setShowHistory] = useState(false)
   const [scrollToMsgId, setScrollToMsgId] = useState<string | null>(null)
+  /** Live tool call steps for the current streaming response. */
+  const [activeToolSteps, setActiveToolSteps] = useState<ToolCallStep[]>([])
   const abortRef = useRef<AbortController | null>(null)
   const conversationIdRef = useRef<string | null>(null)
   const bufferRef = useRef("")
   const drainRef = useRef<ReturnType<typeof setInterval> | null>(null)
+  /** Accumulates tool steps during streaming. */
+  const toolStepsRef = useRef<Map<string, ToolCallStep>>(new Map())
+  /** Tracks accumulated tool args per toolCallId */
+  const toolArgsRef = useRef<Map<string, string>>(new Map())
 
   const history = useConversationHistory()
 
@@ -79,6 +88,9 @@ export function ChatWithDocs() {
       setIsStreaming(true)
       setError(null)
       setScrollToMsgId(userMsg.id)
+      setActiveToolSteps([])
+      toolStepsRef.current = new Map()
+      toolArgsRef.current = new Map()
 
       // Reset buffer & start smooth drain
       bufferRef.current = ""
@@ -152,12 +164,7 @@ export function ChatWithDocs() {
 
               try {
                 const parsed = JSON.parse(payload)
-                if (
-                  parsed.type === "TEXT_MESSAGE_CONTENT" &&
-                  parsed.delta
-                ) {
-                  bufferRef.current += parsed.delta
-                }
+                handleSSEEvent(parsed, assistantMsgId)
               } catch {
                 // Skip malformed JSON
               }
@@ -176,6 +183,18 @@ export function ChatWithDocs() {
           }
           check()
         })
+
+        // Attach accumulated tool steps to the final assistant message
+        const finalSteps = Array.from(toolStepsRef.current.values())
+        if (finalSteps.length > 0) {
+          setMessages((prev) =>
+            prev.map((m) =>
+              m.id === assistantMsgId
+                ? { ...m, toolSteps: finalSteps }
+                : m
+            )
+          )
+        }
       } catch (err: unknown) {
         const isAbort =
           err instanceof Error && err.name === "AbortError"
@@ -210,21 +229,93 @@ export function ChatWithDocs() {
         }
         setIsLoading(false)
         setIsStreaming(false)
+        setActiveToolSteps([])
         abortRef.current = null
       }
     },
     [messages]
   )
 
+  /**
+   * Handle a parsed SSE event from the TanStack AI stream.
+   * AG-UI protocol events: TEXT_MESSAGE_CONTENT, TOOL_CALL_START, TOOL_CALL_ARGS, TOOL_CALL_END
+   */
+  function handleSSEEvent(parsed: Record<string, unknown>, _assistantMsgId: string) {
+    switch (parsed.type) {
+      case "TEXT_MESSAGE_CONTENT": {
+        if (typeof parsed.delta === "string") {
+          bufferRef.current += parsed.delta
+        }
+        break
+      }
+
+      case "TOOL_CALL_START": {
+        const id = parsed.toolCallId as string
+        const name = parsed.toolName as string
+        if (!id || !name) break
+
+        const step: ToolCallStep = {
+          id,
+          name,
+          args: "",
+          status: "calling",
+        }
+        toolStepsRef.current.set(id, step)
+        toolArgsRef.current.set(id, "")
+        syncToolStepsToState()
+        break
+      }
+
+      case "TOOL_CALL_ARGS": {
+        const id = parsed.toolCallId as string
+        const delta = parsed.delta as string
+        if (!id || typeof delta !== "string") break
+
+        const accumulated = (toolArgsRef.current.get(id) || "") + delta
+        toolArgsRef.current.set(id, accumulated)
+
+        const step = toolStepsRef.current.get(id)
+        if (step) {
+          step.args = accumulated
+          step.status = "executing"
+          syncToolStepsToState()
+        }
+        break
+      }
+
+      case "TOOL_CALL_END": {
+        const id = parsed.toolCallId as string
+        if (!id) break
+
+        const step = toolStepsRef.current.get(id)
+        if (step) {
+          const result = parsed.result
+          step.result = typeof result === "string" ? result : JSON.stringify(result)
+          step.status = step.result?.startsWith("Error") ? "error" : "completed"
+          syncToolStepsToState()
+        }
+        break
+      }
+    }
+  }
+
+  /** Sync the mutable tool steps ref to React state for rendering. */
+  function syncToolStepsToState() {
+    setActiveToolSteps(Array.from(toolStepsRef.current.values()).map((s) => ({ ...s })))
+  }
+
   const handleNewConversation = useCallback(() => {
     if (abortRef.current) abortRef.current.abort()
     if (drainRef.current) clearInterval(drainRef.current)
     bufferRef.current = ""
+    toolStepsRef.current = new Map()
+    toolArgsRef.current = new Map()
     conversationIdRef.current = history.generateId()
     setMessages([])
     setError(null)
     setIsLoading(false)
     setIsStreaming(false)
+    setActiveToolSteps([])
   }, [history.generateId])
 
   const handleLoadConversation = useCallback(
@@ -232,6 +323,8 @@ export function ChatWithDocs() {
       if (abortRef.current) abortRef.current.abort()
       if (drainRef.current) clearInterval(drainRef.current)
       bufferRef.current = ""
+      toolStepsRef.current = new Map()
+      toolArgsRef.current = new Map()
       const loaded = history.loadConversation(id)
       if (loaded) {
         conversationIdRef.current = id
@@ -239,6 +332,7 @@ export function ChatWithDocs() {
         setError(null)
         setIsLoading(false)
         setIsStreaming(false)
+        setActiveToolSteps([])
       }
     },
     [history.loadConversation]
@@ -274,6 +368,7 @@ export function ChatWithDocs() {
         isLoading={isLoading}
         isStreaming={isStreaming}
         scrollToMsgId={scrollToMsgId}
+        activeToolSteps={activeToolSteps}
       />
       {error && (
         <div className="px-4 pb-2">
