@@ -1,7 +1,7 @@
 import { PropsWithChildren } from "react"
 import { Link } from "@/src/lib/transition"
 import { iconMap } from "@/src/settings/icons"
-import clsx from "clsx"
+import { cn } from "@/src/lib/utils"
 
 type CardProps = PropsWithChildren & {
   subtitle?: string
@@ -32,8 +32,8 @@ export function Card({
 
   const content = (
     <div
-      className={clsx(
-        "group relative flex overflow-hidden rounded-lg border bg-white shadow-md transition-shadow duration-300 ease-in-out hover:shadow-lg dark:border-neutral-800 dark:bg-neutral-900 hover:dark:shadow-md",
+      className={cn(
+        "group relative flex overflow-hidden rounded-lg border border-border bg-card shadow-md transition-shadow duration-300 ease-in-out hover:shadow-lg hover:dark:shadow-md",
         variant === "small"
           ? "items-center space-x-2 p-3"
           : variant === "image"
@@ -44,8 +44,8 @@ export function Card({
     >
       {external && href && variant !== "image" && (
         <div
-          className={clsx(
-            "absolute top-2 transform text-gray-500 transition-transform duration-300 ease-in-out group-hover:translate-x-1 group-hover:-translate-y-1 group-hover:text-black dark:text-gray-400 dark:group-hover:text-white",
+          className={cn(
+            "absolute top-2 transform text-muted-foreground transition-transform duration-300 ease-in-out group-hover:translate-x-1 group-hover:-translate-y-1 group-hover:text-foreground",
             variant === "small" ? "right-0" : "right-2"
           )}
         >
@@ -53,11 +53,11 @@ export function Card({
         </div>
       )}
       {IconComponent && (
-        <IconComponent className="text-gray-500 dark:text-gray-300" />
+        <IconComponent className="text-muted-foreground" />
       )}
       <div>
         {subtitle && variant === "normal" && (
-          <p className="my-1! text-xs font-semibold text-gray-500 dark:text-gray-400">
+          <p className="my-1! text-xs font-semibold text-muted-foreground">
             {subtitle}
           </p>
         )}
@@ -72,7 +72,7 @@ export function Card({
           />
         )}
         <div
-          className={clsx(
+          className={cn(
             "font-semibold transition-all duration-300 group-hover:font-bold",
             variant === "small"
               ? "text-sm"
@@ -85,7 +85,7 @@ export function Card({
           {title}
         </div>
         {description && variant === "normal" && (
-          <p className="my-2! text-sm font-normal text-gray-600 dark:text-gray-400">
+          <p className="my-2! text-sm font-normal text-muted-foreground">
             {description}
           </p>
         )}

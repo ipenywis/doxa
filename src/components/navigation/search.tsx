@@ -84,7 +84,7 @@ export default function Search() {
         <DialogClose key={href} asChild>
           <Anchor
             className={cn(
-              "flex w-full items-center gap-2.5 rounded-sm px-3 text-[15px] transition-all duration-300 hover:bg-neutral-100 dark:hover:bg-neutral-900"
+              "flex w-full items-center gap-2.5 rounded-sm px-3 text-[15px] transition-all duration-300 hover:bg-accent"
             )}
             href={href}
           >
@@ -110,7 +110,7 @@ export default function Search() {
       >
         <DialogTrigger asChild>
           <div className="relative max-w-md flex-1 cursor-pointer">
-            <LuSearch className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-neutral-500 dark:text-neutral-400" />
+            <LuSearch className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
             <div className="flex h-9 w-full items-center rounded-md border bg-background pr-2 pl-10 text-sm text-muted-foreground shadow-sm md:w-[200px] lg:w-[260px]">
               <span className="flex-1">Search...</span>
               <kbd className="pointer-events-none hidden h-5 items-center gap-1 rounded border bg-muted px-1.5 font-mono text-[10px] font-medium text-muted-foreground sm:flex">
@@ -157,7 +157,7 @@ export default function Search() {
                         <DialogClose key={item.href} asChild>
                           <Anchor
                             className={cn(
-                              "flex w-full max-w-[310px] flex-col gap-0.5 rounded-sm p-3 text-[15px] transition-all duration-300 hover:bg-neutral-100 sm:max-w-[480px] dark:hover:bg-neutral-900"
+                              "flex w-full max-w-[310px] flex-col gap-0.5 rounded-sm p-3 text-[15px] transition-all duration-300 hover:bg-accent sm:max-w-[480px]"
                             )}
                             href={`/docs${item.href}`}
                           >
@@ -167,7 +167,7 @@ export default function Search() {
                             </div>
                             {"snippet" in item && item.snippet && (
                               <p
-                                className="truncate text-xs text-neutral-500 dark:text-neutral-400"
+                                className="truncate text-xs text-muted-foreground"
                                 dangerouslySetInnerHTML={{
                                   __html: highlight(
                                     item.snippet,

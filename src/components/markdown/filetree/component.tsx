@@ -9,7 +9,7 @@ import {
   useContext,
   useState,
 } from "react"
-import cn from "clsx"
+import { cn } from "@/src/lib/utils"
 import { FiFileText } from "react-icons/fi"
 import { LuFolder, LuFolderClosed } from "react-icons/lu"
 

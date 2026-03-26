@@ -1,7 +1,7 @@
 "use client"
 
 import React, { useCallback, useEffect, useMemo, useRef } from "react"
-import clsx from "clsx"
+import { cn } from "@/src/lib/utils"
 import mermaid from "mermaid"
 
 interface MermaidProps {
@@ -29,7 +29,7 @@ const Mermaid = ({ chart, className }: MermaidProps) => {
   }, [chart])
 
   const memoizedClassName = useMemo(
-    () => clsx("mermaid", className),
+    () => cn("mermaid", className),
     [className]
   )
 

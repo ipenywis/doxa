@@ -1,6 +1,5 @@
 import { PropsWithChildren } from "react"
 import { cn } from "@/src/lib/utils"
-import clsx from "clsx"
 
 type NoteProps = PropsWithChildren & {
   title?: string
@@ -12,8 +11,8 @@ export default function Note({
   title = "Note",
   type = "note",
 }: NoteProps) {
-  const noteClassNames = clsx({
-    "dark:bg-neutral-900 bg-neutral-50": type == "note",
+  const noteClassNames = cn({
+    "bg-secondary": type == "note",
     "dark:bg-green-950 bg-green-100 border-green-300 dark:border-green-900":
       type === "success",
     "dark:bg-orange-950 bg-orange-100 border-orange-300 dark:border-orange-900":
