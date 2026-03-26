@@ -98,12 +98,13 @@ export function ChatWithDocs() {
       drainRef.current = setInterval(() => {
         if (bufferRef.current.length === 0) return
         const len = bufferRef.current.length
+        // Drain larger chunks less frequently for smoother rendering
         const chunkSize =
-          len > 80
-            ? Math.ceil(len / 4)
-            : len > 20
-              ? Math.ceil(len / 2)
-              : Math.min(3, len)
+          len > 120
+            ? Math.ceil(len / 2)
+            : len > 40
+              ? Math.ceil(len / 1.5)
+              : Math.min(8, len)
         const chunk = bufferRef.current.slice(0, chunkSize)
         bufferRef.current = bufferRef.current.slice(chunkSize)
         setMessages((prev) =>
@@ -113,7 +114,7 @@ export function ChatWithDocs() {
               : m
           )
         )
-      }, 30)
+      }, 40)
 
       const controller = new AbortController()
       abortRef.current = controller

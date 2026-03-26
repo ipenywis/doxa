@@ -7,7 +7,6 @@
 
 import { catTool } from "@/src/lib/agent/tools/cat"
 import { grepTool } from "@/src/lib/agent/tools/grep"
-import { findTool } from "@/src/lib/agent/tools/find"
 
 /** All tools available to the documentation agent. */
-export const agentTools = [catTool, grepTool, findTool]
+export const agentTools = [catTool, grepTool]

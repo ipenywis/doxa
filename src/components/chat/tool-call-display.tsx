@@ -75,6 +75,7 @@ export function ToolCallDisplay({ step }: ToolCallDisplayProps) {
         <LuTerminal className="size-3 shrink-0 text-muted-foreground" />
 
         <code className="flex-1 truncate font-mono text-[11px] text-foreground/80">
+          <span className="font-semibold text-foreground">{step.name}</span>{" "}
           {displayCommand}
         </code>
 

@@ -61,16 +61,37 @@ function StreamingCursor() {
 const markdownComponents: Components = {
   a: DocLink,
   p: ({ children }: { children?: React.ReactNode }) => (
-    <p className="mb-2 last:mb-0">{children}</p>
+    <p className="mb-3 leading-relaxed text-foreground/90 last:mb-0">{children}</p>
+  ),
+  h1: ({ children }: { children?: React.ReactNode }) => (
+    <h1 className="mb-3 mt-4 text-base font-semibold tracking-tight text-foreground first:mt-0">{children}</h1>
+  ),
+  h2: ({ children }: { children?: React.ReactNode }) => (
+    <h2 className="mb-2 mt-4 text-sm font-semibold tracking-tight text-foreground first:mt-0">{children}</h2>
+  ),
+  h3: ({ children }: { children?: React.ReactNode }) => (
+    <h3 className="mb-2 mt-3 text-sm font-medium text-foreground first:mt-0">{children}</h3>
   ),
   ul: ({ children }: { children?: React.ReactNode }) => (
-    <ul className="mb-2 list-disc pl-4 last:mb-0">{children}</ul>
+    <ul className="mb-3 list-disc space-y-1 pl-5 text-foreground/90 last:mb-0">{children}</ul>
   ),
   ol: ({ children }: { children?: React.ReactNode }) => (
-    <ol className="mb-2 list-decimal pl-4 last:mb-0">{children}</ol>
+    <ol className="mb-3 list-decimal space-y-1 pl-5 text-foreground/90 last:mb-0">{children}</ol>
   ),
   li: ({ children }: { children?: React.ReactNode }) => (
-    <li className="mb-1">{children}</li>
+    <li className="leading-relaxed">{children}</li>
+  ),
+  strong: ({ children }: { children?: React.ReactNode }) => (
+    <strong className="font-semibold text-foreground">{children}</strong>
+  ),
+  em: ({ children }: { children?: React.ReactNode }) => (
+    <em className="text-foreground/80">{children}</em>
+  ),
+  blockquote: ({ children }: { children?: React.ReactNode }) => (
+    <blockquote className="my-3 border-l-2 border-primary/40 pl-3 text-foreground/70 italic">{children}</blockquote>
+  ),
+  hr: () => (
+    <hr className="my-4 border-border/50" />
   ),
   code: ({
     children,
@@ -82,19 +103,36 @@ const markdownComponents: Components = {
     const isBlock = className?.startsWith("language-")
     if (isBlock) {
       return (
-        <code className="block overflow-x-auto rounded bg-muted p-3 text-xs">
+        <code className="block text-xs leading-relaxed">
           {children}
         </code>
       )
     }
     return (
-      <code className="rounded bg-muted px-1.5 py-0.5 text-xs">
+      <code className="rounded-md bg-primary/10 px-1.5 py-0.5 text-xs font-medium text-primary">
         {children}
       </code>
     )
   },
   pre: ({ children }: { children?: React.ReactNode }) => (
-    <pre className="mb-2 last:mb-0">{children}</pre>
+    <pre className="mb-3 overflow-x-auto rounded-md border border-border/30 bg-muted/80 p-3 last:mb-0">{children}</pre>
+  ),
+  table: ({ children }: { children?: React.ReactNode }) => (
+    <div className="mb-3 overflow-x-auto rounded-md border border-border/40">
+      <table className="w-full text-xs">{children}</table>
+    </div>
+  ),
+  thead: ({ children }: { children?: React.ReactNode }) => (
+    <thead className="border-b border-border/40 bg-muted/50">{children}</thead>
+  ),
+  th: ({ children }: { children?: React.ReactNode }) => (
+    <th className="px-3 py-1.5 text-left font-medium text-foreground">{children}</th>
+  ),
+  td: ({ children }: { children?: React.ReactNode }) => (
+    <td className="px-3 py-1.5 text-foreground/80">{children}</td>
+  ),
+  tr: ({ children }: { children?: React.ReactNode }) => (
+    <tr className="border-b border-border/20 last:border-0">{children}</tr>
   ),
 }
 
@@ -285,19 +323,19 @@ export function MessageList({
                   <div className="flex justify-start">
                     <div className="max-w-[85%] rounded-2xl rounded-bl-sm bg-muted px-4 py-2 text-sm">
                       {isCurrentlyStreaming ? (
-                        <>
-                          <p className="whitespace-pre-wrap wrap-break-word leading-relaxed">
-                            {msg.content}
-                          </p>
-                          <StreamingCursor />
-                        </>
-                      ) : (
-                        <Markdown
-                          remarkPlugins={[remarkGfm]}
-                          components={markdownComponents}
-                        >
+                        <p className="whitespace-pre-wrap break-words leading-relaxed">
                           {msg.content}
-                        </Markdown>
+                          <StreamingCursor />
+                        </p>
+                      ) : (
+                        <div className="chat-prose">
+                          <Markdown
+                            remarkPlugins={[remarkGfm]}
+                            components={markdownComponents}
+                          >
+                            {msg.content}
+                          </Markdown>
+                        </div>
                       )}
                     </div>
                   </div>

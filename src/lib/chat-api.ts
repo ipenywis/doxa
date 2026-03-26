@@ -62,6 +62,7 @@ export const chatWithDocsStream = createServerFn({ method: "POST" })
         tools: agentTools,
         maxTokens: aiConfig.maxResponseTokens,
         stream: true as const,
+        agentLoopStrategy: ({ iterationCount }) => iterationCount < 8,
       })
 
       return toServerSentEventsResponse(stream, { abortController })

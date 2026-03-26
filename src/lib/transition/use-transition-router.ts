@@ -3,15 +3,11 @@ import { useNavigate } from "@tanstack/react-router"
 
 import { startViewTransitionIfSupported } from "@/src/lib/transition/document-view-transition"
 
-interface NavigateOptions {
-  scroll?: boolean
-}
-
 export function useTransitionRouter() {
   const navigate = useNavigate()
 
   const push = useCallback(
-    (href: string, _options?: NavigateOptions) => {
+    (href: string) => {
       if ("startViewTransition" in document) {
         startViewTransitionIfSupported(() => {
           navigate({ to: href })
@@ -24,7 +20,7 @@ export function useTransitionRouter() {
   )
 
   const replace = useCallback(
-    (href: string, _options?: NavigateOptions) => {
+    (href: string) => {
       if ("startViewTransition" in document) {
         startViewTransitionIfSupported(() => {
           navigate({ to: href, replace: true })

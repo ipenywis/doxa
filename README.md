@@ -80,6 +80,26 @@ pnpm run start
 
 Deploy to Vercel for automated builds and hosting.
 
+### Optional: Install ripgrep for faster search
+
+The documentation agent's search tool uses [ripgrep](https://github.com/BurntSushi/ripgrep) when available, falling back to standard `grep` otherwise. For significantly faster doc searches, install ripgrep:
+
+**macOS:**
+
+```bash
+brew install ripgrep
+```
+
+**Ubuntu / Debian:**
+
+```bash
+sudo apt-get install ripgrep
+```
+
+**Other platforms:**
+
+See the [ripgrep installation guide](https://github.com/BurntSushi/ripgrep#installation).
+
 ---
 
 ## Usage
