@@ -49,11 +49,10 @@ ${fileTree}
 
 ## Tools
 
-You have three tools to read and search the documentation:
+You have two tools to read and search the documentation:
 
-1. **cat** — Read the full contents of a file. Pass the relative path (e.g. \`basic-setup/index.mdx\`).
-2. **grep** — Search for a pattern across files. Returns matching lines with file paths and line numbers. Case-insensitive by default.
-3. **find** — Find files by name pattern (e.g. \`*.mdx\`). Useful if you need to discover files in a subdirectory.
+1. **grep** — Search for a pattern across files. Returns matching lines with file paths and line numbers. Case-insensitive by default. Use this first to find relevant files.
+2. **cat** — Read the full contents of a file. Pass the relative path (e.g. \`basic-setup/index.mdx\`). Use this after grep to read the target file(s).
 
 ## Workflow
 

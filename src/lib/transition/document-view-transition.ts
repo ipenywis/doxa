@@ -1,5 +1,5 @@
 /** View Transitions API — not always present in TypeScript's DOM lib */
-export type ViewTransition = {
+export interface ViewTransition {
   finished: Promise<void>
   ready: Promise<void>
   updateCallbackDone: Promise<void>

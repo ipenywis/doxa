@@ -27,6 +27,6 @@ export const aiConfig: AiConfig = {
   /** Cast when using a model id not yet in the SDK list */
   model: "moonshotai/kimi-k2.5" as OpenRouterModelId,
   codeSnippets: true,
-  maxContextChunks: 8,
+  maxContextChunks: 12,
   maxResponseTokens: 2048,
 }
