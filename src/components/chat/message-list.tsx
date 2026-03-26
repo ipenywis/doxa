@@ -1,8 +1,21 @@
 import { useCallback, useEffect, useRef } from "react"
 import Markdown, { type Components } from "react-markdown"
 import remarkGfm from "remark-gfm"
+import rehypePrism from "rehype-prism-plus"
 import type { ChatMessage } from "@/src/components/chat"
 import { ToolCallList, type ToolCallStep } from "@/src/components/chat/tool-call-display"
+
+/**
+ * Close any unclosed code fences so react-markdown renders partial
+ * code blocks correctly during streaming.
+ */
+function sanitizeStreamingMarkdown(text: string): string {
+  const fences = text.match(/```/g)
+  if (fences && fences.length % 2 !== 0) {
+    return text + "\n```"
+  }
+  return text
+}
 
 interface MessageListProps {
   messages: ChatMessage[]
@@ -103,7 +116,7 @@ const markdownComponents: Components = {
     const isBlock = className?.startsWith("language-")
     if (isBlock) {
       return (
-        <code className="block text-xs leading-relaxed">
+        <code className={`block text-xs leading-relaxed ${className}`}>
           {children}
         </code>
       )
@@ -115,7 +128,7 @@ const markdownComponents: Components = {
     )
   },
   pre: ({ children }: { children?: React.ReactNode }) => (
-    <pre className="mb-3 overflow-x-auto rounded-md border border-border/30 bg-muted/80 p-3 last:mb-0">{children}</pre>
+    <pre className="chat-code-block mb-3 overflow-x-auto rounded-md border border-border/30 bg-muted/80 p-3 last:mb-0">{children}</pre>
   ),
   table: ({ children }: { children?: React.ReactNode }) => (
     <div className="mb-3 overflow-x-auto rounded-md border border-border/40">
@@ -172,8 +185,14 @@ export function MessageList({
     []
   )
 
+  // ── Scroll-to-top & auto-follow: disabled for now ──────────────
+  // Set to `true` to re-enable the scroll-to-top-on-send, auto-follow
+  // during streaming, and persistent spacer below messages.
+  const ENABLE_SCROLL_BEHAVIOUR = false
+
   // Detect user-initiated scrolls to toggle follow/manual mode
   const handleScroll = useCallback(() => {
+    if (!ENABLE_SCROLL_BEHAVIOUR) return
     if (isProgrammaticRef.current) return
     const el = scrollRef.current
     if (!el) return
@@ -185,6 +204,7 @@ export function MessageList({
 
   // 1) Scroll user message to the top of the container when they send
   useEffect(() => {
+    if (!ENABLE_SCROLL_BEHAVIOUR) return
     if (!scrollToMsgId || scrollToMsgId === processedScrollId.current)
       return
     processedScrollId.current = scrollToMsgId
@@ -211,6 +231,7 @@ export function MessageList({
 
   // 2) Auto-follow streaming content (including tool steps)
   useEffect(() => {
+    if (!ENABLE_SCROLL_BEHAVIOUR) return
     if (scrollModeRef.current !== "follow") return
     if (!isStreaming && !isLoading) return
 
@@ -229,17 +250,31 @@ export function MessageList({
     }
   }, [messages, isStreaming, isLoading, activeToolSteps, scrollTo])
 
-  // 3) When streaming ends, snap to the real bottom (spacer collapses)
+  // 3) When streaming ends, scroll to the content end (not the absolute bottom)
+  //    so the response is visible with breathing room below.
   useEffect(() => {
+    if (!ENABLE_SCROLL_BEHAVIOUR) return
     if (!isStreaming && !isLoading && scrollModeRef.current === "follow") {
       const el = scrollRef.current
-      if (el) {
+      const marker = contentEndRef.current
+      if (el && marker) {
         requestAnimationFrame(() => {
-          scrollTo(el.scrollHeight)
+          const containerRect = el.getBoundingClientRect()
+          const markerRect = marker.getBoundingClientRect()
+          const relativeBottom =
+            markerRect.bottom - containerRect.top + el.scrollTop
+          scrollTo(relativeBottom - el.clientHeight + 16)
         })
       }
     }
   }, [isStreaming, isLoading, scrollTo])
+
+  // Always auto-scroll to the bottom when content changes
+  useEffect(() => {
+    const el = scrollRef.current
+    if (!el) return
+    el.scrollTo({ top: el.scrollHeight, behavior: "smooth" })
+  }, [messages, activeToolSteps])
 
   if (messages.length === 0) {
     return (
@@ -322,21 +357,18 @@ export function MessageList({
                 {msg.content && (
                   <div className="flex justify-start">
                     <div className="max-w-[85%] rounded-2xl rounded-bl-sm bg-muted px-4 py-2 text-sm">
-                      {isCurrentlyStreaming ? (
-                        <p className="whitespace-pre-wrap break-words leading-relaxed">
-                          {msg.content}
-                          <StreamingCursor />
-                        </p>
-                      ) : (
-                        <div className="chat-prose">
-                          <Markdown
-                            remarkPlugins={[remarkGfm]}
-                            components={markdownComponents}
-                          >
-                            {msg.content}
-                          </Markdown>
-                        </div>
-                      )}
+                      <div className="chat-prose">
+                        <Markdown
+                          remarkPlugins={[remarkGfm]}
+                          rehypePlugins={[[rehypePrism, { ignoreMissing: true }]]}
+                          components={markdownComponents}
+                        >
+                          {isCurrentlyStreaming
+                            ? sanitizeStreamingMarkdown(msg.content)
+                            : msg.content}
+                        </Markdown>
+                        {isCurrentlyStreaming && <StreamingCursor />}
+                      </div>
                     </div>
                   </div>
                 )}
@@ -351,18 +383,20 @@ export function MessageList({
             <LoadingDots />
           </div>
         )}
-        {/* Scroll anchor — auto-scroll targets here, before the spacer */}
+        {/* Bottom padding — breathing room below the last message */}
+        <div className="pointer-events-none shrink-0 select-none min-h-[20vh] sm:min-h-[15vh]" aria-hidden="true" />
+        {/* Scroll anchor — auto-scroll targets here, after the padding */}
         <div ref={contentEndRef} aria-hidden="true" />
         {/* Spacer — fills the rest of the viewport so the user message
-            can be scrolled to the very top with empty space below it */}
-        <div
-          className="pointer-events-none shrink-0 select-none transition-[min-height] duration-500 ease-out"
-          style={{
-            minHeight:
-              isLoading || isStreaming ? "calc(100vh - 10rem)" : 0,
-          }}
-          aria-hidden="true"
-        />
+            can be scrolled to the very top with empty space below it.
+            Only active when ENABLE_SCROLL_BEHAVIOUR is true. */}
+        {ENABLE_SCROLL_BEHAVIOUR && (
+          <div
+            className="pointer-events-none shrink-0 select-none"
+            style={{ minHeight: "calc(100vh - 7rem)" }}
+            aria-hidden="true"
+          />
+        )}
       </div>
     </div>
   )
