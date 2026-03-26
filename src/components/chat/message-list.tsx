@@ -73,39 +73,6 @@ function StreamingCursor() {
 
 const markdownComponents: Components = {
   a: DocLink,
-  p: ({ children }: { children?: React.ReactNode }) => (
-    <p className="mb-3 leading-relaxed text-foreground/90 last:mb-0">{children}</p>
-  ),
-  h1: ({ children }: { children?: React.ReactNode }) => (
-    <h1 className="mb-3 mt-4 text-base font-semibold tracking-tight text-foreground first:mt-0">{children}</h1>
-  ),
-  h2: ({ children }: { children?: React.ReactNode }) => (
-    <h2 className="mb-2 mt-4 text-sm font-semibold tracking-tight text-foreground first:mt-0">{children}</h2>
-  ),
-  h3: ({ children }: { children?: React.ReactNode }) => (
-    <h3 className="mb-2 mt-3 text-sm font-medium text-foreground first:mt-0">{children}</h3>
-  ),
-  ul: ({ children }: { children?: React.ReactNode }) => (
-    <ul className="mb-3 list-disc space-y-1 pl-5 text-foreground/90 last:mb-0">{children}</ul>
-  ),
-  ol: ({ children }: { children?: React.ReactNode }) => (
-    <ol className="mb-3 list-decimal space-y-1 pl-5 text-foreground/90 last:mb-0">{children}</ol>
-  ),
-  li: ({ children }: { children?: React.ReactNode }) => (
-    <li className="leading-relaxed">{children}</li>
-  ),
-  strong: ({ children }: { children?: React.ReactNode }) => (
-    <strong className="font-semibold text-foreground">{children}</strong>
-  ),
-  em: ({ children }: { children?: React.ReactNode }) => (
-    <em className="text-foreground/80">{children}</em>
-  ),
-  blockquote: ({ children }: { children?: React.ReactNode }) => (
-    <blockquote className="my-3 border-l-2 border-primary/40 pl-3 text-foreground/70 italic">{children}</blockquote>
-  ),
-  hr: () => (
-    <hr className="my-4 border-border/50" />
-  ),
   code: ({
     children,
     className,
@@ -122,30 +89,18 @@ const markdownComponents: Components = {
       )
     }
     return (
-      <code className="rounded-md bg-primary/10 px-1.5 py-0.5 text-xs font-medium text-primary">
+      <code className="rounded-md bg-primary/10 px-1.5 py-0.5 text-[0.8125em] font-medium text-primary before:content-none after:content-none">
         {children}
       </code>
     )
   },
   pre: ({ children }: { children?: React.ReactNode }) => (
-    <pre className="chat-code-block mb-3 overflow-x-auto rounded-md border border-border/30 bg-muted/80 p-3 last:mb-0">{children}</pre>
+    <pre className="chat-code-block overflow-x-auto rounded-md border border-border/30 bg-muted/80 p-3">{children}</pre>
   ),
   table: ({ children }: { children?: React.ReactNode }) => (
-    <div className="mb-3 overflow-x-auto rounded-md border border-border/40">
-      <table className="w-full text-xs">{children}</table>
+    <div className="overflow-x-auto rounded-md border border-border/40">
+      <table className="w-full">{children}</table>
     </div>
-  ),
-  thead: ({ children }: { children?: React.ReactNode }) => (
-    <thead className="border-b border-border/40 bg-muted/50">{children}</thead>
-  ),
-  th: ({ children }: { children?: React.ReactNode }) => (
-    <th className="px-3 py-1.5 text-left font-medium text-foreground">{children}</th>
-  ),
-  td: ({ children }: { children?: React.ReactNode }) => (
-    <td className="px-3 py-1.5 text-foreground/80">{children}</td>
-  ),
-  tr: ({ children }: { children?: React.ReactNode }) => (
-    <tr className="border-b border-border/20 last:border-0">{children}</tr>
   ),
 }
 
@@ -269,12 +224,13 @@ export function MessageList({
     }
   }, [isStreaming, isLoading, scrollTo])
 
-  // Always auto-scroll to the bottom when content changes
+  // Auto-scroll to the bottom only while streaming
   useEffect(() => {
+    if (!isStreaming && !isLoading) return
     const el = scrollRef.current
     if (!el) return
     el.scrollTo({ top: el.scrollHeight, behavior: "smooth" })
-  }, [messages, activeToolSteps])
+  }, [messages, activeToolSteps, isStreaming, isLoading])
 
   if (messages.length === 0) {
     return (
@@ -356,8 +312,8 @@ export function MessageList({
                 {/* Message content */}
                 {msg.content && (
                   <div className="flex justify-start">
-                    <div className="max-w-[85%] rounded-2xl rounded-bl-sm bg-muted px-4 py-2 text-sm">
-                      <div className="chat-prose">
+                    <div className="max-w-[85%] rounded-2xl rounded-bl-sm bg-muted px-4 py-2.5 text-sm">
+                      <div className="chat-prose prose prose-sm dark:prose-invert prose-headings:text-foreground prose-headings:text-sm prose-headings:font-semibold prose-p:text-foreground/90 prose-p:leading-relaxed prose-p:my-1.5 prose-a:text-primary prose-strong:text-foreground prose-strong:font-semibold prose-em:text-foreground/80 prose-blockquote:border-primary/40 prose-blockquote:text-foreground/70 prose-code:text-primary prose-pre:bg-transparent prose-pre:p-0 prose-li:text-foreground/90 prose-li:my-0.5 prose-ul:my-1.5 prose-ol:my-1.5 prose-th:text-foreground prose-td:text-foreground/80 prose-hr:my-2 max-w-none">
                         <Markdown
                           remarkPlugins={[remarkGfm]}
                           rehypePlugins={[[rehypePrism, { ignoreMissing: true }]]}
