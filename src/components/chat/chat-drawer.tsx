@@ -50,7 +50,7 @@ export function ChatDrawer({
     <aside
       role="dialog"
       aria-label="Chat with Docs"
-      className="sticky top-0 h-screen shrink-0 overflow-hidden border-l border-transparent bg-background transition-[width,border-color] duration-300 ease-in-out"
+      className="sticky top-0 h-screen shrink-0 overflow-hidden border-l border-transparent bg-background transition-[width,border-color] duration-75 ease-out"
       style={{
         width: isOpen ? panelWidth : 0,
         borderColor: isOpen ? "var(--border)" : "transparent",
