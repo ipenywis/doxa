@@ -15,8 +15,13 @@ import {
 import { Settings } from "@/src/types/settings"
 import { getColorPreset } from "@/src/lib/colors"
 import { primaryColor } from "@/src/contents/settings/color"
+import { getTheme, generateThemeCss } from "@/src/lib/themes"
+import { activeTheme } from "@/src/contents/settings/theme"
 
 import globalsCss from "@/src/styles/globals.css?url"
+
+const theme = getTheme(activeTheme)
+const themeCss = generateThemeCss(theme)
 
 const colorPreset = getColorPreset(primaryColor)
 const colorCss = `:root { --primary: ${colorPreset.light.primary}; --primary-foreground: ${colorPreset.light.primaryForeground}; } .dark { --primary: ${colorPreset.dark.primary}; --primary-foreground: ${colorPreset.dark.primaryForeground}; }`
@@ -108,10 +113,10 @@ export const Route = createRootRoute({
         href: "https://fonts.gstatic.com",
         crossOrigin: "anonymous",
       },
-      {
-        rel: "stylesheet",
-        href: "https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700&display=swap",
-      },
+      ...theme.fonts.map((font) => ({
+        rel: "stylesheet" as const,
+        href: font.href,
+      })),
     ],
     //     scripts: Settings.gtmconnected
     //       ? [
@@ -144,6 +149,7 @@ function RootDocument({ children }: Readonly<{ children: ReactNode }>) {
     <html lang="en" suppressHydrationWarning>
       <head>
         <HeadContent />
+        <style dangerouslySetInnerHTML={{ __html: themeCss }} />
         <style dangerouslySetInnerHTML={{ __html: colorCss }} />
       </head>
       <body className="font-regular">
