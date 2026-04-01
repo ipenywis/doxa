@@ -33,12 +33,14 @@ function writeToStorage(conversations: Conversation[]) {
 
 export function useConversationHistory() {
   const [conversations, setConversations] = useState<Conversation[]>([])
+  const [hasLoaded, setHasLoaded] = useState(false)
   const initialized = useRef(false)
 
   useEffect(() => {
     if (!initialized.current) {
       setConversations(readFromStorage())
       initialized.current = true
+      setHasLoaded(true)
     }
   }, [])
 
@@ -107,6 +109,7 @@ export function useConversationHistory() {
 
   return {
     conversations,
+    hasLoaded,
     saveConversation,
     loadConversation,
     deleteConversation,

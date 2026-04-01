@@ -77,7 +77,7 @@ export function HistoryPanel({
   const grouped = groupByDate(conversations)
 
   return (
-    <div className="absolute inset-0 z-10 flex flex-col bg-background animate-in slide-in-from-left duration-200">
+    <div className="animate-in fade-in absolute inset-0 z-10 flex flex-col bg-background duration-200">
       <div className="flex items-center gap-2 border-b p-4">
         <Button
           variant="ghost"

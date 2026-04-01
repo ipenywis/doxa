@@ -39,12 +39,21 @@ export function ChatWithDocs() {
 
   const history = useConversationHistory()
 
-  // Initialize conversation ID on first mount
+  // Initialize the active conversation after history has loaded.
   useEffect(() => {
-    if (!conversationIdRef.current) {
-      conversationIdRef.current = history.generateId()
+    if (!history.hasLoaded || conversationIdRef.current) {
+      return
     }
-  }, [history.generateId])
+
+    const latestConversation = history.conversations[0]
+    if (latestConversation) {
+      conversationIdRef.current = latestConversation.id
+      setMessages(latestConversation.messages)
+      return
+    }
+
+    conversationIdRef.current = history.generateId()
+  }, [history.conversations, history.generateId, history.hasLoaded])
 
   // Persist messages to history when they change
   useEffect(() => {
@@ -165,7 +174,7 @@ export function ChatWithDocs() {
 
               try {
                 const parsed = JSON.parse(payload)
-                handleSSEEvent(parsed, assistantMsgId)
+                handleSSEEvent(parsed)
               } catch {
                 // Skip malformed JSON
               }
@@ -241,7 +250,7 @@ export function ChatWithDocs() {
    * Handle a parsed SSE event from the TanStack AI stream.
    * AG-UI protocol events: TEXT_MESSAGE_CONTENT, TOOL_CALL_START, TOOL_CALL_ARGS, TOOL_CALL_END
    */
-  function handleSSEEvent(parsed: Record<string, unknown>, _assistantMsgId: string) {
+  function handleSSEEvent(parsed: Record<string, unknown>) {
     switch (parsed.type) {
       case "TEXT_MESSAGE_CONTENT": {
         if (typeof parsed.delta === "string") {
@@ -351,8 +360,11 @@ export function ChatWithDocs() {
 
   return (
     <ChatDrawer
-      onHistoryClick={() => setShowHistory(true)}
-      onNewChat={handleNewConversation}
+      onHistoryClick={() => setShowHistory((prev) => !prev)}
+      onNewChat={() => {
+        handleNewConversation()
+        setShowHistory(false)
+      }}
     >
       {showHistory && (
         <HistoryPanel

@@ -3,6 +3,7 @@ import Markdown, { type Components } from "react-markdown"
 import remarkGfm from "remark-gfm"
 import rehypePrism from "rehype-prism-plus"
 import type { ChatMessage } from "@/src/components/chat"
+import { useChatContext } from "@/src/components/chat/chat-context"
 import { ToolCallList, type ToolCallStep } from "@/src/components/chat/tool-call-display"
 
 /**
@@ -111,126 +112,81 @@ export function MessageList({
   scrollToMsgId,
   activeToolSteps = [],
 }: MessageListProps) {
+  const { isOpen } = useChatContext()
   const scrollRef = useRef<HTMLDivElement>(null)
   const contentEndRef = useRef<HTMLDivElement>(null)
-  // 'follow' = auto-scroll to follow content, 'manual' = user scrolled up
-  const scrollModeRef = useRef<"follow" | "manual">("follow")
-  // Tracks programmatic scrolls so handleScroll ignores them
+  const streamFollowModeRef = useRef<"follow" | "manual">("follow")
   const isProgrammaticRef = useRef(false)
   const processedScrollId = useRef<string | null>(null)
 
-  // Programmatic scroll helper — prevents handleScroll from switching to manual
-  const scrollTo = useCallback(
-    (top: number, smooth = false) => {
-      const el = scrollRef.current
-      if (!el) return
-      isProgrammaticRef.current = true
-      el.scrollTo({ top, behavior: smooth ? "smooth" : "instant" })
-      if (smooth) {
-        // Keep the lock for the duration of the smooth scroll animation
-        setTimeout(() => {
-          isProgrammaticRef.current = false
-        }, 500)
-      } else {
-        requestAnimationFrame(() => {
-          isProgrammaticRef.current = false
-        })
-      }
-    },
-    []
-  )
+  const STREAM_FOLLOW_THRESHOLD_PX = 80
 
-  // ── Scroll-to-top & auto-follow: disabled for now ──────────────
-  // Set to `true` to re-enable the scroll-to-top-on-send, auto-follow
-  // during streaming, and persistent spacer below messages.
-  const ENABLE_SCROLL_BEHAVIOUR = false
+  const getDistanceFromBottom = useCallback((el: HTMLDivElement) => {
+    return el.scrollHeight - el.scrollTop - el.clientHeight
+  }, [])
 
-  // Detect user-initiated scrolls to toggle follow/manual mode
+  const scrollToBottomImmediately = useCallback(() => {
+    const el = scrollRef.current
+    if (!el) return
+    isProgrammaticRef.current = true
+    el.scrollTop = el.scrollHeight
+    requestAnimationFrame(() => {
+      isProgrammaticRef.current = false
+    })
+  }, [])
+
   const handleScroll = useCallback(() => {
-    if (!ENABLE_SCROLL_BEHAVIOUR) return
     if (isProgrammaticRef.current) return
     const el = scrollRef.current
     if (!el) return
-    const threshold = 80
-    const atBottom =
-      el.scrollHeight - el.scrollTop - el.clientHeight < threshold
-    scrollModeRef.current = atBottom ? "follow" : "manual"
-  }, [])
+    const distanceFromBottom = getDistanceFromBottom(el)
+    streamFollowModeRef.current =
+      distanceFromBottom <= STREAM_FOLLOW_THRESHOLD_PX
+        ? "follow"
+        : "manual"
+  }, [getDistanceFromBottom, STREAM_FOLLOW_THRESHOLD_PX])
 
-  // 1) Scroll user message to the top of the container when they send
+  // A newly-sent message should always start in follow mode.
   useEffect(() => {
-    if (!ENABLE_SCROLL_BEHAVIOUR) return
-    if (!scrollToMsgId || scrollToMsgId === processedScrollId.current)
-      return
-    processedScrollId.current = scrollToMsgId
-    const el = scrollRef.current
-    if (!el) return
+    if (!scrollToMsgId || scrollToMsgId === processedScrollId.current) return
 
-    // Wait for DOM to render the new messages + spacer
+    processedScrollId.current = scrollToMsgId
+    streamFollowModeRef.current = "follow"
+
+    requestAnimationFrame(() => {
+      scrollToBottomImmediately()
+    })
+  }, [scrollToBottomImmediately, scrollToMsgId])
+
+  // While streaming, stay pinned to the latest content until the user scrolls away.
+  useEffect(() => {
+    if (!isStreaming && !isLoading) return
+    if (streamFollowModeRef.current !== "follow") return
+
+    requestAnimationFrame(() => {
+      if (streamFollowModeRef.current === "follow") {
+        scrollToBottomImmediately()
+      }
+    })
+  }, [
+    activeToolSteps,
+    isLoading,
+    isStreaming,
+    messages,
+    scrollToBottomImmediately,
+  ])
+
+  // Jump straight to the latest message whenever the drawer opens.
+  useEffect(() => {
+    if (!isOpen || messages.length === 0) return
+
+    streamFollowModeRef.current = "follow"
     requestAnimationFrame(() => {
       requestAnimationFrame(() => {
-        const msgEl = el.querySelector(
-          `[data-msg-id="${scrollToMsgId}"]`
-        ) as HTMLElement | null
-        if (!msgEl) return
-        // Use getBoundingClientRect for reliable positioning
-        const containerRect = el.getBoundingClientRect()
-        const msgRect = msgEl.getBoundingClientRect()
-        const relativeTop =
-          msgRect.top - containerRect.top + el.scrollTop
-        scrollModeRef.current = "follow"
-        scrollTo(relativeTop - 16, true)
+        scrollToBottomImmediately()
       })
     })
-  }, [scrollToMsgId, scrollTo])
-
-  // 2) Auto-follow streaming content (including tool steps)
-  useEffect(() => {
-    if (!ENABLE_SCROLL_BEHAVIOUR) return
-    if (scrollModeRef.current !== "follow") return
-    if (!isStreaming && !isLoading) return
-
-    const marker = contentEndRef.current
-    const el = scrollRef.current
-    if (!marker || !el) return
-
-    const containerRect = el.getBoundingClientRect()
-    const markerRect = marker.getBoundingClientRect()
-
-    // Only scroll down if the content end has gone below the visible area
-    if (markerRect.bottom > containerRect.bottom - 8) {
-      const relativeBottom =
-        markerRect.bottom - containerRect.top + el.scrollTop
-      scrollTo(relativeBottom - el.clientHeight + 16)
-    }
-  }, [messages, isStreaming, isLoading, activeToolSteps, scrollTo])
-
-  // 3) When streaming ends, scroll to the content end (not the absolute bottom)
-  //    so the response is visible with breathing room below.
-  useEffect(() => {
-    if (!ENABLE_SCROLL_BEHAVIOUR) return
-    if (!isStreaming && !isLoading && scrollModeRef.current === "follow") {
-      const el = scrollRef.current
-      const marker = contentEndRef.current
-      if (el && marker) {
-        requestAnimationFrame(() => {
-          const containerRect = el.getBoundingClientRect()
-          const markerRect = marker.getBoundingClientRect()
-          const relativeBottom =
-            markerRect.bottom - containerRect.top + el.scrollTop
-          scrollTo(relativeBottom - el.clientHeight + 16)
-        })
-      }
-    }
-  }, [isStreaming, isLoading, scrollTo])
-
-  // Auto-scroll to the bottom only while streaming
-  useEffect(() => {
-    if (!isStreaming && !isLoading) return
-    const el = scrollRef.current
-    if (!el) return
-    el.scrollTo({ top: el.scrollHeight, behavior: "smooth" })
-  }, [messages, activeToolSteps, isStreaming, isLoading])
+  }, [isOpen, messages.length, scrollToBottomImmediately])
 
   if (messages.length === 0) {
     return (
@@ -343,16 +299,6 @@ export function MessageList({
         <div className="pointer-events-none shrink-0 select-none min-h-[20vh] sm:min-h-[15vh]" aria-hidden="true" />
         {/* Scroll anchor — auto-scroll targets here, after the padding */}
         <div ref={contentEndRef} aria-hidden="true" />
-        {/* Spacer — fills the rest of the viewport so the user message
-            can be scrolled to the very top with empty space below it.
-            Only active when ENABLE_SCROLL_BEHAVIOUR is true. */}
-        {ENABLE_SCROLL_BEHAVIOUR && (
-          <div
-            className="pointer-events-none shrink-0 select-none"
-            style={{ minHeight: "calc(100vh - 7rem)" }}
-            aria-hidden="true"
-          />
-        )}
       </div>
     </div>
   )
