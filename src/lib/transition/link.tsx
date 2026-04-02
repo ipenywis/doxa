@@ -32,11 +32,15 @@ interface LinkProps extends Omit<ComponentProps<"a">, "href"> {
   href: string
   replace?: boolean
   scroll?: boolean
+  preload?: ComponentProps<typeof RouterLink>["preload"]
+  preloadDelay?: ComponentProps<typeof RouterLink>["preloadDelay"]
 }
 
 export function Link({
   href,
   onClick,
+  preload,
+  preloadDelay,
   replace,
   scroll,
   children,
@@ -74,15 +78,23 @@ export function Link({
           navigate({
             to: href,
             replace,
+            resetScroll: scroll,
           })
         })
       }
     },
-    [onClick, href, replace, navigate]
+    [onClick, href, replace, scroll, navigate]
   )
 
   return (
-    <RouterLink to={href} onClick={handleClick} {...rest}>
+    <RouterLink
+      to={href}
+      onClick={handleClick}
+      preload={preload}
+      preloadDelay={preloadDelay}
+      resetScroll={scroll}
+      {...rest}
+    >
       {children}
     </RouterLink>
   )

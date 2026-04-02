@@ -96,10 +96,6 @@ export const Route = createRootRoute({
         href: globalsCss,
       },
       {
-        rel: "canonical",
-        href: Settings.canonical,
-      },
-      {
         rel: "icon",
         href: Settings.siteicon,
         type: "image/svg+xml",
@@ -156,7 +152,10 @@ function RootDocument({ children }: Readonly<{ children: ReactNode }>) {
         <Providers>
           <ChatProvider>
             <div className="flex h-screen">
-              <div className="min-w-0 flex-1 overflow-y-auto">
+              <div
+                id="app-scroll-container"
+                className="min-w-0 flex-1 overflow-y-auto"
+              >
                 <Navbar />
                 <main className="mx-auto h-auto max-w-[1440px] px-4 sm:px-6 md:px-8">
                   {children}

@@ -7,6 +7,8 @@ export function createRouter() {
     routeTree,
     defaultPreload: "intent",
     scrollRestoration: true,
+    scrollRestorationBehavior: "instant",
+    scrollToTopSelectors: ["#app-scroll-container"],
   })
 
   return router

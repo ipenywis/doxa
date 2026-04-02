@@ -26,6 +26,7 @@ export function Pagination({ pathname }: { pathname: string }) {
         <Link
           rel="prev"
           href={`/docs${res.prev.href}`}
+          preload="viewport"
           title={`Previous: ${res.prev.title}`}
           className="group flex flex-col items-start gap-1 no-underline! transition-colors"
         >
@@ -44,6 +45,7 @@ export function Pagination({ pathname }: { pathname: string }) {
         <Link
           rel="next"
           href={`/docs${res.next.href}`}
+          preload="viewport"
           title={`Next: ${res.next.title}`}
           className="group ml-auto flex flex-col items-end gap-1 no-underline! transition-colors"
         >

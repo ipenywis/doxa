@@ -1,6 +1,6 @@
 "use client"
 
-import { createElement, useEffect, useState } from "react"
+import { createElement, useMemo } from "react"
 import * as runtime from "react/jsx-runtime"
 import { useChatContext } from "@/src/components/chat/chat-context"
 import { ArticleBreadcrumb } from "@/src/components/article/breadcrumb"
@@ -9,7 +9,8 @@ import { TableOfContents } from "@/src/components/toc"
 import { components } from "@/src/lib/components"
 import { fetchDocumentFromServer } from "@/src/lib/markdown"
 import { PageRoutes, Routes, isHeading, isRoute } from "@/src/lib/pageroutes"
-import { run } from "@mdx-js/mdx"
+import { Settings } from "@/src/types/settings"
+import { runSync } from "@mdx-js/mdx"
 import { createFileRoute } from "@tanstack/react-router"
 import { z } from "zod"
 
@@ -33,30 +34,50 @@ export const Route = createFileRoute("/docs/$")({
   preload: true,
   staleTime: Infinity,
   component: DocsContent,
+  ssr: true,
+  head: ({ loaderData }) => {
+    const slug = loaderData?.slug ?? ""
+    const document = loaderData?.document ?? null
+    const title = document?.frontmatter?.title
+    const description = document?.frontmatter?.description
+    const keywords = document?.frontmatter?.keywords
+
+    const pageTitle = title ? `${title} – ${Settings.title}` : Settings.title
+    const pageDescription = description || Settings.description
+    const pageUrl = `${Settings.metadataBase}/docs/${slug}`
+
+    return {
+      meta: [
+        { title: pageTitle },
+        { name: "description", content: pageDescription },
+        ...(keywords ? [{ name: "keywords", content: keywords }] : []),
+        // Open Graph
+        { property: "og:type", content: "article" },
+        { property: "og:title", content: pageTitle },
+        { property: "og:description", content: pageDescription },
+        { property: "og:url", content: pageUrl },
+        // Twitter
+        { name: "twitter:title", content: pageTitle },
+        { name: "twitter:description", content: pageDescription },
+      ],
+      links: [{ rel: "canonical", href: pageUrl }],
+    }
+  },
 })
 
 function MdxContent({ code }: { code: string }) {
-  const [content, setContent] = useState<React.ReactNode>(null)
-
-  useEffect(() => {
-    async function renderMdx() {
-      try {
-        const { default: MDXContent } = await run(code, {
-          ...runtime,
-          baseUrl: import.meta.url,
-        })
-        setContent(createElement(MDXContent, { components }))
-      } catch (error) {
-        console.error("Failed to render MDX:", error)
-        setContent(<p className="text-red-500">Failed to render content</p>)
-      }
+  const content = useMemo(() => {
+    try {
+      const { default: MDXContent } = runSync(code, {
+        ...runtime,
+        baseUrl: import.meta.url,
+      })
+      return createElement(MDXContent, { components })
+    } catch (error) {
+      console.error("Failed to render MDX:", error)
+      return <p className="text-red-500">Failed to render content. Please refresh the page.</p>
     }
-    renderMdx()
   }, [code])
-
-  if (!content) {
-    return <div className="animate-pulse">Loading content...</div>
-  }
 
   return <>{content}</>
 }
@@ -76,21 +97,21 @@ function findSectionHeading(slug: string): string | undefined {
 
 function DocsContent() {
   const { isOpen: chatOpen } = useChatContext()
-  const { slug, document } = Route.useLoaderData()
+  const { slug, document: pageDocument } = Route.useLoaderData()
   const paths = slug.split("/")
   const pathName = `docs/${slug}`
 
   const currentRoute = PageRoutes.find((r) => r.href === `/${slug}`)
   const title =
-    document?.frontmatter?.title ||
+    pageDocument?.frontmatter?.title ||
     currentRoute?.title ||
     slug.split("/").pop() ||
     "Documentation"
 
-  const description = document?.frontmatter?.description
+  const description = pageDocument?.frontmatter?.description
   const sectionHeading = findSectionHeading(slug)
 
-  if (!document) {
+  if (!pageDocument) {
     return (
       <div key={slug} className="flex animate-in fade-in duration-300 items-start gap-10">
         <article className="prose-code:font-code prose-code:before:content-none prose-code:after:content-none prose max-w-3xl flex-1 prose-zinc dark:prose-invert prose-headings:scroll-m-20 prose-pre:border prose-pre:bg-muted/25 prose-img:rounded-md">
@@ -131,15 +152,15 @@ function DocsContent() {
           </p>
         )}
         <div className="prose-content mt-8">
-          <MdxContent code={document.code} />
+          <MdxContent code={pageDocument.code} />
         </div>
         <Pagination pathname={pathName} />
       </article>
       {!chatOpen && (
         <TableOfContents
-          tocs={{ tocs: document.tocs }}
+          tocs={{ tocs: pageDocument.tocs }}
           pathName={slug}
-          frontmatter={document.frontmatter}
+          frontmatter={pageDocument.frontmatter}
         />
       )}
     </div>
