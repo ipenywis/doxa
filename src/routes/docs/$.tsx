@@ -1,7 +1,6 @@
 "use client"
 
-import { createElement, useMemo } from "react"
-import * as runtime from "react/jsx-runtime"
+import type { ComponentType } from "react"
 import { useChatContext } from "@/src/components/chat/chat-context"
 import { ArticleBreadcrumb } from "@/src/components/article/breadcrumb"
 import { Pagination } from "@/src/components/article/pagination"
@@ -10,9 +9,12 @@ import { components } from "@/src/lib/components"
 import { fetchDocumentFromServer } from "@/src/lib/markdown"
 import { PageRoutes, Routes, isHeading, isRoute } from "@/src/lib/pageroutes"
 import { Settings } from "@/src/types/settings"
-import { runSync } from "@mdx-js/mdx"
 import { createFileRoute } from "@tanstack/react-router"
 import { z } from "zod"
+
+const mdxModules = import.meta.glob<{
+  default: ComponentType<{ components?: typeof components }>
+}>("/src/contents/docs/**/index.mdx", { eager: true })
 
 export const Route = createFileRoute("/docs/$")({
   validateSearch: z.object({
@@ -65,21 +67,20 @@ export const Route = createFileRoute("/docs/$")({
   },
 })
 
-function MdxContent({ code }: { code: string }) {
-  const content = useMemo(() => {
-    try {
-      const { default: MDXContent } = runSync(code, {
-        ...runtime,
-        baseUrl: import.meta.url,
-      })
-      return createElement(MDXContent, { components })
-    } catch (error) {
-      console.error("Failed to render MDX:", error)
-      return <p className="text-red-500">Failed to render content. Please refresh the page.</p>
-    }
-  }, [code])
+function MdxContent({ slug }: { slug: string }) {
+  const mdxModule = mdxModules[`/src/contents/docs/${slug}/index.mdx`]
 
-  return <>{content}</>
+  if (!mdxModule) {
+    return (
+      <p className="text-red-500">
+        Failed to render content. Please refresh the page.
+      </p>
+    )
+  }
+
+  const MDXContent = mdxModule.default
+
+  return <MDXContent components={components} />
 }
 
 function findSectionHeading(slug: string): string | undefined {
@@ -152,7 +153,7 @@ function DocsContent() {
           </p>
         )}
         <div className="prose-content mt-8">
-          <MdxContent code={pageDocument.code} />
+          <MdxContent slug={slug} />
         </div>
         <Pagination pathname={pathName} />
       </article>

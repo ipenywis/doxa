@@ -12,6 +12,7 @@ import {
   Scripts,
 } from "@tanstack/react-router"
 
+import { DemoModeProvider } from "@/src/contexts/demo-mode"
 import { Settings } from "@/src/types/settings"
 import { getColorPreset } from "@/src/lib/colors"
 import { primaryColor } from "@/src/contents/settings/color"
@@ -27,6 +28,16 @@ const colorPreset = getColorPreset(primaryColor)
 const colorCss = `:root { --primary: ${colorPreset.light.primary}; --primary-foreground: ${colorPreset.light.primaryForeground}; } .dark { --primary: ${colorPreset.dark.primary}; --primary-foreground: ${colorPreset.dark.primaryForeground}; }`
 
 export const Route = createRootRoute({
+  validateSearch: (search: Record<string, unknown>) => {
+    const demo =
+      search.demo === true ||
+      search.demo === "true" ||
+      search.demo === "" ||
+      search.demo === 1 ||
+      search.demo === "1"
+
+    return demo ? { demo: true as const } : {}
+  },
   head: () => ({
     meta: [
       {
@@ -133,14 +144,18 @@ export const Route = createRootRoute({
 })
 
 function RootComponent() {
+  const { demo = false } = Route.useSearch()
   return (
-    <RootDocument>
+    <RootDocument isDemoMode={demo}>
       <Outlet />
     </RootDocument>
   )
 }
 
-function RootDocument({ children }: Readonly<{ children: ReactNode }>) {
+function RootDocument({
+  children,
+  isDemoMode = false,
+}: Readonly<{ children: ReactNode; isDemoMode?: boolean }>) {
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
@@ -150,21 +165,23 @@ function RootDocument({ children }: Readonly<{ children: ReactNode }>) {
       </head>
       <body className="font-regular">
         <Providers>
-          <ChatProvider>
-            <div className="flex h-screen">
-              <div
-                id="app-scroll-container"
-                className="min-w-0 flex-1 overflow-y-auto"
-              >
-                <Navbar />
-                <main className="mx-auto h-auto max-w-[1440px] px-4 sm:px-6 md:px-8">
-                  {children}
-                </main>
-                <Footer />
+          <DemoModeProvider value={isDemoMode}>
+            <ChatProvider>
+              <div className="flex h-screen">
+                <div
+                  id="app-scroll-container"
+                  className={`min-w-0 flex-1 overflow-y-auto ${isDemoMode ? "[scrollbar-width:none] [&::-webkit-scrollbar]:hidden" : ""}`}
+                >
+                  <Navbar />
+                  <main className="mx-auto h-auto max-w-[1440px] px-4 sm:px-6 md:px-8">
+                    {children}
+                  </main>
+                  {!isDemoMode && <Footer />}
+                </div>
+                {!isDemoMode && Settings.chat && <ChatWithDocs />}
               </div>
-              {Settings.chat && <ChatWithDocs />}
-            </div>
-          </ChatProvider>
+            </ChatProvider>
+          </DemoModeProvider>
         </Providers>
         <Scripts />
       </body>

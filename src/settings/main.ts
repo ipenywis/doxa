@@ -1,4 +1,4 @@
-export const url = "https://doxa-docs.vercel.app"
+export const url = "https://doxa-docs.islem-coderone.workers.dev"
 export const siteicon = "/favicon.svg"
 
 export const gtm = "GTM-XXXXXXX"
@@ -18,7 +18,7 @@ export const imagealt = "doxa documentation"
 export const twitterhandle = ""
 
 export const companyname = "doxa"
-export const companylink = "https://doxa-docs.vercel.app"
+export const companylink = "https://doxa-docs.islem-coderone.workers.dev"
 
 export const branding = true
 export const rightsidebar = true
