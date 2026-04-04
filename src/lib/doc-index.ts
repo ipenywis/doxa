@@ -1,5 +1,4 @@
-import { Documents } from "@/src/contents/settings/documents"
-import type { Paths } from "@/src/lib/pageroutes"
+import documentsData from "../../public/search-data/documents.json"
 
 export interface DocChunk {
   docPath: string
@@ -66,16 +65,6 @@ function stripMdx(content: string): string {
   return result.trim()
 }
 
-function getAllDocPaths(): { href: string; title: string }[] {
-  const paths: { href: string; title: string }[] = []
-  for (const doc of Documents) {
-    if ("href" in doc && "title" in doc) {
-      paths.push({ href: (doc as Extract<Paths, { href: string }>).href, title: (doc as Extract<Paths, { title: string }>).title })
-    }
-  }
-  return paths
-}
-
 function chunkByHeadings(
   content: string,
   docPath: string,
@@ -132,27 +121,16 @@ function chunkByHeadings(
 }
 
 async function buildIndex(): Promise<DocIndex> {
-  const fs = await import("fs/promises")
-  const matter = (await import("gray-matter")).default
-
-  const docPaths = getAllDocPaths()
   const allChunks: DocChunk[] = []
 
-  console.log(`[doc-index] Building index for ${docPaths.length} doc paths (cwd: ${process.cwd()})`)
-
-  for (const { href, title } of docPaths) {
-    const filePath = `${process.cwd()}/src/contents/docs${href}/index.mdx`
-    try {
-      const raw = await fs.readFile(filePath, "utf-8")
-      const { content } = matter(raw)
-      const chunks = chunkByHeadings(content, href, title)
-      allChunks.push(...chunks)
-    } catch (err) {
-      console.warn(`[doc-index] Failed to read ${filePath}:`, (err as Error).message)
-    }
+  for (const document of documentsData) {
+    const chunks = chunkByHeadings(
+      document.content,
+      document.slug,
+      document.title
+    )
+    allChunks.push(...chunks)
   }
-
-  console.log(`[doc-index] Indexed ${allChunks.length} chunks from ${docPaths.length} docs`)
 
   // Compute IDF
   const docCount = allChunks.length

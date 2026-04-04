@@ -1,5 +1,5 @@
 import { useCallback, type ComponentProps, type MouseEvent } from "react"
-import { Link as RouterLink, useNavigate } from "@tanstack/react-router"
+import { Link as RouterLink, useNavigate, useSearch } from "@tanstack/react-router"
 
 import { startViewTransitionIfSupported } from "@/src/lib/transition/document-view-transition"
 
@@ -47,6 +47,8 @@ export function Link({
   ...rest
 }: LinkProps) {
   const navigate = useNavigate()
+  const rootSearch = useSearch({ from: "__root__" })
+  const demoSearch = rootSearch.demo ? { demo: true as const } : undefined
 
   // Handle external links
   if (href.startsWith("http") || href.startsWith("//")) {
@@ -79,11 +81,12 @@ export function Link({
             to: href,
             replace,
             resetScroll: scroll,
+            search: demoSearch,
           })
         })
       }
     },
-    [onClick, href, replace, scroll, navigate]
+    [onClick, href, replace, scroll, navigate, demoSearch]
   )
 
   return (
@@ -93,6 +96,7 @@ export function Link({
       preload={preload}
       preloadDelay={preloadDelay}
       resetScroll={scroll}
+      search={demoSearch}
       {...rest}
     >
       {children}
