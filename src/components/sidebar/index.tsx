@@ -12,12 +12,15 @@ import {
   SheetHeader,
   SheetTrigger,
 } from "@/src/components/ui/sheet"
+import { useDemoMode } from "@/src/contexts/demo-mode"
 import { LuAlignLeft } from "react-icons/lu"
 
 export function Sidebar() {
+  const isDemoMode = useDemoMode()
+
   return (
     <aside
-      className="sticky top-16 hidden h-[calc(100vh-4rem)] min-w-[240px] max-w-[240px] flex-col overflow-y-auto overscroll-contain md:flex"
+      className={`sticky top-16 hidden h-[calc(100vh-4rem)] min-w-[240px] max-w-[240px] flex-col overscroll-contain md:flex ${isDemoMode ? "overflow-y-hidden [scrollbar-width:none] [&::-webkit-scrollbar]:hidden" : "overflow-y-auto"}`}
       aria-label="Page navigation"
     >
       <ScrollArea className="pr-3 pt-6">
