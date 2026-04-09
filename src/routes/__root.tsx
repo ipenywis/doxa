@@ -3,6 +3,7 @@ import type { ReactNode } from "react"
 import { Footer } from "@/src/components/navigation/footer"
 import { Navbar } from "@/src/components/navigation/navbar"
 import { ChatWithDocs } from "@/src/components/chat"
+import { DemoChatWithDocs } from "@/src/components/chat/demo-chat"
 import { ChatProvider } from "@/src/components/chat/chat-context"
 import { Providers } from "@/src/providers"
 import {
@@ -170,7 +171,7 @@ function RootDocument({
               <div className="flex h-screen">
                 <div
                   id="app-scroll-container"
-                  className={`min-w-0 flex-1 overflow-y-auto ${isDemoMode ? "[scrollbar-width:none] [&::-webkit-scrollbar]:hidden" : ""}`}
+                  className={`min-w-0 flex-1 ${isDemoMode ? "overflow-y-hidden [scrollbar-width:none] [&::-webkit-scrollbar]:hidden" : "overflow-y-auto"}`}
                 >
                   <Navbar />
                   <main className="mx-auto h-auto max-w-[1440px] px-4 sm:px-6 md:px-8">
@@ -178,7 +179,7 @@ function RootDocument({
                   </main>
                   {!isDemoMode && <Footer />}
                 </div>
-                {!isDemoMode && Settings.chat && <ChatWithDocs />}
+                {Settings.chat && (isDemoMode ? <DemoChatWithDocs /> : <ChatWithDocs />)}
               </div>
             </ChatProvider>
           </DemoModeProvider>
