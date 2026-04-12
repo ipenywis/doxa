@@ -1,0 +1,21 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "required": ["primaryColor", "activeTheme"],
+  "additionalProperties": false,
+  "properties": {
+    "$schema": {
+      "type": "string"
+    },
+    "primaryColor": {
+      "type": "string",
+      "enum": ["default", "indigo", "emerald", "rose", "amber", "violet"],
+      "description": "The primary color preset for the site"
+    },
+    "activeTheme": {
+      "type": "string",
+      "enum": ["default", "brutalist"],
+      "description": "The active visual theme for the site"
+    }
+  }
+}
