@@ -33,7 +33,7 @@ export function Card({
   const content = (
     <div
       className={cn(
-        "group relative flex overflow-hidden rounded-lg border border-border bg-card shadow-md transition-shadow duration-300 ease-in-out hover:shadow-lg hover:dark:shadow-md",
+        "group relative flex overflow-hidden rounded-lg border border-border bg-card shadow-md transition-shadow duration-75 hover:shadow-lg hover:dark:shadow-md",
         variant === "small"
           ? "items-center space-x-2 p-3"
           : variant === "image"
@@ -45,7 +45,7 @@ export function Card({
       {external && href && variant !== "image" && (
         <div
           className={cn(
-            "absolute top-2 transform text-muted-foreground transition-transform duration-300 ease-in-out group-hover:translate-x-1 group-hover:-translate-y-1 group-hover:text-foreground",
+            "absolute top-2 transform text-muted-foreground transition-transform duration-75 group-hover:translate-x-1 group-hover:-translate-y-1 group-hover:text-foreground",
             variant === "small" ? "right-0" : "right-2"
           )}
         >
@@ -73,7 +73,7 @@ export function Card({
         )}
         <div
           className={cn(
-            "font-semibold transition-all duration-300 group-hover:font-bold",
+            "font-semibold group-hover:font-bold",
             variant === "small"
               ? "text-sm"
               : variant === "image"

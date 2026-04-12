@@ -26,13 +26,13 @@ export default function Copy({ content }: { content: string }) {
     >
       <LuCopy
         className={cn(
-          "absolute size-3.5! transform transition-opacity duration-300",
+          "absolute size-3.5! transform transition-opacity duration-75",
           isCopied ? "scale-90 opacity-0" : "scale-100 opacity-100"
         )}
       />
       <LuCheck
         className={cn(
-          "absolute size-3.5! transform transition-opacity duration-300",
+          "absolute size-3.5! transform transition-opacity duration-75",
           isCopied ? "scale-100 opacity-100" : "scale-90 opacity-0"
         )}
       />

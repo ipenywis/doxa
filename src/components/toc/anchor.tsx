@@ -37,7 +37,7 @@ export function TableAnchor({ tocs }: TableAnchorProps) {
               aria-label={text}
               onClick={(e) => handleSmoothScroll(e, href)}
               className={cn(
-                "border-l-2 py-1.5 text-sm transition-colors hover:text-foreground",
+                "border-l-2 py-1.5 text-sm hover:text-foreground",
                 levelPadding[level],
                 activeId === hrefToId(href)
                   ? "border-primary text-primary hover:text-primary font-medium"

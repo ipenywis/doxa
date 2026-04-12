@@ -77,7 +77,7 @@ export function HistoryPanel({
   const grouped = groupByDate(conversations)
 
   return (
-    <div className="animate-in fade-in absolute inset-0 z-10 flex flex-col bg-background duration-200">
+    <div className="absolute inset-0 z-10 flex flex-col bg-background">
       <div className="flex items-center gap-2 border-b p-4">
         <Button
           variant="ghost"
@@ -125,7 +125,7 @@ export function HistoryPanel({
                 {group.items.map((conv) => (
                   <div
                     key={conv.id}
-                    className={`group flex cursor-pointer items-center gap-2 rounded-md px-2 py-2 text-sm transition-colors hover:bg-muted ${
+                    className={`group flex cursor-pointer items-center gap-2 rounded-md px-2 py-2 text-sm hover:bg-muted ${
                       conv.id === activeConversationId
                         ? "border-l-2 border-primary bg-muted/50"
                         : ""
@@ -145,7 +145,7 @@ export function HistoryPanel({
                     <Button
                       variant="ghost"
                       size="icon"
-                      className="h-7 w-7 shrink-0 cursor-pointer opacity-0 transition-opacity group-hover:opacity-100"
+                      className="h-7 w-7 shrink-0 cursor-pointer opacity-0 group-hover:opacity-100"
                       onClick={(e) => {
                         e.stopPropagation()
                         onDeleteConversation(conv.id)

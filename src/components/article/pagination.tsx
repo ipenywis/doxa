@@ -28,7 +28,7 @@ export function Pagination({ pathname }: { pathname: string }) {
           href={`/docs${res.prev.href}`}
           preload="viewport"
           title={`Previous: ${res.prev.title}`}
-          className="group flex flex-col items-start gap-1 no-underline! transition-colors"
+          className="group flex flex-col items-start gap-1 no-underline!"
         >
           <span className="flex items-center text-xs text-muted-foreground">
             <LuChevronLeft className="mr-0.5 h-3 w-3" />
@@ -47,7 +47,7 @@ export function Pagination({ pathname }: { pathname: string }) {
           href={`/docs${res.next.href}`}
           preload="viewport"
           title={`Next: ${res.next.title}`}
-          className="group ml-auto flex flex-col items-end gap-1 no-underline! transition-colors"
+          className="group ml-auto flex flex-col items-end gap-1 no-underline!"
         >
           <span className="flex items-center text-xs text-muted-foreground">
             Next
