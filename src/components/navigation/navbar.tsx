@@ -55,7 +55,7 @@ export function NavMenu({ isSheet = false }) {
             key={item.title + item.href}
             absolute
             activeClassName="font-semibold text-primary"
-            className="flex items-center gap-1 text-sm transition-colors hover:text-foreground"
+            className="flex items-center gap-1 text-sm hover:text-foreground"
             href={item.href}
             target={item.external ? "_blank" : undefined}
             rel={item.external ? "noopener noreferrer" : undefined}

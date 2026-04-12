@@ -115,7 +115,7 @@ function DocsContent() {
 
   if (!pageDocument) {
     return (
-      <div key={slug} className="flex animate-in fade-in duration-300 items-start gap-10">
+      <div key={slug} className="flex items-start gap-10">
         <article className="prose-code:font-code prose-code:before:content-none prose-code:after:content-none prose max-w-3xl flex-1 prose-zinc dark:prose-invert prose-headings:scroll-m-20 prose-pre:border prose-pre:bg-muted/25 prose-img:rounded-md">
           <ArticleBreadcrumb paths={paths} />
           <h1 className="text-3xl font-bold tracking-tight lg:text-4xl">
@@ -138,7 +138,7 @@ function DocsContent() {
   }
 
   return (
-    <div key={slug} className="flex animate-in fade-in duration-300 items-start gap-10">
+    <div key={slug} className="flex items-start gap-10">
       <article className="prose-code:font-code prose-code:before:content-none prose-code:after:content-none prose max-w-3xl flex-1 prose-zinc dark:prose-invert prose-headings:scroll-m-20 prose-pre:border prose-pre:bg-muted/25 prose-img:rounded-md">
         {sectionHeading && (
           <p className="not-prose mb-2 text-sm font-medium text-primary">

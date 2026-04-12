@@ -23,7 +23,7 @@ export default function SubLink(
       href={href}
       preload="viewport"
       className={cn(
-        "flex w-full items-center rounded-md px-2 py-1.5 text-sm text-foreground/80 transition-colors hover:bg-muted hover:text-foreground",
+        "flex w-full items-center rounded-md px-2 py-1.5 text-sm text-foreground/80 hover:bg-muted hover:text-foreground",
         isActive && "bg-primary/10 text-primary font-medium hover:bg-primary/15 hover:text-primary",
       )}
     >

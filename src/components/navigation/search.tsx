@@ -84,7 +84,7 @@ export default function Search() {
         <DialogClose key={href} asChild>
           <Anchor
             className={cn(
-              "flex w-full items-center gap-2.5 rounded-sm px-3 text-[15px] transition-all duration-300 hover:bg-accent"
+              "flex w-full items-center gap-2.5 rounded-sm px-3 text-[15px] transition-colors duration-75 hover:bg-accent"
             )}
             href={href}
           >
@@ -157,7 +157,7 @@ export default function Search() {
                         <DialogClose key={item.href} asChild>
                           <Anchor
                             className={cn(
-                              "flex w-full max-w-[310px] flex-col gap-0.5 rounded-sm p-3 text-[15px] transition-all duration-300 hover:bg-accent sm:max-w-[480px]"
+                              "flex w-full max-w-[310px] flex-col gap-0.5 rounded-sm p-3 text-[15px] transition-colors duration-75 hover:bg-accent sm:max-w-[480px]"
                             )}
                             href={`/docs${item.href}`}
                           >

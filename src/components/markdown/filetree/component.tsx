@@ -66,7 +66,7 @@ export const Folder = memo(
           onClick={toggle}
           title={name}
           className={cn(
-            "inline-flex cursor-pointer items-center py-1 text-xs transition-all hover:text-muted-foreground"
+            "inline-flex cursor-pointer items-center py-1 text-xs transition-colors duration-75 hover:text-muted-foreground"
           )}
         >
           <span className="ml-1">
@@ -80,7 +80,7 @@ export const Folder = memo(
         </div>
         <div
           className={cn(
-            "grid transition-[grid-template-rows] duration-200 ease-in-out",
+            "grid transition-[grid-template-rows] duration-100 ease-in-out",
             isFolderOpen ? "grid-rows-[1fr]" : "grid-rows-[0fr]"
           )}
         >
@@ -99,7 +99,7 @@ Folder.displayName = "Folder"
 
 export const File = memo(({ label, name }: FileProps) => (
   <li className="list-none">
-    <div className="inline-flex cursor-default items-center py-1 text-xs transition-all hover:text-muted-foreground">
+    <div className="inline-flex cursor-default items-center py-1 text-xs transition-colors duration-75 hover:text-muted-foreground">
       <span className="ml-1">
         <FiFileText size={14} />
       </span>
