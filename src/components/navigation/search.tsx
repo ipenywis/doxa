@@ -12,7 +12,7 @@ import {
 } from "@/src/components/ui/dialog"
 import { ScrollArea } from "@/src/components/ui/scroll-area"
 import { advanceSearch, cn, debounce, highlight, search } from "@/src/lib/utils"
-import { Documents } from "@/src/contents/settings/documents"
+import Documents from "@/src/contents/settings/documents.json"
 import { isRoute } from "@/src/lib/pageroutes"
 import { LuFileText, LuSearch } from "react-icons/lu"
 

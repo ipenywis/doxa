@@ -3,14 +3,14 @@ import { buttonVariants } from "@/src/components/ui/button"
 import { PageRoutes } from "@/src/lib/pageroutes"
 import { Link } from "@/src/lib/transition"
 import { GitHubLink } from "@/src/settings/navigation"
-import { Settings } from "@/src/types/settings"
+import { Settings } from "@/src/settings/main"
 import { createFileRoute } from "@tanstack/react-router"
 import { LuArrowRight, LuGithub } from "react-icons/lu"
 
 export const Route = createFileRoute("/")({
   component: Home,
   head: () => ({
-    links: [{ rel: "canonical", href: Settings.metadataBase }],
+    links: [{ rel: "canonical", href: Settings.site.url }],
   }),
 })
 

@@ -2,7 +2,7 @@ import { promises as fs } from "fs"
 import path from "path"
 
 import { Paths } from "@/src/lib/pageroutes"
-import { Documents } from "@/src/contents/settings/documents"
+import Documents from "@/src/contents/settings/documents.json"
 import grayMatter from "gray-matter"
 import remarkMdx from "remark-mdx"
 import remarkParse from "remark-parse"

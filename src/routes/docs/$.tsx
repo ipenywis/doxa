@@ -8,7 +8,7 @@ import { TableOfContents } from "@/src/components/toc"
 import { components } from "@/src/lib/components"
 import { fetchDocumentFromServer } from "@/src/lib/markdown"
 import { PageRoutes, Routes, isHeading, isRoute } from "@/src/lib/pageroutes"
-import { Settings } from "@/src/types/settings"
+import { Settings } from "@/src/settings/main"
 import { createFileRoute } from "@tanstack/react-router"
 import { z } from "zod"
 
@@ -24,13 +24,14 @@ export const Route = createFileRoute("/docs/$")({
     const firstRoute = PageRoutes[0]?.href?.replace(/^\//, "")
     const slug = params._splat || firstRoute || ""
     if (!slug) {
-      return { slug: "", document: null }
+      return { slug: "", document: null, routeTitle: null }
     }
     try {
       const document = await fetchDocumentFromServer({ data: slug })
-      return { slug, document }
+      const routeTitle = PageRoutes.find((r) => r.href === `/${slug}`)?.title ?? null
+      return { slug, document, routeTitle }
     } catch {
-      return { slug, document: null }
+      return { slug, document: null, routeTitle: null }
     }
   },
   preload: true,
@@ -40,13 +41,13 @@ export const Route = createFileRoute("/docs/$")({
   head: ({ loaderData }) => {
     const slug = loaderData?.slug ?? ""
     const document = loaderData?.document ?? null
-    const title = document?.frontmatter?.title
+    const title = loaderData?.routeTitle || document?.frontmatter?.title
     const description = document?.frontmatter?.description
     const keywords = document?.frontmatter?.keywords
 
-    const pageTitle = title ? `${title} – ${Settings.title}` : Settings.title
-    const pageDescription = description || Settings.description
-    const pageUrl = `${Settings.metadataBase}/docs/${slug}`
+    const pageTitle = title ? `${title} – ${Settings.site.name}` : Settings.site.name
+    const pageDescription = description || Settings.site.description
+    const pageUrl = `${Settings.site.url}/docs/${slug}`
 
     return {
       meta: [
@@ -104,8 +105,8 @@ function DocsContent() {
 
   const currentRoute = PageRoutes.find((r) => r.href === `/${slug}`)
   const title =
-    pageDocument?.frontmatter?.title ||
     currentRoute?.title ||
+    pageDocument?.frontmatter?.title ||
     slug.split("/").pop() ||
     "Documentation"
 

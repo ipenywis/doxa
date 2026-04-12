@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router"
 
-import { Settings } from "@/src/types/settings"
+import { Settings } from "@/src/settings/main"
 
 export const Route = createFileRoute("/robots/txt")({
   server: {
@@ -9,7 +9,7 @@ export const Route = createFileRoute("/robots/txt")({
         const robots = `User-agent: *
 Allow: /
 
-Sitemap: ${Settings.metadataBase}/sitemap.xml`
+Sitemap: ${Settings.site.url}/sitemap.xml`
 
         return new Response(robots, {
           headers: {

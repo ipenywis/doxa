@@ -1,5 +1,5 @@
 import { Logo } from "@/src/components/navigation/logo"
-import { Settings } from "@/src/types/settings"
+import { Settings } from "@/src/settings/main"
 
 export function Footer() {
   return (
@@ -7,18 +7,18 @@ export function Footer() {
       <p className="items-center">
         &copy; {new Date().getFullYear()}{" "}
         <a
-          title={Settings.name}
-          aria-label={Settings.name}
+          title={Settings.company.name}
+          aria-label={Settings.company.name}
           className="font-semibold"
-          href={Settings.link}
+          href={Settings.company.link}
           target="_blank"
           rel="noopener noreferrer"
         >
-          {Settings.name}
+          {Settings.company.name}
         </a>
         .
       </p>
-      {Settings.branding !== false && (
+      {Settings.features.branding !== false && (
         <div className="hidden items-center md:block">
           <Logo variant="full" size={16} />
         </div>
