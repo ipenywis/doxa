@@ -1,4 +1,4 @@
-import { Documents } from "@/src/contents/settings/documents"
+import Documents from "@/src/contents/settings/documents.json"
 
 export type Paths =
   | {
@@ -35,7 +35,7 @@ function flattenRoutes(routes: Paths[], parentHref = ""): Paths[] {
   return result
 }
 
-export const Routes: Paths[] = flattenRoutes(Documents)
+export const Routes: Paths[] = flattenRoutes(Documents as Paths[])
 
 export function isRoute(
   node: Paths

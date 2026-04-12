@@ -1,0 +1,105 @@
+[
+  {
+    "heading": "Introduction"
+  },
+  {
+    "title": "Basic Setup",
+    "href": "/basic-setup"
+  },
+  {
+    "title": "Installation",
+    "href": "/basic-setup/installation"
+  },
+  {
+    "title": "Setup",
+    "href": "/basic-setup/setup"
+  },
+  {
+    "title": "Changelog",
+    "href": "/basic-setup/changelog"
+  },
+  {
+    "title": "New mage",
+    "href": "/basic-setup/new-page"
+  },
+  {
+    "spacer": true
+  },
+  {
+    "heading": "Documents"
+  },
+  {
+    "title": "Navigation",
+    "href": "/navigation"
+  },
+  {
+    "title": "Structure",
+    "href": "/structure"
+  },
+  {
+    "title": "Deep",
+    "href": "/structure/deep"
+  },
+  {
+    "title": "Deeper",
+    "href": "/structure/deep/deeper"
+  },
+  {
+    "title": "Even Deeper",
+    "href": "/structure/deep/deeper/even-deeper"
+  },
+  {
+    "spacer": true
+  },
+  {
+    "heading": "Components"
+  },
+  {
+    "title": "Markdown",
+    "href": "/markdown"
+  },
+  {
+    "title": "Cards",
+    "href": "/markdown/cards"
+  },
+  {
+    "title": "Diagrams",
+    "href": "/markdown/diagrams"
+  },
+  {
+    "title": "Filetree",
+    "href": "/markdown/filetree"
+  },
+  {
+    "title": "Lists",
+    "href": "/markdown/lists"
+  },
+  {
+    "title": "Maths",
+    "href": "/markdown/maths"
+  },
+  {
+    "title": "Notes",
+    "href": "/markdown/notes"
+  },
+  {
+    "title": "Steps",
+    "href": "/markdown/steps"
+  },
+  {
+    "title": "Table",
+    "href": "/markdown/table"
+  },
+  {
+    "title": "Tabs",
+    "href": "/markdown/tabs"
+  },
+  {
+    "title": "Random",
+    "href": "/random"
+  },
+  {
+    "title": "Another Page",
+    "href": "/another-page"
+  }
+]

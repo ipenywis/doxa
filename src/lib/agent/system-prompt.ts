@@ -7,7 +7,7 @@
 
 import { resolve } from "path"
 import { execFileSync } from "child_process"
-import { sitename } from "@/src/settings/main"
+import { Settings } from "@/src/settings/main"
 import { aiConfig } from "@/src/settings/ai"
 
 /** Cache the file tree so we only scan once per server lifecycle. */
@@ -38,7 +38,7 @@ function getDocsFileTree(): string {
 export function buildAgentSystemPrompt(): string {
   const fileTree = getDocsFileTree()
 
-  return `You are a documentation assistant for ${sitename}.
+  return `You are a documentation assistant for ${Settings.site.name}.
 Your job is to answer user questions accurately using ONLY the documentation content available to you.
 
 ## Documentation Files

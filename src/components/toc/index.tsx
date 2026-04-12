@@ -2,7 +2,7 @@ import { TableAnchor, TableAnchorProps } from "@/src/components/toc/anchor"
 import { BackToTop } from "@/src/components/toc/backtotop"
 import Feedback from "@/src/components/toc/feedback"
 
-import { Settings } from "@/src/types/settings"
+import { Settings } from "@/src/settings/main"
 
 interface TableProps {
   tocs: TableAnchorProps
@@ -13,16 +13,16 @@ interface TableProps {
 export function TableOfContents({ tocs, pathName, frontmatter }: TableProps) {
   return (
     <>
-      {Settings.rightbar && (
+      {Settings.features.rightSidebar && (
         <aside
           className="toc sticky top-24 hidden min-w-[200px] max-w-[220px] gap-4 pt-6 xl:flex xl:flex-col"
           aria-label="Table of contents"
         >
-          {Settings.toc && <TableAnchor tocs={tocs.tocs} />}
-          {Settings.feedback && (
+          {Settings.features.tableOfContents && <TableAnchor tocs={tocs.tocs} />}
+          {Settings.features.feedbackEdit && (
             <Feedback slug={pathName} title={frontmatter.title} />
           )}
-          {Settings.totop && <BackToTop />}
+          {Settings.features.scrollToTop && <BackToTop />}
         </aside>
       )}
     </>

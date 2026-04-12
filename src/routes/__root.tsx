@@ -14,7 +14,7 @@ import {
 } from "@tanstack/react-router"
 
 import { DemoModeProvider } from "@/src/contexts/demo-mode"
-import { Settings } from "@/src/types/settings"
+import { Settings } from "@/src/settings/main"
 import { getColorPreset } from "@/src/lib/colors"
 import { primaryColor } from "@/src/contents/settings/color"
 import { getTheme, generateThemeCss } from "@/src/lib/themes"
@@ -49,15 +49,15 @@ export const Route = createRootRoute({
         content: "width=device-width, initial-scale=1",
       },
       {
-        title: Settings.title,
+        title: Settings.site.name,
       },
       {
         name: "description",
-        content: Settings.description,
+        content: Settings.site.description,
       },
       {
         name: "keywords",
-        content: Settings.keywords.join(", "),
+        content: Settings.site.keywords.join(", "),
       },
       // Open Graph
       {
@@ -78,7 +78,7 @@ export const Route = createRootRoute({
       },
       {
         property: "og:image",
-        content: `${Settings.metadataBase}${Settings.openGraph.images[0]?.url}`,
+        content: `${Settings.site.url}${Settings.openGraph.images[0]?.url}`,
       },
       // Twitter
       {
@@ -99,7 +99,7 @@ export const Route = createRootRoute({
       },
       {
         name: "twitter:image",
-        content: `${Settings.metadataBase}${Settings.twitter.images[0]?.url}`,
+        content: `${Settings.site.url}${Settings.twitter.images[0]?.url}`,
       },
     ],
     links: [
@@ -109,7 +109,7 @@ export const Route = createRootRoute({
       },
       {
         rel: "icon",
-        href: Settings.siteicon,
+        href: Settings.site.icon,
         type: "image/svg+xml",
       },
       {
@@ -126,7 +126,7 @@ export const Route = createRootRoute({
         href: font.href,
       })),
     ],
-    //     scripts: Settings.gtmconnected
+    //     scripts: Settings.analytics.gtmEnabled
     //       ? [
     //           {
     //             type: "text/javascript",
@@ -134,7 +134,7 @@ export const Route = createRootRoute({
     // new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
     // j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
     // 'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
-    // })(window,document,'script','dataLayer','${Settings.gtm}');`,
+    // })(window,document,'script','dataLayer','${Settings.analytics.gtmId}');`,
     //           },
     //         ]
     //       : [],
@@ -179,7 +179,7 @@ function RootDocument({
                   </main>
                   {!isDemoMode && <Footer />}
                 </div>
-                {Settings.chat && (isDemoMode ? <DemoChatWithDocs /> : <ChatWithDocs />)}
+                {Settings.features.chatWithDocs && (isDemoMode ? <DemoChatWithDocs /> : <ChatWithDocs />)}
               </div>
             </ChatProvider>
           </DemoModeProvider>
