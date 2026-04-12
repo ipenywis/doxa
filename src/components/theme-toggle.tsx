@@ -4,9 +4,9 @@ import { Button } from "@/src/components/ui/button"
 import { useTheme } from "next-themes"
 import { RxMoon, RxSun } from "react-icons/rx"
 import { getTheme } from "@/src/lib/themes"
-import { activeTheme } from "@/src/contents/settings/theme"
+import themeSettings from "@/src/contents/settings/theme.json"
 
-const siteTheme = getTheme(activeTheme)
+const siteTheme = getTheme(themeSettings.activeTheme)
 
 export function ModeToggle() {
   const { theme, setTheme } = useTheme()

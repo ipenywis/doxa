@@ -16,16 +16,15 @@ import {
 import { DemoModeProvider } from "@/src/contexts/demo-mode"
 import { Settings } from "@/src/settings/main"
 import { getColorPreset } from "@/src/lib/colors"
-import { primaryColor } from "@/src/contents/settings/color"
 import { getTheme, generateThemeCss } from "@/src/lib/themes"
-import { activeTheme } from "@/src/contents/settings/theme"
+import themeSettings from "@/src/contents/settings/theme.json"
 
 import globalsCss from "@/src/styles/globals.css?url"
 
-const theme = getTheme(activeTheme)
+const theme = getTheme(themeSettings.activeTheme)
 const themeCss = generateThemeCss(theme)
 
-const colorPreset = getColorPreset(primaryColor)
+const colorPreset = getColorPreset(themeSettings.primaryColor)
 const colorCss = `:root { --primary: ${colorPreset.light.primary}; --primary-foreground: ${colorPreset.light.primaryForeground}; } .dark { --primary: ${colorPreset.dark.primary}; --primary-foreground: ${colorPreset.dark.primaryForeground}; }`
 
 export const Route = createRootRoute({
