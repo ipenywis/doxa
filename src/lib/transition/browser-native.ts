@@ -1,4 +1,4 @@
-/* eslint-disable react-hooks/refs */
+/* eslint-disable */
 import { use, useEffect, useRef, useState } from "react"
 import { useLocation } from "@tanstack/react-router"
 

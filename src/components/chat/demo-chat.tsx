@@ -53,7 +53,7 @@ const markdownComponents = {
 
 export function DemoChatWithDocs() {
   return (
-    <ChatDrawer onHistoryClick={() => {}} onNewChat={() => {}}>
+    <ChatDrawer onHistoryClick={() => undefined} onNewChat={() => undefined}>
       {/* Example messages */}
       <div className="flex-1 overflow-y-auto overscroll-contain">
         <div className="flex flex-col gap-3 p-4">

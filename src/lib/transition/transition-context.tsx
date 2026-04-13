@@ -1,4 +1,3 @@
-/* eslint-disable react-hooks/set-state-in-effect */
 /* eslint-disable @typescript-eslint/no-empty-function */
 import {
   createContext,
