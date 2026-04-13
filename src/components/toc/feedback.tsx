@@ -7,6 +7,8 @@ interface SideBarEdit {
 }
 
 export default function RightSideBar({ slug, title }: SideBarEdit) {
+  if (!GitHubLink.href) return null
+
   const feedbackUrl = `${GitHubLink.href}/issues/new?title=Feedback for "${title}"&labels=feedback`
   const editUrl = `${GitHubLink.href}/edit/main/contents/docs/${slug}/index.mdx`
 

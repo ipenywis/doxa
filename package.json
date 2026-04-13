@@ -17,7 +17,8 @@
     "generate-content-json:ide": "node -r esbuild-register scripts/content.ts",
     "generate:docs": "tsx scripts/docs-generator/generator.ts",
     "generate:docs:watch": "tsx scripts/docs-generator/generator.ts --watch",
-    "prepare": "husky"
+    "prepare": "husky",
+    "deploy": "vite build && pnpx wrangler deploy"
   },
   "dependencies": {
     "@mdx-js/mdx": "^3.1.0",
