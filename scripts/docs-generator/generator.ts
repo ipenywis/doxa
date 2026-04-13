@@ -71,7 +71,7 @@ async function parseFrontmatter(filePath: string): Promise<MdxFrontmatter> {
  */
 async function discoverPages(
   dirPath: string,
-  parentHref: string = ""
+  parentHref = ""
 ): Promise<{ href: string; title: string }[]> {
   const pages: { href: string; title: string }[] = []
 
