@@ -3,6 +3,7 @@ import {
   rehypePreCopy,
   remarkStripFrontmatter,
 } from "./src/lib/mdx-plugins"
+import { cloudflare } from "@cloudflare/vite-plugin"
 import tailwindcss from "@tailwindcss/vite"
 import { tanstackStart } from "@tanstack/react-start/plugin/vite"
 import viteReact from "@vitejs/plugin-react"
@@ -20,6 +21,17 @@ export default defineConfig({
   base: "/",
   server: {
     port: 3000,
+  },
+  build: {
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          mermaid: ["mermaid"],
+          katex: ["rehype-katex"],
+          react: ["react", "react-dom"],
+        },
+      },
+    },
   },
   plugins: [
     tsConfigPaths({
@@ -54,5 +66,6 @@ export default defineConfig({
       },
     }),
     viteReact(),
+    cloudflare({ viteEnvironment: { name: "ssr" } }),
   ],
 })

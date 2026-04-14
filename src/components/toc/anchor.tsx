@@ -1,5 +1,3 @@
-"use client"
-
 import { ScrollArea } from "@/src/components/ui/scroll-area"
 import { useScrollSpy, type TocItem } from "@/src/hooks/use-scroll-spy"
 import { hrefToId } from "@/src/lib/toc"

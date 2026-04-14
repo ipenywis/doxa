@@ -1,5 +1,3 @@
-"use client"
-
 import * as React from "react"
 import { cn } from "@/src/lib/utils"
 import * as DialogPrimitive from "@radix-ui/react-dialog"

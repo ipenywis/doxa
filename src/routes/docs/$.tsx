@@ -1,5 +1,3 @@
-"use client"
-
 import type { ComponentType } from "react"
 import { useChatContext } from "@/src/components/chat/chat-context"
 import { ArticleBreadcrumb } from "@/src/components/article/breadcrumb"

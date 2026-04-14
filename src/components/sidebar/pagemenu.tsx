@@ -1,5 +1,3 @@
-"use client"
-
 import SubLink from "@/src/components/sidebar/sublink"
 import { isHeading, isRoute, Routes } from "@/src/lib/pageroutes"
 import { useLocation } from "@tanstack/react-router"

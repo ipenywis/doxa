@@ -1,6 +1,5 @@
 import { Card, CardGrid } from "@/src/components/markdown/card"
-import { FileTree } from "@/src/components/markdown/filetree"
-import { File, Folder } from "@/src/components/markdown/filetree/component"
+import { File, FileTree, Folder } from "@/src/components/markdown/filetree"
 import RoutedLink from "@/src/components/markdown/link"
 import Mermaid from "@/src/components/markdown/mermaid"
 import Note from "@/src/components/markdown/note"
