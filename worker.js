@@ -1,4 +1,4 @@
-import server from "./dist/server/server.js"
+import server from "virtual:tanstack-start-server-entry"
 
 function redirectToPath(url, pathname) {
   const redirectUrl = new URL(url)
@@ -9,15 +9,6 @@ function redirectToPath(url, pathname) {
 
 export default {
   async fetch(request, env) {
-    if (env) {
-      for (const [key, value] of Object.entries(env)) {
-        if (typeof value === "string") {
-          // eslint-disable-next-line no-undef
-          process.env[key] = value
-        }
-      }
-    }
-
     const url = new URL(request.url)
 
     if (url.pathname === "/docs/docs") {

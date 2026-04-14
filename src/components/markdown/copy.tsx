@@ -1,5 +1,3 @@
-"use client"
-
 import { useState } from "react"
 import { Button } from "@/src/components/ui/button"
 import { cn } from "@/src/lib/utils"

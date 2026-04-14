@@ -1,5 +1,3 @@
-"use client"
-
 import * as React from "react"
 import { cn } from "@/src/lib/utils"
 import * as AccordionPrimitive from "@radix-ui/react-accordion"

@@ -4,7 +4,8 @@
   "main": "worker.js",
   "compatibility_date": "2025-03-30",
   "compatibility_flags": [
-    "nodejs_compat"
+    "nodejs_compat",
+    "nodejs_compat_populate_process_env"
   ],
   "assets": {
     "directory": "dist/client",
