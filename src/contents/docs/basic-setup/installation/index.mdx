@@ -1,13 +1,13 @@
 ---
 title: Installation
-description: This guide covers the installation of Documents and how to edit your new project.
-keywords: ["installation", "github", "node", "guide", "nextjs", "documents"]
+description: This guide covers installing Doxa Docs Template, editing content, and deploying to Cloudflare Workers or Vercel.
+keywords: ["installation", "github", "node", "guide", "tanstack start", "doxa"]
 ---
 
 To install and edit the Documents, you need to have several prerequisites in place. Here's a list of all the essential pre-requisites
 for setting up and working on this project.
 
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Fdoxa-docs%2Fdoxa&project-name=doxa-docs&repository-name=doxa-docs)
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Fipenywis%2Fdoxa-docs-template&project-name=doxa-docs-template&repository-name=doxa-docs-template)
 
 ## Prerequisites
 
@@ -42,7 +42,7 @@ You’ll need a code editor to work on the project. Common options include:
 
 </StepItem>
 <StepItem title="Required Knowledge">
-- **Next.js:** Since this is a Next.js project, you should be familiar with Next.js basics.
+- **TanStack Start:** The app uses TanStack Start on top of Vite and React Router.
 - **React:** The project uses React, so understanding React's component structure and hooks will help.
 - **TypeScript:** The project is written in TypeScript, so you should have a basic understanding of it.
 - **Tailwind:** The project uses Tailwind CSS for styling.
@@ -58,13 +58,13 @@ You’ll need a code editor to work on the project. Common options include:
 First, clone the repository to your local machine using Git:
 
 ```bash
-git clone https://github.com/doxa-docs/doxa.git
+git clone https://github.com/ipenywis/doxa-docs-template.git
 ```
 
 Change the directory to the project folder:
 
 ```bash
-cd doxa
+cd doxa-docs-template
 ```
 
 </StepItem>
@@ -77,7 +77,7 @@ pnpm install
 
 This will install all the dependencies listed in the package.json file, including:
 
-- Next.js
+- TanStack Start
 - React
 - TypeScript
 - Tailwind CSS
@@ -102,9 +102,9 @@ http://localhost:3000
 </StepItem>
 
 <StepItem title="Editing the Project">
-  - **MDX Files:** Documentation content is stored in `contents/docs`.
-  - **Components:** You can edit React components in the `components/` directory.
-  - **Tailwind:** Tailwind styling are managed in `tailwind.config.ts` and `app/globals.css`.
+  - **MDX Files:** Documentation content is stored in `src/contents/docs`.
+  - **Components:** You can edit React components in `src/components/`.
+  - **Tailwind:** Global styling lives in `src/styles/globals.css`.
 
 To make any changes to the project, open the files in your editor and modify them as needed.
 
@@ -145,11 +145,18 @@ http://localhost:3000
 
 <Step>
 <StepItem title="Deploying to Vercel">
-This project is optimized for Vercel deployment. To deploy to Vercel:
+This project includes native Vercel support. To deploy to Vercel:
 
-- Go to [vercel.com](https://vercel.com/) and sign up.
-- Link your GitHub repository and deploy the project.
-- Vercel will handle the build process for you automatically.
+- Run `vercel link` to connect the local directory to your Vercel project.
+- Set `VITE_SITE_URL` to the public URL for your docs site.
+- Set `AI_API_KEY` if the AI chat feature is enabled.
+- Run `pnpm run deploy:vercel`.
+</StepItem>
+<StepItem title="Deploying to Cloudflare Workers">
+Cloudflare remains the default deployment target:
+
+- Add the required Wrangler secrets, including `AI_API_KEY` if chat is enabled.
+- Run `pnpm run deploy`.
 </StepItem>
 <StepItem title="Linting and Pre-commit Hooks">
 The project uses ESLint for linting and Husky for Git hooks. These tools are configured automatically, but you can customize them in `.eslintrc.json` and `.husky` directories.

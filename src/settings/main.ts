@@ -34,10 +34,15 @@ interface AppSettings {
   twitter: TwitterCard
 }
 
+const siteUrl =
+  import.meta.env.VITE_SITE_URL ??
+  "https://doxa-docs.islem-coderone.workers.dev"
+const companyLink = import.meta.env.VITE_COMPANY_LINK ?? siteUrl
+
 export const Settings: AppSettings = {
   site: {
     name: "doxa",
-    url: "https://doxa-docs.islem-coderone.workers.dev",
+    url: siteUrl,
     description:
       "Beautiful, fast documentation that stays out of your way. Built for developers who care about the reading experience as much as the writing.",
     keywords: ["doxa", "documentation", "open source", "SEO"],
@@ -45,7 +50,7 @@ export const Settings: AppSettings = {
   },
   company: {
     name: "doxa",
-    link: "https://doxa-docs.islem-coderone.workers.dev",
+    link: companyLink,
   },
   seo: {
     ogImage: "/images/og-image.png",
