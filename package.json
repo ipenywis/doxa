@@ -4,8 +4,12 @@
   "private": false,
   "type": "module",
   "scripts": {
-    "dev": "vite dev",
-    "build": "vite build",
+    "dev": "pnpm run dev:cloudflare",
+    "dev:cloudflare": "cross-env DOXA_DEPLOY_TARGET=cloudflare vite dev",
+    "dev:vercel": "cross-env DOXA_DEPLOY_TARGET=vercel vite dev",
+    "build": "pnpm run build:cloudflare",
+    "build:cloudflare": "cross-env DOXA_DEPLOY_TARGET=cloudflare vite build",
+    "build:vercel": "cross-env DOXA_DEPLOY_TARGET=vercel vite build",
     "start": "vite preview",
     "lint": "eslint --quiet",
     "lint:fix": "eslint --fix --quiet",
@@ -18,7 +22,9 @@
     "generate:docs": "tsx scripts/docs-generator/generator.ts",
     "generate:docs:watch": "tsx scripts/docs-generator/generator.ts --watch",
     "prepare": "husky",
-    "deploy": "vite build && pnpx wrangler deploy -c dist/server/wrangler.json"
+    "deploy": "pnpm run deploy:cloudflare",
+    "deploy:cloudflare": "pnpm run build:cloudflare && pnpx wrangler deploy -c dist/server/wrangler.json",
+    "deploy:vercel": "vercel deploy --prod"
   },
   "dependencies": {
     "@mdx-js/mdx": "^3.1.0",
@@ -80,10 +86,12 @@
     "@types/unist": "^3.0.3",
     "@typescript-eslint/parser": "^8.50.0",
     "@vitejs/plugin-react": "^4.4.1",
+    "cross-env": "^10.1.0",
     "esbuild": "^0.27.2",
     "esbuild-register": "^3.6.0",
     "eslint": "^9.39.2",
     "husky": "^9.1.7",
+    "nitro": "3.0.260415-beta",
     "postcss": "^8.5.6",
     "prettier": "^3.7.4",
     "prettier-plugin-tailwindcss": "^0.7.2",
@@ -93,6 +101,7 @@
     "tsx": "^4.21.0",
     "typescript": "^5.9.3",
     "typescript-eslint": "^8.50.0",
+    "vercel": "^51.3.0",
     "vite": "^7.3.0",
     "vite-tsconfig-paths": "^5.1.4"
   },

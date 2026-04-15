@@ -78,7 +78,6 @@ function MdxContent({ slug }: { slug: string }) {
   }
 
   const MDXContent = mdxModule.default
-
   return <MDXContent components={components} />
 }
 

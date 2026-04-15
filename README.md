@@ -1,6 +1,6 @@
 # Documents
 
-Documents is a modern documentation starter kit built with **Next.js**, **React**, **Tailwind CSS**, and **TypeScript**. Designed for businesses, product teams, and technical writers, it provides a scalable and efficient foundation for building documentation websites, product manuals, and knowledge bases.
+Documents is a modern documentation starter kit built with **TanStack Start**, **React**, **Tailwind CSS**, **TypeScript**, and **MDX**. Designed for businesses, product teams, and technical writers, it provides a scalable and efficient foundation for documentation websites, product manuals, and knowledge bases.
 
 > **Demo**: [https://rubix-documents.vercel.app](https://rubix-documents.vercel.app)
 
@@ -16,7 +16,7 @@ Documents is a modern documentation starter kit built with **Next.js**, **React*
 [![GitHub forks](https://img.shields.io/github/forks/rubixvi/rubix-documents)](https://github.com/rubixvi/rubix-documents/network)
 [![GitHub repo size](https://img.shields.io/github/repo-size/rubixvi/rubix-documents)](https://github.com/rubixvi/rubix-documents)
 
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Frubixvi%2Frubix-documents&project-name=my-documents&repository-name=my-documents&demo-title=Documents&demo-description=This%20Document%20Starter%20Kit%20is%20developed%20with%20Next.js%2C%20Tailwind%20CSS%20and%20TypeScript.%20It%20serves%20as%20a%20flexible%20and%20scalable%20foundation%20for%20building%20documentation%20websites%20or%20content-driven%20projects.&demo-url=https%3A%2F%2Frubix-documents.vercel.app%2F&demo-image=https%3A%2F%2Fgithub.com%2Frubixvi%2Frubix-documents%2Fblob%2Fmain%2Fpublic%2Fscreens%2Fscreen-1.png)
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Fipenywis%2Fdoxa-docs-template&project-name=doxa-docs-template&repository-name=doxa-docs-template)
 
 ---
 
@@ -63,8 +63,8 @@ Built for technical and content-driven projects, this starter kit supports Markd
 ### Installation
 
 ```bash
-git clone https://github.com/rubixvi/rubix-documents.git
-cd rubix-documents
+git clone https://github.com/ipenywis/doxa-docs-template.git
+cd doxa-docs-template
 pnpm install
 pnpm run dev
 ```
@@ -78,7 +78,26 @@ pnpm run build
 pnpm run start
 ```
 
-Deploy to Vercel for automated builds and hosting.
+Deploy to Cloudflare Workers or Vercel for automated builds and hosting.
+
+## Deployment
+
+### Cloudflare Workers
+
+```bash
+pnpm run deploy
+```
+
+### Vercel
+
+```bash
+vercel link
+vercel env add VITE_SITE_URL
+vercel env add AI_API_KEY
+pnpm run deploy:vercel
+```
+
+`VITE_SITE_URL` should match the public docs URL so canonical tags, sitemap entries, robots, and social metadata use the correct host.
 
 ### Optional: Install ripgrep for faster search
 
