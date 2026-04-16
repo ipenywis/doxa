@@ -7,7 +7,7 @@ import { ModeToggle } from "@/src/components/theme-toggle"
 import { buttonVariants } from "@/src/components/ui/button"
 import { SheetClose } from "@/src/components/ui/sheet"
 import { GitHubLink, Navigations } from "@/src/settings/navigation"
-import { Settings } from "@/src/types/settings"
+import { Settings } from "@/src/settings/main"
 import { LuArrowUpRight, LuGithub } from "react-icons/lu"
 
 export function Navbar() {
@@ -38,7 +38,7 @@ export function Navbar() {
               <LuGithub className="h-[1.1rem] w-[1.1rem]" />
             </a>
           )}
-          {Settings.chat && <ChatButton />}
+          {Settings.features.chatWithDocs && <ChatButton />}
           <ModeToggle />
         </div>
       </div>
@@ -55,7 +55,7 @@ export function NavMenu({ isSheet = false }) {
             key={item.title + item.href}
             absolute
             activeClassName="font-semibold text-primary"
-            className="flex items-center gap-1 text-sm transition-colors hover:text-foreground"
+            className="flex items-center gap-1 text-sm hover:text-foreground"
             href={item.href}
             target={item.external ? "_blank" : undefined}
             rel={item.external ? "noopener noreferrer" : undefined}

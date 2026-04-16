@@ -1,5 +1,3 @@
-"use client"
-
 import { ComponentProps } from "react"
 import { Link } from "@/src/lib/transition"
 import { cn } from "@/src/lib/utils"

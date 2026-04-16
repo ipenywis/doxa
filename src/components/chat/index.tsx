@@ -1,5 +1,3 @@
-"use client"
-
 import { useCallback, useEffect, useRef, useState } from "react"
 import { ChatDrawer } from "@/src/components/chat/chat-drawer"
 import { ChatInput } from "@/src/components/chat/chat-input"

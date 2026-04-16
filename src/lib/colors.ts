@@ -1,4 +1,4 @@
-export type ColorPreset = "indigo" | "emerald" | "rose" | "amber" | "violet"
+export type ColorPreset = "default" | "indigo" | "emerald" | "rose" | "amber" | "violet"
 
 interface ColorValues {
   primary: string
@@ -11,6 +11,16 @@ interface ColorPresetConfig {
 }
 
 export const colorPresets: Record<ColorPreset, ColorPresetConfig> = {
+  default: {
+    light: {
+      primary: "oklch(0.205 0 0)",
+      primaryForeground: "oklch(0.985 0 0)",
+    },
+    dark: {
+      primary: "oklch(0.985 0 0)",
+      primaryForeground: "oklch(0.205 0 0)",
+    },
+  },
   indigo: {
     light: {
       primary: "oklch(0.585 0.233 277)",

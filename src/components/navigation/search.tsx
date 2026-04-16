@@ -1,5 +1,3 @@
-"use client"
-
 import { useEffect, useMemo, useState } from "react"
 import Anchor from "@/src/components/anchor"
 import {
@@ -12,7 +10,7 @@ import {
 } from "@/src/components/ui/dialog"
 import { ScrollArea } from "@/src/components/ui/scroll-area"
 import { advanceSearch, cn, debounce, highlight, search } from "@/src/lib/utils"
-import { Documents } from "@/src/contents/settings/documents"
+import Documents from "@/src/contents/settings/documents.json"
 import { isRoute } from "@/src/lib/pageroutes"
 import { LuFileText, LuSearch } from "react-icons/lu"
 
@@ -84,7 +82,7 @@ export default function Search() {
         <DialogClose key={href} asChild>
           <Anchor
             className={cn(
-              "flex w-full items-center gap-2.5 rounded-sm px-3 text-[15px] transition-all duration-300 hover:bg-accent"
+              "flex w-full items-center gap-2.5 rounded-sm px-3 text-[15px] transition-colors duration-75 hover:bg-accent"
             )}
             href={href}
           >
@@ -157,7 +155,7 @@ export default function Search() {
                         <DialogClose key={item.href} asChild>
                           <Anchor
                             className={cn(
-                              "flex w-full max-w-[310px] flex-col gap-0.5 rounded-sm p-3 text-[15px] transition-all duration-300 hover:bg-accent sm:max-w-[480px]"
+                              "flex w-full max-w-[310px] flex-col gap-0.5 rounded-sm p-3 text-[15px] transition-colors duration-75 hover:bg-accent sm:max-w-[480px]"
                             )}
                             href={`/docs${item.href}`}
                           >

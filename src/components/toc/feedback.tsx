@@ -7,6 +7,8 @@ interface SideBarEdit {
 }
 
 export default function RightSideBar({ slug, title }: SideBarEdit) {
+  if (!GitHubLink.href) return null
+
   const feedbackUrl = `${GitHubLink.href}/issues/new?title=Feedback for "${title}"&labels=feedback`
   const editUrl = `${GitHubLink.href}/edit/main/contents/docs/${slug}/index.mdx`
 
@@ -19,7 +21,7 @@ export default function RightSideBar({ slug, title }: SideBarEdit) {
           aria-label="Give Feedback"
           target="_blank"
           rel="noopener noreferrer"
-          className="flex items-center gap-2 text-sm text-muted-foreground transition-colors hover:text-foreground"
+          className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground"
         >
           <LuMessageSquare className="h-3.5 w-3.5" />
           <span>Feedback</span>
@@ -30,7 +32,7 @@ export default function RightSideBar({ slug, title }: SideBarEdit) {
           aria-label="Edit this page"
           target="_blank"
           rel="noopener noreferrer"
-          className="flex items-center gap-2 text-sm text-muted-foreground transition-colors hover:text-foreground"
+          className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground"
         >
           <LuPencil className="h-3.5 w-3.5" />
           <span>Edit this page</span>

@@ -26,7 +26,7 @@ const eslintConfig = defineConfig([
     },
   },
   {
-    ignores: ["dist/", ".vite/", ".vinxi/", ".output/"],
+    ignores: ["dist/", ".vite/", ".vinxi/", ".output/", ".next/"],
   },
 ])
 

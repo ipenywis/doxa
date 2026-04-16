@@ -19,7 +19,7 @@ interface ChatDrawerProps {
 }
 
 const btnClass =
-  "cursor-pointer rounded-xs p-1 opacity-70 transition-opacity hover:opacity-100 focus:outline-none"
+  "cursor-pointer rounded-xs p-1 opacity-70 hover:opacity-100 focus:outline-none"
 
 export function ChatDrawer({
   onHistoryClick,

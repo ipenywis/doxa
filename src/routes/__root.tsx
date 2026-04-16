@@ -3,6 +3,7 @@ import type { ReactNode } from "react"
 import { Footer } from "@/src/components/navigation/footer"
 import { Navbar } from "@/src/components/navigation/navbar"
 import { ChatWithDocs } from "@/src/components/chat"
+import { DemoChatWithDocs } from "@/src/components/chat/demo-chat"
 import { ChatProvider } from "@/src/components/chat/chat-context"
 import { Providers } from "@/src/providers"
 import {
@@ -12,21 +13,31 @@ import {
   Scripts,
 } from "@tanstack/react-router"
 
-import { Settings } from "@/src/types/settings"
+import { DemoModeProvider } from "@/src/contexts/demo-mode"
+import { Settings } from "@/src/settings/main"
 import { getColorPreset } from "@/src/lib/colors"
-import { primaryColor } from "@/src/contents/settings/color"
 import { getTheme, generateThemeCss } from "@/src/lib/themes"
-import { activeTheme } from "@/src/contents/settings/theme"
+import themeSettings from "@/src/contents/settings/theme.json"
 
 import globalsCss from "@/src/styles/globals.css?url"
 
-const theme = getTheme(activeTheme)
+const theme = getTheme(themeSettings.activeTheme)
 const themeCss = generateThemeCss(theme)
 
-const colorPreset = getColorPreset(primaryColor)
+const colorPreset = getColorPreset(themeSettings.primaryColor)
 const colorCss = `:root { --primary: ${colorPreset.light.primary}; --primary-foreground: ${colorPreset.light.primaryForeground}; } .dark { --primary: ${colorPreset.dark.primary}; --primary-foreground: ${colorPreset.dark.primaryForeground}; }`
 
 export const Route = createRootRoute({
+  validateSearch: (search: Record<string, unknown>) => {
+    const demo =
+      search.demo === true ||
+      search.demo === "true" ||
+      search.demo === "" ||
+      search.demo === 1 ||
+      search.demo === "1"
+
+    return demo ? { demo: true as const } : {}
+  },
   head: () => ({
     meta: [
       {
@@ -37,15 +48,15 @@ export const Route = createRootRoute({
         content: "width=device-width, initial-scale=1",
       },
       {
-        title: Settings.title,
+        title: Settings.site.name,
       },
       {
         name: "description",
-        content: Settings.description,
+        content: Settings.site.description,
       },
       {
         name: "keywords",
-        content: Settings.keywords.join(", "),
+        content: Settings.site.keywords.join(", "),
       },
       // Open Graph
       {
@@ -66,7 +77,7 @@ export const Route = createRootRoute({
       },
       {
         property: "og:image",
-        content: `${Settings.metadataBase}${Settings.openGraph.images[0]?.url}`,
+        content: `${Settings.site.url}${Settings.openGraph.images[0]?.url}`,
       },
       // Twitter
       {
@@ -87,7 +98,7 @@ export const Route = createRootRoute({
       },
       {
         name: "twitter:image",
-        content: `${Settings.metadataBase}${Settings.twitter.images[0]?.url}`,
+        content: `${Settings.site.url}${Settings.twitter.images[0]?.url}`,
       },
     ],
     links: [
@@ -97,7 +108,7 @@ export const Route = createRootRoute({
       },
       {
         rel: "icon",
-        href: Settings.siteicon,
+        href: Settings.site.icon,
         type: "image/svg+xml",
       },
       {
@@ -114,7 +125,7 @@ export const Route = createRootRoute({
         href: font.href,
       })),
     ],
-    //     scripts: Settings.gtmconnected
+    //     scripts: Settings.analytics.gtmEnabled
     //       ? [
     //           {
     //             type: "text/javascript",
@@ -122,7 +133,7 @@ export const Route = createRootRoute({
     // new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
     // j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
     // 'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
-    // })(window,document,'script','dataLayer','${Settings.gtm}');`,
+    // })(window,document,'script','dataLayer','${Settings.analytics.gtmId}');`,
     //           },
     //         ]
     //       : [],
@@ -133,14 +144,18 @@ export const Route = createRootRoute({
 })
 
 function RootComponent() {
+  const { demo = false } = Route.useSearch()
   return (
-    <RootDocument>
+    <RootDocument isDemoMode={demo}>
       <Outlet />
     </RootDocument>
   )
 }
 
-function RootDocument({ children }: Readonly<{ children: ReactNode }>) {
+function RootDocument({
+  children,
+  isDemoMode = false,
+}: Readonly<{ children: ReactNode; isDemoMode?: boolean }>) {
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
@@ -150,21 +165,23 @@ function RootDocument({ children }: Readonly<{ children: ReactNode }>) {
       </head>
       <body className="font-regular">
         <Providers>
-          <ChatProvider>
-            <div className="flex h-screen">
-              <div
-                id="app-scroll-container"
-                className="min-w-0 flex-1 overflow-y-auto"
-              >
-                <Navbar />
-                <main className="mx-auto h-auto max-w-[1440px] px-4 sm:px-6 md:px-8">
-                  {children}
-                </main>
-                <Footer />
+          <DemoModeProvider value={isDemoMode}>
+            <ChatProvider>
+              <div className="flex h-screen">
+                <div
+                  id="app-scroll-container"
+                  className={`min-w-0 flex-1 ${isDemoMode ? "overflow-y-hidden [scrollbar-width:none] [&::-webkit-scrollbar]:hidden" : "overflow-y-auto"}`}
+                >
+                  <Navbar />
+                  <main className="mx-auto h-auto max-w-[1440px] px-4 sm:px-6 md:px-8">
+                    {children}
+                  </main>
+                  {!isDemoMode && <Footer />}
+                </div>
+                {Settings.features.chatWithDocs && (isDemoMode ? <DemoChatWithDocs /> : <ChatWithDocs />)}
               </div>
-              {Settings.chat && <ChatWithDocs />}
-            </div>
-          </ChatProvider>
+            </ChatProvider>
+          </DemoModeProvider>
         </Providers>
         <Scripts />
       </body>
@@ -182,7 +199,7 @@ function NotFoundComponent() {
       <div className="flex items-center">
         <a
           href="/"
-          className="inline-flex h-11 items-center justify-center gap-2 rounded-md bg-primary px-8 text-sm font-medium text-primary-foreground ring-offset-background transition-colors hover:bg-primary/90 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:outline-none"
+          className="inline-flex h-11 items-center justify-center gap-2 rounded-md bg-primary px-8 text-sm font-medium text-primary-foreground ring-offset-background hover:bg-primary/90 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:outline-none"
         >
           Return Home
         </a>
@@ -206,7 +223,7 @@ function ErrorComponent({ error }: { error: Error }) {
         </div>
         <a
           href="/"
-          className="inline-flex h-10 items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground ring-offset-background transition-colors hover:bg-primary/90 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:outline-none"
+          className="inline-flex h-10 items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground ring-offset-background hover:bg-primary/90 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:outline-none"
         >
           Go Home
         </a>

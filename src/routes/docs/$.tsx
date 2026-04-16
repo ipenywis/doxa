@@ -1,7 +1,4 @@
-"use client"
-
-import { createElement, useMemo } from "react"
-import * as runtime from "react/jsx-runtime"
+import type { ComponentType } from "react"
 import { useChatContext } from "@/src/components/chat/chat-context"
 import { ArticleBreadcrumb } from "@/src/components/article/breadcrumb"
 import { Pagination } from "@/src/components/article/pagination"
@@ -9,10 +6,13 @@ import { TableOfContents } from "@/src/components/toc"
 import { components } from "@/src/lib/components"
 import { fetchDocumentFromServer } from "@/src/lib/markdown"
 import { PageRoutes, Routes, isHeading, isRoute } from "@/src/lib/pageroutes"
-import { Settings } from "@/src/types/settings"
-import { runSync } from "@mdx-js/mdx"
+import { Settings } from "@/src/settings/main"
 import { createFileRoute } from "@tanstack/react-router"
 import { z } from "zod"
+
+const mdxModules = import.meta.glob<{
+  default: ComponentType<{ components?: typeof components }>
+}>("/src/contents/docs/**/index.mdx", { eager: true })
 
 export const Route = createFileRoute("/docs/$")({
   validateSearch: z.object({
@@ -22,13 +22,14 @@ export const Route = createFileRoute("/docs/$")({
     const firstRoute = PageRoutes[0]?.href?.replace(/^\//, "")
     const slug = params._splat || firstRoute || ""
     if (!slug) {
-      return { slug: "", document: null }
+      return { slug: "", document: null, routeTitle: null }
     }
     try {
       const document = await fetchDocumentFromServer({ data: slug })
-      return { slug, document }
+      const routeTitle = PageRoutes.find((r) => r.href === `/${slug}`)?.title ?? null
+      return { slug, document, routeTitle }
     } catch {
-      return { slug, document: null }
+      return { slug, document: null, routeTitle: null }
     }
   },
   preload: true,
@@ -38,13 +39,13 @@ export const Route = createFileRoute("/docs/$")({
   head: ({ loaderData }) => {
     const slug = loaderData?.slug ?? ""
     const document = loaderData?.document ?? null
-    const title = document?.frontmatter?.title
+    const title = loaderData?.routeTitle || document?.frontmatter?.title
     const description = document?.frontmatter?.description
     const keywords = document?.frontmatter?.keywords
 
-    const pageTitle = title ? `${title} – ${Settings.title}` : Settings.title
-    const pageDescription = description || Settings.description
-    const pageUrl = `${Settings.metadataBase}/docs/${slug}`
+    const pageTitle = title ? `${title} – ${Settings.site.name}` : Settings.site.name
+    const pageDescription = description || Settings.site.description
+    const pageUrl = `${Settings.site.url}/docs/${slug}`
 
     return {
       meta: [
@@ -65,21 +66,19 @@ export const Route = createFileRoute("/docs/$")({
   },
 })
 
-function MdxContent({ code }: { code: string }) {
-  const content = useMemo(() => {
-    try {
-      const { default: MDXContent } = runSync(code, {
-        ...runtime,
-        baseUrl: import.meta.url,
-      })
-      return createElement(MDXContent, { components })
-    } catch (error) {
-      console.error("Failed to render MDX:", error)
-      return <p className="text-red-500">Failed to render content. Please refresh the page.</p>
-    }
-  }, [code])
+function MdxContent({ slug }: { slug: string }) {
+  const mdxModule = mdxModules[`/src/contents/docs/${slug}/index.mdx`]
 
-  return <>{content}</>
+  if (!mdxModule) {
+    return (
+      <p className="text-red-500">
+        Failed to render content. Please refresh the page.
+      </p>
+    )
+  }
+
+  const MDXContent = mdxModule.default
+  return <MDXContent components={components} />
 }
 
 function findSectionHeading(slug: string): string | undefined {
@@ -103,8 +102,8 @@ function DocsContent() {
 
   const currentRoute = PageRoutes.find((r) => r.href === `/${slug}`)
   const title =
-    pageDocument?.frontmatter?.title ||
     currentRoute?.title ||
+    pageDocument?.frontmatter?.title ||
     slug.split("/").pop() ||
     "Documentation"
 
@@ -113,7 +112,7 @@ function DocsContent() {
 
   if (!pageDocument) {
     return (
-      <div key={slug} className="flex animate-in fade-in duration-300 items-start gap-10">
+      <div key={slug} className="flex items-start gap-10">
         <article className="prose-code:font-code prose-code:before:content-none prose-code:after:content-none prose max-w-3xl flex-1 prose-zinc dark:prose-invert prose-headings:scroll-m-20 prose-pre:border prose-pre:bg-muted/25 prose-img:rounded-md">
           <ArticleBreadcrumb paths={paths} />
           <h1 className="text-3xl font-bold tracking-tight lg:text-4xl">
@@ -136,7 +135,7 @@ function DocsContent() {
   }
 
   return (
-    <div key={slug} className="flex animate-in fade-in duration-300 items-start gap-10">
+    <div key={slug} className="flex items-start gap-10">
       <article className="prose-code:font-code prose-code:before:content-none prose-code:after:content-none prose max-w-3xl flex-1 prose-zinc dark:prose-invert prose-headings:scroll-m-20 prose-pre:border prose-pre:bg-muted/25 prose-img:rounded-md">
         {sectionHeading && (
           <p className="not-prose mb-2 text-sm font-medium text-primary">
@@ -152,7 +151,7 @@ function DocsContent() {
           </p>
         )}
         <div className="prose-content mt-8">
-          <MdxContent code={pageDocument.code} />
+          <MdxContent slug={slug} />
         </div>
         <Pagination pathname={pathName} />
       </article>
