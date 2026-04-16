@@ -179,28 +179,6 @@ See the [ripgrep installation guide](https://github.com/BurntSushi/ripgrep#insta
 
 ---
 
-## Screenshots
-
-![Main Screen](./public/screens/screen-1.png)
-_Main Screen_
-
-![Document Screen](./public/screens/screen-2.png)
-_Document Screen_
-
-![Document Footer](./public/screens/screen-3.png)
-_Document Footer_
-
-![Document Search](./public/screens/screen-4.png)
-_Document Search_
-
-![Main Dark Screen](./public/screens/screen-5.png)
-_Main Dark Mode Screen_
-
-![Document Dark Screen](./public/screens/screen-6.png)
-_Document Dark Mode Screen_
-
----
-
 ## Contributing
 
 Contributions welcome.
