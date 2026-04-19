@@ -1,3 +1,4 @@
+import { readFile } from "node:fs/promises"
 import mdx from "@mdx-js/rollup"
 import { cloudflare } from "@cloudflare/vite-plugin"
 import tailwindcss from "@tailwindcss/vite"
@@ -13,6 +14,36 @@ import remarkFrontmatter from "remark-frontmatter"
 import remarkGfm from "remark-gfm"
 import { defineConfig, type PluginOption } from "vite"
 import tsConfigPaths from "vite-tsconfig-paths"
+
+/**
+ * Pre-enforced Vite plugin: serves raw MDX source for `?raw` imports before
+ * the MDX rollup plugin hijacks the transform. Needed by the content layer
+ * (`src/lib/content/adapters/vite-adapter.ts`) which bundles raw MDX for the
+ * AI agent, llms.txt routes, and search — all of which need text, not the
+ * compiled React component.
+ */
+const MDX_RAW_PREFIX = "\0mdx-raw:"
+
+function mdxRawPlugin(): PluginOption {
+  return {
+    name: "doxa:mdx-raw",
+    enforce: "pre",
+    async resolveId(source, importer) {
+      if (!source.includes("?raw")) return null
+      const [filePath] = source.split("?")
+      if (!filePath.endsWith(".mdx")) return null
+      const resolved = await this.resolve(filePath, importer, { skipSelf: true })
+      if (!resolved) return null
+      return MDX_RAW_PREFIX + resolved.id
+    },
+    async load(id) {
+      if (!id.startsWith(MDX_RAW_PREFIX)) return null
+      const filePath = id.slice(MDX_RAW_PREFIX.length)
+      const source = await readFile(filePath, "utf-8")
+      return `export default ${JSON.stringify(source)}`
+    },
+  }
+}
 
 import {
   rehypePreCopy,
@@ -90,6 +121,7 @@ export default defineConfig(() => {
       tsConfigPaths({
         projects: ["./tsconfig.json"],
       }),
+      mdxRawPlugin(),
       mdx({
         remarkPlugins: [remarkFrontmatter, remarkStripFrontmatter, remarkGfm],
         rehypePlugins: [

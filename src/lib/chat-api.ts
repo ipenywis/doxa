@@ -46,7 +46,7 @@ export const chatWithDocsStream = createServerFn({ method: "POST" })
     }
 
     try {
-      const systemPrompt = buildAgentSystemPrompt()
+      const systemPrompt = await buildAgentSystemPrompt()
       const adapter = getAdapter(apiKey)
       const abortController = new AbortController()
 

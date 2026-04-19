@@ -1,13 +1,14 @@
 /**
- * cat — Read file contents.
+ * cat — Read a documentation file.
  *
- * Reads and returns the full contents of a file.
- * All paths are relative to the docs root directory.
+ * Returns raw MDX content via the ContentStore. Edge-compatible — no
+ * filesystem access. Output includes frontmatter and original component
+ * markup so the agent sees the same content as the source file.
  */
 
-import { readFile } from "fs/promises"
 import { toolDefinition } from "@tanstack/ai"
-import { resolveSandboxed } from "@/src/lib/agent/tools/sandbox"
+
+import { contentStore } from "@/src/lib/content/store"
 
 const MAX_OUTPUT_CHARS = 30_000
 
@@ -34,13 +35,10 @@ async function executeCat(args: { file: string }): Promise<string> {
     return "Error: missing file path"
   }
 
-  const resolved = resolveSandboxed(file)
-  if (!resolved) {
-    return `Error: path not allowed: ${file}`
-  }
-
   try {
-    const content = await readFile(resolved, "utf-8")
+    const content = await contentStore.readRaw(file)
+    if (content === null) return `Error: file not found: ${file}`
+
     if (content.length > MAX_OUTPUT_CHARS) {
       return (
         content.slice(0, MAX_OUTPUT_CHARS) +
@@ -48,11 +46,12 @@ async function executeCat(args: { file: string }): Promise<string> {
       )
     }
     return content
-  } catch {
-    return `Error: file not found: ${file}`
+  } catch (err) {
+    const message = err instanceof Error ? err.message : String(err)
+    return `Error: ${message}`
   }
 }
 
-export const catTool = catToolDefinition.server(
-  (args: unknown) => executeCat(args as { file: string })
+export const catTool = catToolDefinition.server((args: unknown) =>
+  executeCat(args as { file: string })
 )

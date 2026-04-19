@@ -163,19 +163,60 @@ All site settings live in `src/settings/main.ts`:
 
 ---
 
-## Optional: Install ripgrep for Faster Search
+## Content Sources
 
-The documentation agent's search tool uses [ripgrep](https://github.com/BurntSushi/ripgrep) when available, falling back to standard `grep`. For faster doc searches:
+Doxa ships a **unified content access layer** with pluggable adapters. The AI chat agent, route renderers, and AI-native endpoints (`/llms.txt`, `/llms-full.txt`) all read from a single `contentStore` — swap the underlying backend with one env var, no code changes.
 
-```bash
-# macOS
-brew install ripgrep
+Two adapters ship out of the box:
 
-# Ubuntu / Debian
-sudo apt-get install ripgrep
-```
+| | `vite` (default) | `github` |
+|---|---|---|
+| Where content lives | `src/contents/docs/` in this repo | Separate GitHub repo |
+| Update model | Redeploy to ship changes | Edits appear within cache TTL |
+| Latency | Zero (bundled at build time) | GitHub API + TTL cache |
+| External calls | None | GitHub REST API |
+| Best for | Site + docs shipped together | Content team edits in GitHub web UI; docs decoupled from site repo |
 
-See the [ripgrep installation guide](https://github.com/BurntSushi/ripgrep#installation) for other platforms.
+### Switching to GitHub mode
+
+1. Set `CONTENT_SOURCE=github` in your environment
+2. Set the required GitHub env vars:
+
+   ```bash
+   DOXA_GITHUB_OWNER=your-org
+   DOXA_GITHUB_REPO=your-docs-repo
+   DOXA_GITHUB_BRANCH=main                # optional, default "main"
+   DOXA_GITHUB_BASE_PATH=src/contents/docs # optional, default "src/contents/docs"
+   DOXA_GITHUB_TOKEN=ghp_xxx              # required for private repos
+   DOXA_GITHUB_CACHE_TTL=300              # optional, default 300 (seconds)
+   ```
+
+3. Redeploy. Content now streams from GitHub — doc edits appear on the site within `DOXA_GITHUB_CACHE_TTL` with no redeploy.
+
+**Creating a GitHub token:**
+- Public repos: no token needed (60 req/hr limit; set one anyway for 5,000/hr).
+- Private repos: create a fine-grained PAT at [github.com/settings/tokens?type=beta](https://github.com/settings/tokens?type=beta) with **Contents: Read-only** permission on the docs repo.
+
+### Adding a custom adapter (R2, KV, Supabase, Notion, ...)
+
+1. Implement the `ContentAdapter` interface from `src/lib/content/types.ts`.
+2. Add a case to the `resolveAdapter()` switch in `src/settings/content.ts`.
+3. Add any needed env vars to `.env.example`.
+
+All consumers keep working unchanged — they only see the stable `contentStore` API.
+
+---
+
+## AI-Native Routes
+
+Doxa exposes its documentation in the [llms.txt](https://llmstxt.org/) format so external AI tools (ChatGPT, Claude, Cursor, MCP clients) can discover and cite content directly:
+
+| Route | What |
+|---|---|
+| `/llms.txt` | Index of all pages with titles, URLs, descriptions |
+| `/llms-full.txt` | Full corpus concatenated — paste into an LLM for Q&A |
+
+Both are generated on-demand from `contentStore`, so they stay in sync regardless of adapter.
 
 ---
 

@@ -5,38 +5,21 @@
  * exist without needing an initial discovery step.
  */
 
-import { resolve } from "path"
-import { execFileSync } from "child_process"
+import { contentStore } from "@/src/lib/content/store"
 import { Settings } from "@/src/settings/main"
 import { aiConfig } from "@/src/settings/ai"
 
-/** Cache the file tree so we only scan once per server lifecycle. */
-let cachedFileTree: string | null = null
-
-function getDocsFileTree(): string {
-  if (cachedFileTree) return cachedFileTree
-
-  const docsRoot = resolve(process.cwd(), "src/contents/docs")
+async function getDocsFileTree(): Promise<string> {
   try {
-    const output = execFileSync("find", [docsRoot, "-type", "f", "-name", "*.mdx"], {
-      encoding: "utf-8",
-      timeout: 5000,
-    })
-    cachedFileTree = output
-      .trim()
-      .split("\n")
-      .map((p) => p.replace(docsRoot + "/", ""))
-      .sort()
-      .join("\n")
+    const paths = await contentStore.getAllPaths()
+    return paths.slice().sort().join("\n")
   } catch {
-    cachedFileTree = "(unable to list docs files)"
+    return "(unable to list docs files)"
   }
-
-  return cachedFileTree
 }
 
-export function buildAgentSystemPrompt(): string {
-  const fileTree = getDocsFileTree()
+export async function buildAgentSystemPrompt(): Promise<string> {
+  const fileTree = await getDocsFileTree()
 
   return `You are a documentation assistant for ${Settings.site.name}.
 Your job is to answer user questions accurately using ONLY the documentation content available to you.
@@ -71,5 +54,6 @@ You have two tools to read and search the documentation:
 - If the question is outside the scope of the documentation, say so and suggest checking the docs directly.
 - Be concise but thorough. Use markdown formatting.
 - You may need multiple tool calls to gather enough context — that's expected.
-- Read the frontmatter (between \`---\` markers at the top of files) to get page titles and metadata.`
+- Read the frontmatter (between \`---\` markers at the top of files) to get page titles and metadata.
+- MDX files contain JSX-like component markup (\`<Step>\`, \`<Note>\`, \`<Card>\`, etc.). Focus on the prose content inside these components, not the markup itself.`
 }
