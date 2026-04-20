@@ -10,9 +10,13 @@ import { Settings } from "@/src/settings/main"
 import { createFileRoute } from "@tanstack/react-router"
 import { z } from "zod"
 
-const mdxModules = import.meta.glob<{
-  default: ComponentType<{ components?: typeof components }>
-}>("/src/contents/docs/**/index.mdx", { eager: true })
+// `import: "default"` pulls only the compiled React component, skipping the
+// sibling `__rawSource` export injected by mdxSourceCapturePlugin. This keeps
+// the raw MDX strings out of the client bundle — they ship only in the SSR
+// bundle where `vite-adapter.ts` references them.
+const mdxModules = import.meta.glob<
+  ComponentType<{ components?: typeof components }>
+>("/src/contents/docs/**/index.mdx", { eager: true, import: "default" })
 
 export const Route = createFileRoute("/docs/$")({
   validateSearch: z.object({
@@ -67,9 +71,9 @@ export const Route = createFileRoute("/docs/$")({
 })
 
 function MdxContent({ slug }: { slug: string }) {
-  const mdxModule = mdxModules[`/src/contents/docs/${slug}/index.mdx`]
+  const MDXContent = mdxModules[`/src/contents/docs/${slug}/index.mdx`]
 
-  if (!mdxModule) {
+  if (!MDXContent) {
     return (
       <p className="text-red-500">
         Failed to render content. Please refresh the page.
@@ -77,7 +81,6 @@ function MdxContent({ slug }: { slug: string }) {
     )
   }
 
-  const MDXContent = mdxModule.default
   return <MDXContent components={components} />
 }
 

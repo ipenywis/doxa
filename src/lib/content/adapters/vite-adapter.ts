@@ -1,8 +1,12 @@
 /**
  * Vite Adapter
  * ────────────
- * Default content adapter. Bundles all raw MDX files into the server module at
- * build time using Vite's `import.meta.glob` with the `?raw` query.
+ * Default content adapter. Reads raw MDX source from the `__rawSource` named
+ * export injected by `mdxSourceCapturePlugin` (see `vite.config.ts`) at build
+ * time. Each `.mdx` file is bundled exactly once — the compiled React
+ * component (default export) and the raw source string (`__rawSource` export)
+ * ship from the same module. The route renderer consumes `default`; this
+ * adapter consumes `__rawSource`.
  *
  * This adapter is:
  *   - Sync (wrapped in Promise for interface uniformity)
@@ -17,12 +21,21 @@
 import type { ContentAdapter } from "@/src/lib/content/types"
 
 /**
- * Eager glob: all MDX content is bundled at build time as raw strings.
- * Keys are absolute Vite paths like "/src/contents/docs/basic-setup/installation/index.mdx".
+ * Shape of each compiled MDX module. `default` is the React component
+ * (consumed by `src/routes/docs/$.tsx`); `__rawSource` is the verbatim
+ * source text injected by `mdxSourceCapturePlugin`.
  */
-const rawModules = import.meta.glob<string>(
+type MdxModule = {
+  __rawSource: string
+}
+
+/**
+ * Eager glob of the compiled MDX modules. Keys are absolute Vite paths like
+ * "/src/contents/docs/basic-setup/installation/index.mdx".
+ */
+const mdxModules = import.meta.glob<MdxModule>(
   "/src/contents/docs/**/index.mdx",
-  { query: "?raw", import: "default", eager: true }
+  { eager: true }
 )
 
 const DOCS_ROOT_PREFIX = "/src/contents/docs/"
@@ -39,10 +52,16 @@ function toRelativePath(viteKey: string): string {
 }
 
 const fileMap = new Map<string, string>(
-  Object.entries(rawModules).map(([viteKey, content]) => [
-    toRelativePath(viteKey),
-    content,
-  ])
+  Object.entries(mdxModules).map(([viteKey, mod]) => {
+    const source = mod?.__rawSource
+    if (typeof source !== "string") {
+      throw new Error(
+        `[vite-adapter] Missing __rawSource on ${viteKey}. ` +
+          `mdxSourceCapturePlugin is not wired correctly in vite.config.ts.`
+      )
+    }
+    return [toRelativePath(viteKey), source]
+  })
 )
 
 const filePaths = Array.from(fileMap.keys()).sort()
@@ -71,7 +90,7 @@ if (import.meta.env.VITE_DEBUG_CONTENT === "true") {
     n >= 1024 * 1024
       ? `${(n / 1024 / 1024).toFixed(2)} MB`
       : `${(n / 1024).toFixed(2)} KB`
-  console.log("[vite-adapter] rawModules memory footprint:", {
+  console.log("[vite-adapter] mdxModules memory footprint:", {
     files: fileMap.size,
     utf8Bytes: fmt(totalUtf8Bytes),
     approxHeapBytes: fmt(approxHeapBytes),

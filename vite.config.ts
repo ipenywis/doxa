@@ -16,31 +16,45 @@ import { defineConfig, type PluginOption } from "vite"
 import tsConfigPaths from "vite-tsconfig-paths"
 
 /**
- * Pre-enforced Vite plugin: serves raw MDX source for `?raw` imports before
- * the MDX rollup plugin hijacks the transform. Needed by the content layer
- * (`src/lib/content/adapters/vite-adapter.ts`) which bundles raw MDX for the
- * AI agent, llms.txt routes, and search — all of which need text, not the
- * compiled React component.
+ * mdxSourceCapturePlugin
+ * ──────────────────────
+ * Runs AFTER `@mdx-js/rollup`'s transform. For every MDX file under
+ * `src/contents/docs/`, it re-reads the original source from disk and
+ * appends a `__rawSource` named export to the compiled module:
+ *
+ *     export const __rawSource = "<verbatim .mdx file contents>";
+ *
+ * Why: the content layer (`src/lib/content/adapters/vite-adapter.ts`, used
+ * by the AI chat agent, /llms.txt, /llms-full.txt, and BM25 search) needs
+ * the raw MDX text — not the compiled React component. Injecting it as a
+ * sibling export on the SAME module means we bundle each `.mdx` exactly
+ * once. The route renderer (`src/routes/docs/$.tsx`) reads `default` for
+ * the component; the adapter reads `__rawSource` for the text.
+ *
+ * Tree-shaking: the client bundle never references `__rawSource`, so Vite
+ * drops it from client chunks automatically. Only the SSR bundle carries
+ * the raw strings.
+ *
+ * Collision note: the dunder prefix signals "framework-injected, don't
+ * author". An MDX file writing its own `export const __rawSource` would
+ * collide; no current docs do, and the naming convention makes the risk
+ * explicit.
  */
-const MDX_RAW_PREFIX = "\0mdx-raw:"
+const DOCS_SOURCE_ROOT = "/src/contents/docs/"
 
-function mdxRawPlugin(): PluginOption {
+function mdxSourceCapturePlugin(): PluginOption {
   return {
-    name: "doxa:mdx-raw",
-    enforce: "pre",
-    async resolveId(source, importer) {
-      if (!source.includes("?raw")) return null
-      const [filePath] = source.split("?")
+    name: "doxa:mdx-source-capture",
+    enforce: "post",
+    async transform(code, id) {
+      const [filePath] = id.split("?")
       if (!filePath.endsWith(".mdx")) return null
-      const resolved = await this.resolve(filePath, importer, { skipSelf: true })
-      if (!resolved) return null
-      return MDX_RAW_PREFIX + resolved.id
-    },
-    async load(id) {
-      if (!id.startsWith(MDX_RAW_PREFIX)) return null
-      const filePath = id.slice(MDX_RAW_PREFIX.length)
+      if (!filePath.includes(DOCS_SOURCE_ROOT)) return null
       const source = await readFile(filePath, "utf-8")
-      return `export default ${JSON.stringify(source)}`
+      return {
+        code: `${code}\nexport const __rawSource = ${JSON.stringify(source)};\n`,
+        map: null,
+      }
     },
   }
 }
@@ -121,7 +135,6 @@ export default defineConfig(() => {
       tsConfigPaths({
         projects: ["./tsconfig.json"],
       }),
-      mdxRawPlugin(),
       mdx({
         remarkPlugins: [remarkFrontmatter, remarkStripFrontmatter, remarkGfm],
         rehypePlugins: [
@@ -133,6 +146,7 @@ export default defineConfig(() => {
           rehypeAutolinkHeadings,
         ],
       }),
+      mdxSourceCapturePlugin(),
       tailwindcss(),
       tanstackStart(startConfig),
       viteReact(),
