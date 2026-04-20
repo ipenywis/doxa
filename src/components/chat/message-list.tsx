@@ -2,9 +2,17 @@ import { useCallback, useEffect, useRef } from "react"
 import Markdown, { type Components } from "react-markdown"
 import remarkGfm from "remark-gfm"
 import rehypePrism from "rehype-prism-plus"
-import type { ChatMessage } from "@/src/components/chat"
+import type {
+  ChatMessage,
+  MessagePart,
+  ToolPart,
+} from "@/src/components/chat"
+import { AgentActivityFooter } from "@/src/components/chat/agent-activity"
 import { useChatContext } from "@/src/components/chat/chat-context"
-import { ToolCallList, type ToolCallStep } from "@/src/components/chat/tool-call-display"
+import {
+  ToolCallDisplay,
+  type ToolCallStep,
+} from "@/src/components/chat/tool-call-display"
 
 /**
  * Close any unclosed code fences so react-markdown renders partial
@@ -23,8 +31,6 @@ interface MessageListProps {
   isLoading: boolean
   isStreaming: boolean
   scrollToMsgId: string | null
-  /** Live tool call steps for the current streaming response. */
-  activeToolSteps?: ToolCallStep[]
 }
 
 function DocLink({
@@ -105,12 +111,84 @@ const markdownComponents: Components = {
   ),
 }
 
+interface TextBubbleProps {
+  content: string
+  isStreaming: boolean
+}
+
+function TextBubble({ content, isStreaming }: TextBubbleProps) {
+  return (
+    <div className="flex justify-start">
+      <div className="max-w-[85%] rounded-2xl rounded-bl-sm bg-muted px-4 py-2.5 text-sm">
+        <div className="chat-prose prose prose-sm dark:prose-invert prose-headings:text-foreground prose-headings:text-sm prose-headings:font-semibold prose-p:text-foreground/90 prose-p:leading-relaxed prose-p:my-1.5 prose-a:text-primary prose-strong:text-foreground prose-strong:font-semibold prose-em:text-foreground/80 prose-blockquote:border-primary/40 prose-blockquote:text-foreground/70 prose-code:text-primary prose-pre:bg-transparent prose-pre:p-0 prose-li:text-foreground/90 prose-li:my-0.5 prose-ul:my-1.5 prose-ol:my-1.5 prose-th:text-foreground prose-td:text-foreground/80 prose-hr:my-2 max-w-none">
+          <Markdown
+            remarkPlugins={[remarkGfm]}
+            rehypePlugins={[[rehypePrism, { ignoreMissing: true }]]}
+            components={markdownComponents}
+          >
+            {isStreaming ? sanitizeStreamingMarkdown(content) : content}
+          </Markdown>
+          {isStreaming && <StreamingCursor />}
+        </div>
+      </div>
+    </div>
+  )
+}
+
+function parseToolDisplayArg(step: ToolCallStep): string {
+  const raw = step.args
+  if (!raw) return ""
+  try {
+    const parsed = JSON.parse(raw) as Record<string, unknown>
+    const file = typeof parsed.file === "string" ? parsed.file : null
+    const pattern = typeof parsed.pattern === "string" ? parsed.pattern : null
+    const command = typeof parsed.command === "string" ? parsed.command : null
+    return file ?? pattern ?? command ?? raw
+  } catch {
+    return raw
+  }
+}
+
+function truncate(text: string, max = 48): string {
+  if (text.length <= max) return text
+  return text.slice(0, max - 1) + "…"
+}
+
+function describeActiveTool(step: ToolCallStep): string {
+  const verb =
+    step.name === "cat"
+      ? "Reading"
+      : step.name === "grep"
+        ? "Searching"
+        : `Running ${step.name}`
+  const arg = parseToolDisplayArg(step)
+  if (!arg) return `${verb}…`
+  return `${verb} ${truncate(arg)}`
+}
+
+function computeAgentStatus(parts: MessagePart[] | undefined): string | null {
+  if (!parts) return "Thinking…"
+
+  const activeTool = parts.find(
+    (p): p is ToolPart =>
+      p.type === "tool" &&
+      (p.step.status === "calling" || p.step.status === "executing")
+  )
+  if (activeTool) return describeActiveTool(activeTool.step)
+
+  const last = parts[parts.length - 1]
+  if (last && last.type === "text" && last.content.length > 0) {
+    // Text is actively streaming — StreamingCursor covers the visual.
+    return null
+  }
+  return "Thinking…"
+}
+
 export function MessageList({
   messages,
   isLoading,
   isStreaming,
   scrollToMsgId,
-  activeToolSteps = [],
 }: MessageListProps) {
   const { isOpen } = useChatContext()
   const scrollRef = useRef<HTMLDivElement>(null)
@@ -141,12 +219,9 @@ export function MessageList({
     if (!el) return
     const distanceFromBottom = getDistanceFromBottom(el)
     streamFollowModeRef.current =
-      distanceFromBottom <= STREAM_FOLLOW_THRESHOLD_PX
-        ? "follow"
-        : "manual"
+      distanceFromBottom <= STREAM_FOLLOW_THRESHOLD_PX ? "follow" : "manual"
   }, [getDistanceFromBottom, STREAM_FOLLOW_THRESHOLD_PX])
 
-  // A newly-sent message should always start in follow mode.
   useEffect(() => {
     if (!scrollToMsgId || scrollToMsgId === processedScrollId.current) return
 
@@ -158,7 +233,6 @@ export function MessageList({
     })
   }, [scrollToBottomImmediately, scrollToMsgId])
 
-  // While streaming, stay pinned to the latest content until the user scrolls away.
   useEffect(() => {
     if (!isStreaming && !isLoading) return
     if (streamFollowModeRef.current !== "follow") return
@@ -168,15 +242,8 @@ export function MessageList({
         scrollToBottomImmediately()
       }
     })
-  }, [
-    activeToolSteps,
-    isLoading,
-    isStreaming,
-    messages,
-    scrollToBottomImmediately,
-  ])
+  }, [isLoading, isStreaming, messages, scrollToBottomImmediately])
 
-  // Jump straight to the latest message whenever the drawer opens.
   useEffect(() => {
     if (!isOpen || messages.length === 0) return
 
@@ -214,10 +281,6 @@ export function MessageList({
   const streamingMsgId =
     isStreaming && lastMsg?.role === "assistant" ? lastMsg.id : null
 
-  // Show active tool steps when streaming and no text content yet
-  const showActiveToolSteps =
-    isStreaming && activeToolSteps.length > 0
-
   return (
     <div
       ref={scrollRef}
@@ -242,47 +305,37 @@ export function MessageList({
 
           if (msg.role === "assistant") {
             const isCurrentlyStreaming = msg.id === streamingMsgId
+            // Legacy support: messages persisted before parts-refactor.
+            const parts: MessagePart[] | undefined =
+              msg.parts && msg.parts.length > 0
+                ? msg.parts
+                : msg.content
+                  ? [{ type: "text", id: `legacy-${msg.id}`, content: msg.content }]
+                  : undefined
 
-            // Show persisted tool steps for completed messages
-            const persistedSteps = msg.toolSteps && msg.toolSteps.length > 0
+            const lastIdx = parts ? parts.length - 1 : -1
+            const agentStatus = isCurrentlyStreaming
+              ? computeAgentStatus(parts)
+              : null
 
             return (
               <div key={msg.id} className="flex flex-col gap-1">
-                {/* Persisted tool steps (from history or after streaming completes) */}
-                {persistedSteps && !isCurrentlyStreaming && (
-                  <ToolCallList steps={msg.toolSteps!} />
-                )}
+                {parts?.map((part, idx) => {
+                  if (part.type === "tool") {
+                    return <ToolCallDisplay key={part.id} step={part.step} />
+                  }
+                  const isLastPart = idx === lastIdx
+                  return (
+                    <TextBubble
+                      key={part.id}
+                      content={part.content}
+                      isStreaming={isCurrentlyStreaming && isLastPart}
+                    />
+                  )
+                })}
 
-                {/* Active tool steps during streaming */}
-                {isCurrentlyStreaming && showActiveToolSteps && (
-                  <ToolCallList steps={activeToolSteps} />
-                )}
-
-                {/* Loading dots while waiting for first content */}
-                {isCurrentlyStreaming && !msg.content && activeToolSteps.length === 0 && (
-                  <div className="flex justify-start">
-                    <LoadingDots />
-                  </div>
-                )}
-
-                {/* Message content */}
-                {msg.content && (
-                  <div className="flex justify-start">
-                    <div className="max-w-[85%] rounded-2xl rounded-bl-sm bg-muted px-4 py-2.5 text-sm">
-                      <div className="chat-prose prose prose-sm dark:prose-invert prose-headings:text-foreground prose-headings:text-sm prose-headings:font-semibold prose-p:text-foreground/90 prose-p:leading-relaxed prose-p:my-1.5 prose-a:text-primary prose-strong:text-foreground prose-strong:font-semibold prose-em:text-foreground/80 prose-blockquote:border-primary/40 prose-blockquote:text-foreground/70 prose-code:text-primary prose-pre:bg-transparent prose-pre:p-0 prose-li:text-foreground/90 prose-li:my-0.5 prose-ul:my-1.5 prose-ol:my-1.5 prose-th:text-foreground prose-td:text-foreground/80 prose-hr:my-2 max-w-none">
-                        <Markdown
-                          remarkPlugins={[remarkGfm]}
-                          rehypePlugins={[[rehypePrism, { ignoreMissing: true }]]}
-                          components={markdownComponents}
-                        >
-                          {isCurrentlyStreaming
-                            ? sanitizeStreamingMarkdown(msg.content)
-                            : msg.content}
-                        </Markdown>
-                        {isCurrentlyStreaming && <StreamingCursor />}
-                      </div>
-                    </div>
-                  </div>
+                {agentStatus && (
+                  <AgentActivityFooter status={agentStatus} />
                 )}
               </div>
             )
@@ -297,7 +350,7 @@ export function MessageList({
         )}
         {/* Bottom padding — breathing room below the last message */}
         <div className="pointer-events-none shrink-0 select-none min-h-[20vh] sm:min-h-[15vh]" aria-hidden="true" />
-        {/* Scroll anchor — auto-scroll targets here, after the padding */}
+        {/* Scroll anchor */}
         <div ref={contentEndRef} aria-hidden="true" />
       </div>
     </div>

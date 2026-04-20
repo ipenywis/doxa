@@ -1,5 +1,6 @@
 import { useCallback, useState } from "react"
 import { LuChevronDown, LuChevronRight, LuTerminal } from "react-icons/lu"
+import { BrailleSpinner } from "@/src/components/chat/agent-activity"
 
 export interface ToolCallStep {
   id: string
@@ -52,10 +53,7 @@ export function ToolCallDisplay({ step }: ToolCallDisplayProps) {
       >
         {/* Status indicator */}
         {isActive && (
-          <span className="relative flex size-2 shrink-0">
-            <span className="absolute inline-flex size-full animate-ping rounded-full bg-primary/60" />
-            <span className="relative inline-flex size-2 rounded-full bg-primary" />
-          </span>
+          <BrailleSpinner className="size-3.5 shrink-0 text-primary" />
         )}
         {isDone && (
           <span className="flex size-4 shrink-0 items-center justify-center rounded-full bg-emerald-500/15 text-emerald-600 dark:text-emerald-400">

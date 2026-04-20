@@ -50,9 +50,10 @@ export function useConversationHistory() {
       setConversations((prev) => {
         const existing = prev.find((c) => c.id === id)
         const firstUserMsg = messages.find((m) => m.role === "user")
-        const title = firstUserMsg
-          ? firstUserMsg.content.slice(0, 50) +
-            (firstUserMsg.content.length > 50 ? "..." : "")
+        const firstUserText = firstUserMsg?.content ?? ""
+        const title = firstUserText
+          ? firstUserText.slice(0, 50) +
+            (firstUserText.length > 50 ? "..." : "")
           : "New conversation"
 
         let updated: Conversation[]

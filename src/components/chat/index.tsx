@@ -7,15 +7,56 @@ import type { ToolCallStep } from "@/src/components/chat/tool-call-display"
 import { useConversationHistory } from "@/src/components/chat/use-conversation-history"
 import { chatWithDocsStream } from "@/src/lib/chat-api"
 
+export interface TextPart { type: "text"; id: string; content: string }
+export interface ToolPart { type: "tool"; id: string; step: ToolCallStep }
+export type MessagePart = TextPart | ToolPart
+
 export interface ChatMessage {
   id: string
   role: "user" | "assistant"
-  content: string
-  /** Tool call steps that occurred before this assistant message. */
+  /** User messages: raw text. Assistant messages: legacy — prefer `parts`. */
+  content?: string
+  /** Assistant only: ordered text + tool timeline. */
+  parts?: MessagePart[]
+  /** @deprecated replaced by `parts`. Kept for loading legacy conversations. */
   toolSteps?: ToolCallStep[]
 }
 
 let msgCounter = 0
+let partCounter = 0
+const genPartId = () => `part-${++partCounter}`
+
+function migrateMessage(msg: ChatMessage): ChatMessage {
+  if (msg.role !== "assistant") return msg
+  if (msg.parts && msg.parts.length > 0) return msg
+
+  const parts: MessagePart[] = []
+  if (msg.toolSteps && msg.toolSteps.length > 0) {
+    for (const step of msg.toolSteps) {
+      parts.push({ type: "tool", id: step.id, step })
+    }
+  }
+  if (msg.content && msg.content.length > 0) {
+    parts.push({ type: "text", id: genPartId(), content: msg.content })
+  }
+
+  return { id: msg.id, role: msg.role, parts }
+}
+
+function migrateMessages(messages: ChatMessage[]): ChatMessage[] {
+  return messages.map(migrateMessage)
+}
+
+function messageToApiContent(m: ChatMessage): string {
+  if (m.role === "user") return m.content ?? ""
+  if (m.parts && m.parts.length > 0) {
+    return m.parts
+      .filter((p): p is TextPart => p.type === "text")
+      .map((p) => p.content)
+      .join("\n\n")
+  }
+  return m.content ?? ""
+}
 
 export function ChatWithDocs() {
   const [messages, setMessages] = useState<ChatMessage[]>([])
@@ -24,43 +65,38 @@ export function ChatWithDocs() {
   const [error, setError] = useState<string | null>(null)
   const [showHistory, setShowHistory] = useState(false)
   const [scrollToMsgId, setScrollToMsgId] = useState<string | null>(null)
-  /** Live tool call steps for the current streaming response. */
-  const [activeToolSteps, setActiveToolSteps] = useState<ToolCallStep[]>([])
   const abortRef = useRef<AbortController | null>(null)
   const conversationIdRef = useRef<string | null>(null)
   const bufferRef = useRef("")
   const drainRef = useRef<ReturnType<typeof setInterval> | null>(null)
-  /** Accumulates tool steps during streaming. */
-  const toolStepsRef = useRef<Map<string, ToolCallStep>>(new Map())
-  /** Tracks accumulated tool args per toolCallId */
-  const toolArgsRef = useRef<Map<string, string>>(new Map())
+  /** Ordered parts for the currently streaming assistant message. */
+  const partsRef = useRef<MessagePart[]>([])
+  /** Direct lookup of tool parts by toolCallId. */
+  const toolPartByIdRef = useRef<Map<string, ToolPart>>(new Map())
+  /** ID of the assistant message currently being streamed into. */
+  const streamingMsgIdRef = useRef<string | null>(null)
 
   const history = useConversationHistory()
 
-  // Initialize the active conversation after history has loaded.
   useEffect(() => {
-    if (!history.hasLoaded || conversationIdRef.current) {
-      return
-    }
+    if (!history.hasLoaded || conversationIdRef.current) return
 
     const latestConversation = history.conversations[0]
     if (latestConversation) {
       conversationIdRef.current = latestConversation.id
-      setMessages(latestConversation.messages)
+      setMessages(migrateMessages(latestConversation.messages))
       return
     }
 
     conversationIdRef.current = history.generateId()
   }, [history.conversations, history.generateId, history.hasLoaded])
 
-  // Persist messages to history when they change
   useEffect(() => {
     if (conversationIdRef.current && messages.length > 0 && !isStreaming) {
       history.saveConversation(conversationIdRef.current, messages)
     }
   }, [messages, isStreaming, history.saveConversation])
 
-  // Clear scrollToMsgId after MessageList processes it
   useEffect(() => {
     if (scrollToMsgId) {
       const timer = setTimeout(() => setScrollToMsgId(null), 200)
@@ -68,12 +104,44 @@ export function ChatWithDocs() {
     }
   }, [scrollToMsgId])
 
-  // Cleanup drain interval on unmount
   useEffect(() => {
     return () => {
       if (drainRef.current) clearInterval(drainRef.current)
     }
   }, [])
+
+  /** Snapshot parts-ref into state for the streaming assistant message. */
+  const syncPartsToMessage = useCallback(() => {
+    const assistantMsgId = streamingMsgIdRef.current
+    if (!assistantMsgId) return
+    const snapshot: MessagePart[] = partsRef.current.map((p) =>
+      p.type === "text"
+        ? { ...p }
+        : { type: "tool", id: p.id, step: { ...p.step } }
+    )
+    setMessages((prev) =>
+      prev.map((m) =>
+        m.id === assistantMsgId ? { ...m, parts: snapshot } : m
+      )
+    )
+  }, [])
+
+  /** Get the trailing text part, creating one if absent or if the last part is a tool. */
+  const ensureTrailingTextPart = useCallback((): TextPart => {
+    const last = partsRef.current[partsRef.current.length - 1]
+    if (last && last.type === "text") return last
+    const created: TextPart = { type: "text", id: genPartId(), content: "" }
+    partsRef.current.push(created)
+    return created
+  }, [])
+
+  /** Flush buffered text immediately into the trailing text part (synchronous). */
+  const flushBufferNow = useCallback(() => {
+    if (bufferRef.current.length === 0) return
+    const part = ensureTrailingTextPart()
+    part.content += bufferRef.current
+    bufferRef.current = ""
+  }, [ensureTrailingTextPart])
 
   const handleSend = useCallback(
     async (text: string) => {
@@ -87,7 +155,7 @@ export function ChatWithDocs() {
       const assistantMsg: ChatMessage = {
         id: assistantMsgId,
         role: "assistant",
-        content: "",
+        parts: [],
       }
 
       setMessages((prev) => [...prev, userMsg, assistantMsg])
@@ -95,17 +163,15 @@ export function ChatWithDocs() {
       setIsStreaming(true)
       setError(null)
       setScrollToMsgId(userMsg.id)
-      setActiveToolSteps([])
-      toolStepsRef.current = new Map()
-      toolArgsRef.current = new Map()
+      partsRef.current = []
+      toolPartByIdRef.current = new Map()
+      streamingMsgIdRef.current = assistantMsgId
 
-      // Reset buffer & start smooth drain
       bufferRef.current = ""
       if (drainRef.current) clearInterval(drainRef.current)
       drainRef.current = setInterval(() => {
         if (bufferRef.current.length === 0) return
         const len = bufferRef.current.length
-        // Drain larger chunks less frequently for smoother rendering
         const chunkSize =
           len > 120
             ? Math.ceil(len / 2)
@@ -114,13 +180,10 @@ export function ChatWithDocs() {
               : Math.min(8, len)
         const chunk = bufferRef.current.slice(0, chunkSize)
         bufferRef.current = bufferRef.current.slice(chunkSize)
-        setMessages((prev) =>
-          prev.map((m) =>
-            m.id === assistantMsgId
-              ? { ...m, content: m.content + chunk }
-              : m
-          )
-        )
+
+        const part = ensureTrailingTextPart()
+        part.content += chunk
+        syncPartsToMessage()
       }, 40)
 
       const controller = new AbortController()
@@ -129,7 +192,7 @@ export function ChatWithDocs() {
       try {
         const allMessages = [...messages, userMsg].map((m) => ({
           role: m.role,
-          content: m.content,
+          content: messageToApiContent(m),
         }))
 
         const response = (await chatWithDocsStream({
@@ -180,7 +243,6 @@ export function ChatWithDocs() {
           }
         }
 
-        // Wait for buffer to drain before finishing
         await new Promise<void>((resolve) => {
           const check = () => {
             if (bufferRef.current.length === 0) {
@@ -191,18 +253,6 @@ export function ChatWithDocs() {
           }
           check()
         })
-
-        // Attach accumulated tool steps to the final assistant message
-        const finalSteps = Array.from(toolStepsRef.current.values())
-        if (finalSteps.length > 0) {
-          setMessages((prev) =>
-            prev.map((m) =>
-              m.id === assistantMsgId
-                ? { ...m, toolSteps: finalSteps }
-                : m
-            )
-          )
-        }
       } catch (err: unknown) {
         const isAbort =
           err instanceof Error && err.name === "AbortError"
@@ -216,7 +266,11 @@ export function ChatWithDocs() {
         setError(message)
         setMessages((prev) =>
           prev.filter(
-            (m) => !(m.id === assistantMsgId && m.content === "")
+            (m) =>
+              !(
+                m.id === assistantMsgId &&
+                (!m.parts || m.parts.length === 0)
+              )
           )
         )
       } finally {
@@ -225,23 +279,16 @@ export function ChatWithDocs() {
           drainRef.current = null
         }
         if (bufferRef.current.length > 0) {
-          const remaining = bufferRef.current
-          bufferRef.current = ""
-          setMessages((prev) =>
-            prev.map((m) =>
-              m.id === assistantMsgId
-                ? { ...m, content: m.content + remaining }
-                : m
-            )
-          )
+          flushBufferNow()
+          syncPartsToMessage()
         }
         setIsLoading(false)
         setIsStreaming(false)
-        setActiveToolSteps([])
+        streamingMsgIdRef.current = null
         abortRef.current = null
       }
     },
-    [messages]
+    [ensureTrailingTextPart, flushBufferNow, messages, syncPartsToMessage]
   )
 
   /**
@@ -262,15 +309,19 @@ export function ChatWithDocs() {
         const name = parsed.toolName as string
         if (!id || !name) break
 
+        // Pending text must land before the tool row.
+        flushBufferNow()
+
         const step: ToolCallStep = {
           id,
           name,
           args: "",
           status: "calling",
         }
-        toolStepsRef.current.set(id, step)
-        toolArgsRef.current.set(id, "")
-        syncToolStepsToState()
+        const toolPart: ToolPart = { type: "tool", id, step }
+        partsRef.current.push(toolPart)
+        toolPartByIdRef.current.set(id, toolPart)
+        syncPartsToMessage()
         break
       }
 
@@ -279,14 +330,11 @@ export function ChatWithDocs() {
         const delta = parsed.delta as string
         if (!id || typeof delta !== "string") break
 
-        const accumulated = (toolArgsRef.current.get(id) || "") + delta
-        toolArgsRef.current.set(id, accumulated)
-
-        const step = toolStepsRef.current.get(id)
-        if (step) {
-          step.args = accumulated
-          step.status = "executing"
-          syncToolStepsToState()
+        const toolPart = toolPartByIdRef.current.get(id)
+        if (toolPart) {
+          toolPart.step.args += delta
+          toolPart.step.status = "executing"
+          syncPartsToMessage()
         }
         break
       }
@@ -295,55 +343,52 @@ export function ChatWithDocs() {
         const id = parsed.toolCallId as string
         if (!id) break
 
-        const step = toolStepsRef.current.get(id)
-        if (step) {
+        const toolPart = toolPartByIdRef.current.get(id)
+        if (toolPart) {
           const result = parsed.result
-          step.result = typeof result === "string" ? result : JSON.stringify(result)
-          step.status = step.result?.startsWith("Error") ? "error" : "completed"
-          syncToolStepsToState()
+          toolPart.step.result =
+            typeof result === "string" ? result : JSON.stringify(result)
+          toolPart.step.status = toolPart.step.result?.startsWith("Error")
+            ? "error"
+            : "completed"
+          syncPartsToMessage()
         }
         break
       }
     }
   }
 
-  /** Sync the mutable tool steps ref to React state for rendering. */
-  function syncToolStepsToState() {
-    setActiveToolSteps(Array.from(toolStepsRef.current.values()).map((s) => ({ ...s })))
-  }
-
-  const handleNewConversation = useCallback(() => {
+  const resetStreamingRefs = useCallback(() => {
     if (abortRef.current) abortRef.current.abort()
     if (drainRef.current) clearInterval(drainRef.current)
     bufferRef.current = ""
-    toolStepsRef.current = new Map()
-    toolArgsRef.current = new Map()
+    partsRef.current = []
+    toolPartByIdRef.current = new Map()
+    streamingMsgIdRef.current = null
+  }, [])
+
+  const handleNewConversation = useCallback(() => {
+    resetStreamingRefs()
     conversationIdRef.current = history.generateId()
     setMessages([])
     setError(null)
     setIsLoading(false)
     setIsStreaming(false)
-    setActiveToolSteps([])
-  }, [history.generateId])
+  }, [history.generateId, resetStreamingRefs])
 
   const handleLoadConversation = useCallback(
     (id: string) => {
-      if (abortRef.current) abortRef.current.abort()
-      if (drainRef.current) clearInterval(drainRef.current)
-      bufferRef.current = ""
-      toolStepsRef.current = new Map()
-      toolArgsRef.current = new Map()
+      resetStreamingRefs()
       const loaded = history.loadConversation(id)
       if (loaded) {
         conversationIdRef.current = id
-        setMessages(loaded)
+        setMessages(migrateMessages(loaded))
         setError(null)
         setIsLoading(false)
         setIsStreaming(false)
-        setActiveToolSteps([])
       }
     },
-    [history.loadConversation]
+    [history.loadConversation, resetStreamingRefs]
   )
 
   const handleDeleteConversation = useCallback(
@@ -379,7 +424,6 @@ export function ChatWithDocs() {
         isLoading={isLoading}
         isStreaming={isStreaming}
         scrollToMsgId={scrollToMsgId}
-        activeToolSteps={activeToolSteps}
       />
       {error && (
         <div className="px-4 pb-2">
