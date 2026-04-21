@@ -13,6 +13,7 @@ import {
   ToolCallDisplay,
   type ToolCallStep,
 } from "@/src/components/chat/tool-call-display"
+import { Link } from "@/src/lib/transition"
 
 /**
  * Close any unclosed code fences so react-markdown renders partial
@@ -38,15 +39,16 @@ function DocLink({
   children,
   ...props
 }: React.AnchorHTMLAttributes<HTMLAnchorElement>) {
-  if (href?.startsWith("/docs")) {
+  const isInternal = href?.startsWith("/")
+  if (isInternal && href) {
     return (
-      <a
+      <Link
         href={href}
         className="text-primary underline underline-offset-2 hover:text-primary/80"
         {...props}
       >
         {children}
-      </a>
+      </Link>
     )
   }
   return (
