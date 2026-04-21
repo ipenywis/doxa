@@ -28,6 +28,7 @@ interface AppSettings {
     tableOfContents: boolean
     scrollToTop: boolean
     chatWithDocs: boolean
+    chatWithDocsFloatingBar: boolean
     loadFromGithub: boolean
   }
   openGraph: OpenGraph
@@ -68,6 +69,7 @@ export const Settings: AppSettings = {
     tableOfContents: true,
     scrollToTop: true,
     chatWithDocs: true,
+    chatWithDocsFloatingBar: true,
     loadFromGithub: false,
   },
   openGraph: {

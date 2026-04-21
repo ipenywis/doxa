@@ -9,8 +9,8 @@ import {
 import { useLocation } from "@tanstack/react-router"
 import { useChatContext } from "@/src/components/chat/chat-context"
 
-const PANEL_WIDTH = 400
-const PANEL_WIDTH_EXPANDED = 533
+const PANEL_WIDTH = "clamp(400px, 30vw, 720px)"
+const PANEL_WIDTH_EXPANDED = "clamp(533px, 45vw, 1040px)"
 
 interface ChatDrawerProps {
   onHistoryClick: () => void
@@ -50,9 +50,9 @@ export function ChatDrawer({
     <aside
       role="dialog"
       aria-label="Chat with Docs"
-      className="sticky top-0 h-screen shrink-0 overflow-hidden border-l border-transparent bg-background transition-[width,border-color] duration-75 ease-out"
+      className="sticky top-0 h-screen shrink-0 overflow-hidden border-l border-transparent bg-background transition-[width,border-color] duration-300 ease-[cubic-bezier(0.22,1,0.36,1)]"
       style={{
-        width: isOpen ? panelWidth : 0,
+        width: isOpen ? panelWidth : "0px",
         borderColor: isOpen ? "var(--border)" : "transparent",
         maxWidth: "calc(100vw - 320px)",
       }}

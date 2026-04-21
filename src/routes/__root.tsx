@@ -1,25 +1,24 @@
 /// <reference types="vite/client" />
 import type { ReactNode } from "react"
+import { ChatWithDocs } from "@/src/components/chat"
+import { ChatProvider } from "@/src/components/chat/chat-context"
+import { DemoChatWithDocs } from "@/src/components/chat/demo-chat"
+import { FloatingChatBar } from "@/src/components/chat/floating-chat-bar"
 import { Footer } from "@/src/components/navigation/footer"
 import { Navbar } from "@/src/components/navigation/navbar"
-import { ChatWithDocs } from "@/src/components/chat"
-import { DemoChatWithDocs } from "@/src/components/chat/demo-chat"
-import { ChatProvider } from "@/src/components/chat/chat-context"
+import themeSettings from "@/src/contents/settings/theme.json"
+import { DemoModeProvider } from "@/src/contexts/demo-mode"
+import { getColorPreset } from "@/src/lib/colors"
+import { generateThemeCss, getTheme } from "@/src/lib/themes"
 import { Providers } from "@/src/providers"
+import { Settings } from "@/src/settings/main"
+import globalsCss from "@/src/styles/globals.css?url"
 import {
   createRootRoute,
   HeadContent,
   Outlet,
   Scripts,
 } from "@tanstack/react-router"
-
-import { DemoModeProvider } from "@/src/contexts/demo-mode"
-import { Settings } from "@/src/settings/main"
-import { getColorPreset } from "@/src/lib/colors"
-import { getTheme, generateThemeCss } from "@/src/lib/themes"
-import themeSettings from "@/src/contents/settings/theme.json"
-
-import globalsCss from "@/src/styles/globals.css?url"
 
 const theme = getTheme(themeSettings.activeTheme)
 const themeCss = generateThemeCss(theme)
@@ -156,21 +155,39 @@ function RootDocument({
   children,
   isDemoMode = false,
 }: Readonly<{ children: ReactNode; isDemoMode?: boolean }>) {
+  const appScrollStyle = {
+    minWidth: 0,
+    flex: "1 1 0%",
+    overflowY: isDemoMode ? "hidden" : "auto",
+    scrollbarGutter: isDemoMode ? undefined : "stable",
+  } as const
+
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html
+      lang="en"
+      suppressHydrationWarning
+      style={{ height: "100%", overflow: "hidden" }}
+    >
       <head>
         <HeadContent />
         <style dangerouslySetInnerHTML={{ __html: themeCss }} />
         <style dangerouslySetInnerHTML={{ __html: colorCss }} />
       </head>
-      <body className="font-regular">
+      <body
+        className="font-regular"
+        style={{ height: "100%", margin: 0, overflow: "hidden" }}
+      >
         <Providers>
           <DemoModeProvider value={isDemoMode}>
             <ChatProvider>
-              <div className="flex h-screen">
+              <div
+                className="flex h-screen"
+                style={{ display: "flex", height: "100vh" }}
+              >
                 <div
                   id="app-scroll-container"
                   className={`min-w-0 flex-1 ${isDemoMode ? "overflow-y-hidden [scrollbar-width:none] [&::-webkit-scrollbar]:hidden" : "overflow-y-auto"}`}
+                  style={appScrollStyle}
                 >
                   <Navbar />
                   <main className="mx-auto h-auto max-w-[1440px] px-4 sm:px-6 md:px-8">
@@ -178,8 +195,12 @@ function RootDocument({
                   </main>
                   {!isDemoMode && <Footer />}
                 </div>
-                {Settings.features.chatWithDocs && (isDemoMode ? <DemoChatWithDocs /> : <ChatWithDocs />)}
+                {Settings.features.chatWithDocs &&
+                  (isDemoMode ? <DemoChatWithDocs /> : <ChatWithDocs />)}
               </div>
+              {Settings.features.chatWithDocs &&
+                Settings.features.chatWithDocsFloatingBar &&
+                !isDemoMode && <FloatingChatBar />}
             </ChatProvider>
           </DemoModeProvider>
         </Providers>

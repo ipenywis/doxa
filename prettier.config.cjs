@@ -32,6 +32,6 @@ module.exports = {
     "",
     "^[./]",
   ],
-  tailwindStylesheet: "./styles/globals.css",
+  tailwindStylesheet: "./src/styles/globals.css",
   importOrderParserPlugins: ["typescript", "jsx", "decorators-legacy"],
 }

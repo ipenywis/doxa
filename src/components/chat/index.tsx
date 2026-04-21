@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react"
+import { useChatContext } from "@/src/components/chat/chat-context"
 import { ChatDrawer } from "@/src/components/chat/chat-drawer"
 import { ChatInput } from "@/src/components/chat/chat-input"
 import { HistoryPanel } from "@/src/components/chat/history-panel"
@@ -77,6 +78,7 @@ export function ChatWithDocs() {
   const streamingMsgIdRef = useRef<string | null>(null)
 
   const history = useConversationHistory()
+  const { pendingQuery, consumePendingQuery } = useChatContext()
 
   useEffect(() => {
     if (!history.hasLoaded || conversationIdRef.current) return
@@ -144,7 +146,14 @@ export function ChatWithDocs() {
   }, [ensureTrailingTextPart])
 
   const handleSend = useCallback(
-    async (text: string) => {
+    async (text: string, options?: { startNew?: boolean }) => {
+      const startNew = options?.startNew ?? false
+
+      if (startNew) {
+        if (abortRef.current) abortRef.current.abort()
+        conversationIdRef.current = history.generateId()
+      }
+
       const userMsg: ChatMessage = {
         id: `msg-${++msgCounter}`,
         role: "user",
@@ -158,7 +167,11 @@ export function ChatWithDocs() {
         parts: [],
       }
 
-      setMessages((prev) => [...prev, userMsg, assistantMsg])
+      if (startNew) {
+        setMessages([userMsg, assistantMsg])
+      } else {
+        setMessages((prev) => [...prev, userMsg, assistantMsg])
+      }
       setIsLoading(true)
       setIsStreaming(true)
       setError(null)
@@ -190,7 +203,8 @@ export function ChatWithDocs() {
       abortRef.current = controller
 
       try {
-        const allMessages = [...messages, userMsg].map((m) => ({
+        const prior = startNew ? [] : messages
+        const allMessages = [...prior, userMsg].map((m) => ({
           role: m.role,
           content: messageToApiContent(m),
         }))
@@ -288,7 +302,13 @@ export function ChatWithDocs() {
         abortRef.current = null
       }
     },
-    [ensureTrailingTextPart, flushBufferNow, messages, syncPartsToMessage]
+    [
+      ensureTrailingTextPart,
+      flushBufferNow,
+      history,
+      messages,
+      syncPartsToMessage,
+    ]
   )
 
   /**
@@ -366,6 +386,22 @@ export function ChatWithDocs() {
     toolPartByIdRef.current = new Map()
     streamingMsgIdRef.current = null
   }, [])
+
+  useEffect(() => {
+    if (!pendingQuery) return
+    if (!history.hasLoaded) return
+    if (isLoading || isStreaming) return
+    const query = pendingQuery
+    consumePendingQuery()
+    handleSend(query, { startNew: true })
+  }, [
+    pendingQuery,
+    history.hasLoaded,
+    isLoading,
+    isStreaming,
+    handleSend,
+    consumePendingQuery,
+  ])
 
   const handleNewConversation = useCallback(() => {
     resetStreamingRefs()
