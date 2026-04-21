@@ -1,10 +1,11 @@
 import type { ComponentType } from "react"
 import { useChatContext } from "@/src/components/chat/chat-context"
 import { ArticleBreadcrumb } from "@/src/components/article/breadcrumb"
+import { CopyPage } from "@/src/components/article/copy-page"
 import { Pagination } from "@/src/components/article/pagination"
 import { TableOfContents } from "@/src/components/toc"
 import { components } from "@/src/lib/components"
-import { fetchDocumentFromServer } from "@/src/lib/markdown"
+import { fetchDocumentFromServer, fetchRawDocument } from "@/src/lib/markdown"
 import { PageRoutes, Routes, isHeading, isRoute } from "@/src/lib/pageroutes"
 import { Settings } from "@/src/settings/main"
 import { createFileRoute } from "@tanstack/react-router"
@@ -26,14 +27,17 @@ export const Route = createFileRoute("/docs/$")({
     const firstRoute = PageRoutes[0]?.href?.replace(/^\//, "")
     const slug = params._splat || firstRoute || ""
     if (!slug) {
-      return { slug: "", document: null, routeTitle: null }
+      return { slug: "", document: null, routeTitle: null, rawDoc: null }
     }
     try {
       const document = await fetchDocumentFromServer({ data: slug })
       const routeTitle = PageRoutes.find((r) => r.href === `/${slug}`)?.title ?? null
-      return { slug, document, routeTitle }
+      // Deferred: not awaited. Streams in after initial HTML so copy-page can
+      // read from a resolved promise on first interaction without blocking SSR.
+      const rawDoc = fetchRawDocument({ data: slug }).catch(() => null)
+      return { slug, document, routeTitle, rawDoc }
     } catch {
-      return { slug, document: null, routeTitle: null }
+      return { slug, document: null, routeTitle: null, rawDoc: null }
     }
   },
   preload: true,
@@ -99,7 +103,7 @@ function findSectionHeading(slug: string): string | undefined {
 
 function DocsContent() {
   const { isOpen: chatOpen } = useChatContext()
-  const { slug, document: pageDocument } = Route.useLoaderData()
+  const { slug, document: pageDocument, rawDoc } = Route.useLoaderData()
   const paths = slug.split("/")
   const pathName = `docs/${slug}`
 
@@ -145,9 +149,12 @@ function DocsContent() {
             {sectionHeading}
           </p>
         )}
-        <h1 className="not-prose text-3xl font-bold tracking-tight lg:text-4xl">
-          {title}
-        </h1>
+        <div className="not-prose flex items-start justify-between gap-4">
+          <h1 className="text-3xl font-bold tracking-tight lg:text-4xl">
+            {title}
+          </h1>
+          <CopyPage rawDoc={rawDoc} title={title} description={description} />
+        </div>
         {description && (
           <p className="not-prose mt-3 text-lg text-muted-foreground">
             {description}

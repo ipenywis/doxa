@@ -1,3 +1,4 @@
+import { contentStore } from "@/src/lib/content/store"
 import { PageRoutes } from "@/src/lib/pageroutes"
 import { createServerFn } from "@tanstack/react-start"
 
@@ -57,6 +58,29 @@ export const fetchDocumentFromServer = createServerFn({ method: "GET" })
   .handler(async ({ data: slug }) => {
     try {
       return getDocument(slug)
+    } catch (err) {
+      console.error(err)
+      return null
+    }
+  })
+
+export interface RawDocument {
+  body: string
+  title: string
+  description: string
+}
+
+export const fetchRawDocument = createServerFn({ method: "GET" })
+  .inputValidator((slug: string) => slug)
+  .handler(async ({ data: slug }): Promise<RawDocument | null> => {
+    try {
+      const entry = await contentStore.getEntry(slug)
+      if (!entry) return null
+      return {
+        body: entry.body,
+        title: entry.frontmatter.title,
+        description: entry.frontmatter.description,
+      }
     } catch (err) {
       console.error(err)
       return null

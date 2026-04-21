@@ -55,7 +55,6 @@ export class ContentStore {
   /** Get a single entry by file path or slug. Returns null if not found. */
   async getEntry(input: string): Promise<ContentEntry | null> {
     const filePath = normalizeFilePath(input)
-    console.log("filePath", filePath)
     const cached = this.entryCache.get(filePath)
     if (cached) return cached
 
