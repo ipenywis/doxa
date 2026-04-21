@@ -1,0 +1,163 @@
+---
+title: MDX Components
+description: Use Doxa's built-in MDX components for navigation cards, callouts, steps, tabs, diagrams, and file trees.
+keywords: ["mdx components", "cards", "notes", "steps", "tabs", "filetree", "mermaid"]
+---
+
+Doxa registers a focused component set for documentation pages in `src/lib/components.ts`. These components are available directly in MDX without per-page imports.
+
+## Component Catalog
+
+| Component | Use it for |
+| :-- | :-- |
+| `CardGrid` and `Card` | Navigation, feature groups, related pages, and external links. |
+| `Note` | Important callouts, prerequisites, warnings, and success states. |
+| `Step` and `StepItem` | Sequential workflows. |
+| `Tabs` | Alternative commands, providers, platforms, or languages. |
+| `Mermaid` | Architecture diagrams, agent flows, and process charts. |
+| `FileTree`, `Folder`, and `File` | Project structure and content layout. |
+
+## Cards
+
+Use large cards for section navigation and compact cards for related links.
+
+<CardGrid>
+  <Card
+    subtitle="Authoring"
+    title="Code Blocks"
+    description="Show commands, configuration, and source snippets with syntax highlighting and copy buttons."
+    href="/docs/authoring/code-blocks"
+  />
+  <Card
+    subtitle="Architecture"
+    title="Diagrams And Math"
+    description="Render Mermaid diagrams and KaTeX equations inside MDX."
+    href="/docs/authoring/diagrams-and-math"
+  />
+  <Card
+    subtitle="AI"
+    title="Agent Tools"
+    description="Understand how the assistant searches and reads documentation."
+    href="/docs/ai/agent-tools"
+  />
+</CardGrid>
+
+```jsx showLineNumbers
+<CardGrid>
+  <Card
+    subtitle="Authoring"
+    title="Code Blocks"
+    description="Show commands, configuration, and source snippets."
+    href="/docs/authoring/code-blocks"
+  />
+</CardGrid>
+```
+
+## Notes
+
+Use notes for information a reader should not miss.
+
+<Note title="Default note">
+  Use the default note for neutral context, requirements, and reminders.
+</Note>
+
+<Note title="Success" type="success">
+  Use success notes to confirm expected output or completion states.
+</Note>
+
+<Note title="Warning" type="warning">
+  Use warnings for configuration details that can break a workflow.
+</Note>
+
+<Note title="Danger" type="danger">
+  Use danger notes for irreversible actions, security risks, or destructive commands.
+</Note>
+
+## Steps
+
+Use `Step` for workflows that must happen in order.
+
+<Step>
+  <StepItem title="Write the MDX">
+    Add frontmatter and body content under `src/contents/docs`.
+  </StepItem>
+
+  <StepItem title="Update navigation">
+    Add the page to `src/contents/settings/documents.json`.
+  </StepItem>
+
+  <StepItem title="Regenerate search data">
+    ```bash
+    pnpm generate-content-json
+    ```
+  </StepItem>
+</Step>
+
+## Tabs
+
+Tabs are useful when the user chooses one option from a small set.
+
+<Tabs defaultValue="pnpm" className="pt-5 pb-1">
+  <TabsList>
+    <TabsTrigger value="pnpm">pnpm</TabsTrigger>
+    <TabsTrigger value="npm">npm</TabsTrigger>
+    <TabsTrigger value="yarn">yarn</TabsTrigger>
+  </TabsList>
+  <TabsContent value="pnpm">
+    ```bash
+    pnpm install
+    ```
+  </TabsContent>
+  <TabsContent value="npm">
+    ```bash
+    npm install
+    ```
+  </TabsContent>
+  <TabsContent value="yarn">
+    ```bash
+    yarn install
+    ```
+  </TabsContent>
+</Tabs>
+
+## File Tree
+
+Use file trees to explain physical structure.
+
+<FileTree>
+  <Folder name="src" label="Source" defaultOpen>
+    <Folder name="contents" label="Docs content" defaultOpen>
+      <Folder name="docs" label="Pages">
+        <File name="overview/index.mdx" label="Overview page" />
+      </Folder>
+    </Folder>
+    <Folder name="lib" label="Shared code">
+      <File name="components.ts" label="MDX component registry" />
+    </Folder>
+  </Folder>
+</FileTree>
+
+## Mermaid
+
+Use Mermaid when the relationship is easier to understand visually.
+
+<Mermaid
+  chart={`sequenceDiagram
+    participant Reader
+    participant Chat as Chat with Docs
+    participant Agent
+    participant Store as contentStore
+    Reader->>Chat: Ask a question
+    Chat->>Agent: Stream request
+    Agent->>Store: Search and read MDX
+    Store-->>Agent: Relevant content
+    Agent-->>Reader: Cited answer`}
+/>
+
+## Composition Rules
+
+- Put cards in grids; do not place standalone cards between paragraphs.
+- Use steps for sequential work, not feature lists.
+- Keep notes short enough to scan.
+- Use tabs only when all tab values are mutually exclusive.
+- Prefer one Mermaid diagram per page section.

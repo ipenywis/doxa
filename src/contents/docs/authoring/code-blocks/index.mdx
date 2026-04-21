@@ -1,0 +1,107 @@
+---
+title: Code Blocks
+description: Show commands, config files, source snippets, line numbers, line highlights, and language alternatives in Doxa docs.
+keywords: ["code blocks", "syntax highlighting", "copy button", "line numbers", "mdx"]
+---
+
+Code examples are one of Doxa's core reading surfaces. Fenced code blocks support language-aware highlighting, optional line numbers, line highlighting, and a copy button.
+
+## Commands
+
+Use `bash` for terminal commands.
+
+```bash
+pnpm install
+pnpm dev
+```
+
+## Config Files
+
+Use `showLineNumbers` on multi-line config examples.
+
+```ts showLineNumbers
+export const Settings = {
+  site: {
+    name: "doxa",
+    url: "https://docs.example.com",
+  },
+  features: {
+    chatWithDocs: true,
+    tableOfContents: true,
+  },
+}
+```
+
+## Highlight Important Lines
+
+Line highlighting helps readers find the part that matters.
+
+```ts {6-7} showLineNumbers
+export const aiConfig = {
+  provider: "openrouter",
+  model: "z-ai/glm-4.7:nitro",
+  codeSnippets: true,
+  maxContextChunks: 12,
+  maxResponseTokens: 2048,
+}
+```
+
+## Titles In Surrounding Text
+
+Code titles are most reliable when you introduce the file path in prose, then show the code below.
+
+`src/lib/components.ts`
+
+```ts showLineNumbers
+export const components = {
+  Card,
+  CardGrid,
+  Note,
+  Step,
+  StepItem,
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+}
+```
+
+## Provider Alternatives
+
+Tabs keep related alternatives in one place.
+
+<Tabs defaultValue="cloudflare" className="pt-5 pb-1">
+  <TabsList>
+    <TabsTrigger value="cloudflare">Cloudflare</TabsTrigger>
+    <TabsTrigger value="vercel">Vercel</TabsTrigger>
+  </TabsList>
+  <TabsContent value="cloudflare">
+    ```bash
+    pnpm build:cloudflare
+    pnpm deploy:cloudflare
+    ```
+  </TabsContent>
+  <TabsContent value="vercel">
+    ```bash
+    pnpm build:vercel
+    pnpm deploy:vercel
+    ```
+  </TabsContent>
+</Tabs>
+
+## Complete Examples
+
+Avoid abbreviated code in docs that users are expected to run.
+
+<Note title="Runnable examples" type="success">
+  Prefer complete examples over snippets with omitted branches. Readers should
+  be able to paste setup code into their project and understand what changed.
+</Note>
+
+## Code Block Checklist
+
+- Use a language identifier on every fence.
+- Use `showLineNumbers` only for examples longer than a few lines.
+- Highlight only the lines that matter.
+- Put commands in `bash`, plain URLs in `text`, and config in `ts`, `json`, or `yaml`.
+- Keep package-manager alternatives in tabs.

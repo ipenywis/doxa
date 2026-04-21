@@ -55,6 +55,19 @@ export const chatWithDocsStream = createServerFn({ method: "POST" })
         content: m.content,
       }))
 
+      // OpenRouter: sort providers by throughput (fastest first) and allow
+      // parallel tool calls so the model can batch multiple reads in one turn.
+      const modelOptions =
+        aiConfig.provider === "openrouter"
+          ? {
+              provider: {
+                sort: "throughput" as const,
+                allow_fallbacks: true,
+              },
+              parallelToolCalls: true,
+            }
+          : undefined
+
       const stream = chat({
         adapter,
         systemPrompts: [systemPrompt],
@@ -62,8 +75,9 @@ export const chatWithDocsStream = createServerFn({ method: "POST" })
         tools: agentTools,
         maxTokens: aiConfig.maxResponseTokens,
         stream: true as const,
-        agentLoopStrategy: ({ iterationCount }) => iterationCount < 8,
-      })
+        agentLoopStrategy: ({ iterationCount }) => iterationCount < 5,
+        ...(modelOptions ? { modelOptions } : {}),
+      } as Parameters<typeof chat>[0])
 
       return toServerSentEventsResponse(stream, { abortController })
     } catch (err: unknown) {

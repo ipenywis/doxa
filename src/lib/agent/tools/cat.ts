@@ -22,7 +22,7 @@ const catToolDefinition = toolDefinition({
       file: {
         type: "string" as const,
         description:
-          "Path to the file to read, relative to the docs root. Example: basic-setup/index.mdx",
+          "Path to the file to read, relative to the docs root. Example: overview/index.mdx",
       },
     },
     required: ["file"] as const,

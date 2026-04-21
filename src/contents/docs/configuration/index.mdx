@@ -1,0 +1,156 @@
+---
+title: Configuration
+description: Configure Doxa site metadata, feature toggles, AI providers, analytics, SEO, and content sources.
+keywords: ["configuration", "settings", "ai provider", "seo", "feature toggles"]
+---
+
+Doxa configuration is split by concern. Site and SEO defaults live in `src/settings/main.ts`, AI provider settings live in `src/settings/ai.ts`, and content backend selection lives in `src/settings/content.ts`.
+
+## Site Settings
+
+`Settings` controls public metadata, branding, analytics, and feature flags.
+
+```ts {8-12,35-43} showLineNumbers
+export const Settings = {
+  site: {
+    name: "doxa",
+    url: "https://docs.example.com",
+    description: "Beautiful, fast documentation that stays out of your way.",
+    keywords: ["documentation", "mdx", "ai"],
+    icon: "/favicon.svg",
+  },
+  features: {
+    branding: true,
+    rightSidebar: true,
+    feedbackEdit: true,
+    tableOfContents: true,
+    scrollToTop: true,
+    chatWithDocs: true,
+    loadFromGithub: false,
+  },
+}
+```
+
+| Setting group | Purpose |
+| :-- | :-- |
+| `site` | Name, URL, description, keywords, and favicon. |
+| `company` | Footer company name and link. |
+| `seo` | Open Graph image, alt text, and social handle. |
+| `analytics` | Google Tag Manager id and enablement flag. |
+| `features` | Toggles for docs shell behavior. |
+| `openGraph` / `twitter` | Social metadata used by the root document. |
+
+## AI Provider
+
+The docs chat uses TanStack AI. Configure the provider and model in `src/settings/ai.ts`, then set `AI_API_KEY` in the environment.
+
+<Tabs defaultValue="openrouter" className="pt-5 pb-1">
+  <TabsList>
+    <TabsTrigger value="openrouter">OpenRouter</TabsTrigger>
+    <TabsTrigger value="openai">OpenAI</TabsTrigger>
+    <TabsTrigger value="anthropic">Anthropic</TabsTrigger>
+    <TabsTrigger value="grok">Grok</TabsTrigger>
+  </TabsList>
+  <TabsContent value="openrouter">
+    ```ts showLineNumbers
+    export const aiConfig = {
+      provider: "openrouter",
+      model: "z-ai/glm-4.7:nitro",
+      codeSnippets: true,
+      maxContextChunks: 12,
+      maxResponseTokens: 2048,
+    }
+    ```
+  </TabsContent>
+  <TabsContent value="openai">
+    ```ts showLineNumbers
+    export const aiConfig = {
+      provider: "openai",
+      model: "gpt-4.1-mini",
+      codeSnippets: true,
+      maxContextChunks: 12,
+      maxResponseTokens: 2048,
+    }
+    ```
+  </TabsContent>
+  <TabsContent value="anthropic">
+    ```ts showLineNumbers
+    export const aiConfig = {
+      provider: "anthropic",
+      model: "claude-3-5-sonnet-latest",
+      codeSnippets: true,
+      maxContextChunks: 12,
+      maxResponseTokens: 2048,
+    }
+    ```
+  </TabsContent>
+  <TabsContent value="grok">
+    ```ts showLineNumbers
+    export const aiConfig = {
+      provider: "grok",
+      model: "grok-2-latest",
+      codeSnippets: true,
+      maxContextChunks: 12,
+      maxResponseTokens: 2048,
+    }
+    ```
+  </TabsContent>
+</Tabs>
+
+<Note title="Secret required" type="warning">
+  The chat endpoint returns a configuration error when `AI_API_KEY` is missing.
+  Set the key in local `.env` files and in your deployment provider.
+</Note>
+
+## Environment Variables
+
+| Variable | Required | Used for |
+| :-- | :--: | :-- |
+| `VITE_SITE_URL` | Production | Canonical URLs, sitemap, Open Graph, and AI-native route URLs. |
+| `AI_API_KEY` | When chat is enabled | Provider authentication for Chat with Docs. |
+| `CONTENT_SOURCE` | Optional | Selects `vite` or `github`. Defaults to `vite`. |
+| `DOXA_GITHUB_OWNER` | GitHub source | Repository owner for runtime docs loading. |
+| `DOXA_GITHUB_REPO` | GitHub source | Repository name for runtime docs loading. |
+| `DOXA_GITHUB_TOKEN` | Private GitHub docs | Read-only token for private docs repositories. |
+
+## Feature Toggle Guidance
+
+- Keep `chatWithDocs` enabled for demos that showcase the AI assistant.
+- Disable `feedbackEdit` unless `GitHubLink.href` points at a real repository.
+- Keep `tableOfContents` enabled for long reference pages.
+- Use `loadFromGithub` as a product-facing toggle only after `CONTENT_SOURCE=github` is configured.
+
+## Validate Configuration
+
+<Step>
+  <StepItem title="Set the public URL">
+    ```bash
+    VITE_SITE_URL=https://docs.example.com
+    ```
+  </StepItem>
+
+  <StepItem title="Regenerate search data after content changes">
+    ```bash
+    pnpm generate-content-json
+    ```
+  </StepItem>
+
+  <StepItem title="Build the target you plan to deploy">
+    <Tabs defaultValue="cloudflare" className="pt-5 pb-1">
+      <TabsList>
+        <TabsTrigger value="cloudflare">Cloudflare</TabsTrigger>
+        <TabsTrigger value="vercel">Vercel</TabsTrigger>
+      </TabsList>
+      <TabsContent value="cloudflare">
+        ```bash
+        pnpm build:cloudflare
+        ```
+      </TabsContent>
+      <TabsContent value="vercel">
+        ```bash
+        pnpm build:vercel
+        ```
+      </TabsContent>
+    </Tabs>
+  </StepItem>
+</Step>

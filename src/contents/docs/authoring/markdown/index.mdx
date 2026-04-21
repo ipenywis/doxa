@@ -1,0 +1,91 @@
+---
+title: Markdown
+description: Write clean documentation with GitHub-flavored Markdown, tables, checklists, links, blockquotes, images, and math.
+keywords: ["markdown", "gfm", "tables", "checklists", "documentation authoring"]
+---
+
+Doxa supports standard Markdown through MDX, so writers can start with familiar syntax and introduce components only where they add value.
+
+## Text And Links
+
+Use normal Markdown for paragraphs, emphasis, inline code, and links.
+
+```md
+Doxa renders **bold text**, _emphasis_, `inline code`, and [links](/docs/overview).
+```
+
+That renders as:
+
+Doxa renders **bold text**, _emphasis_, `inline code`, and [links](/docs/overview).
+
+## Lists
+
+Use unordered lists for related facts and ordered lists for sequential ideas that do not need the visual Step component.
+
+- MDX files are easy to review in pull requests.
+- Frontmatter powers page metadata.
+- Headings feed the right-side table of contents.
+
+1. Draft the page.
+2. Add examples.
+3. Regenerate search data.
+4. Review the rendered page.
+
+## Checklists
+
+Checklists are useful for operational docs and release readiness.
+
+- [x] Write the page frontmatter.
+- [x] Add one concrete example.
+- [ ] Verify internal links.
+- [ ] Regenerate the search index.
+
+## Tables
+
+Tables work well for settings, flags, limits, and comparisons.
+
+| Feature | Markdown syntax | When to use |
+| :-- | :-- | :-- |
+| Checklist | `- [ ] Task` | Launch or review workflows. |
+| Table | `| Column | Value |` | Settings and reference data. |
+| Blockquote | `> Text` | Quotes and short editorial emphasis. |
+| Code fence | <code>```ts</code> | Commands, examples, and config. |
+
+## Blockquotes
+
+> Good docs reduce the number of decisions a reader has to hold in memory.
+
+Use blockquotes sparingly. If the message is operationally important, use a `Note` instead.
+
+## Images
+
+Images use standard Markdown syntax and can include an optional title that becomes a caption.
+
+```md
+![Doxa screenshot](/screens/screen-1.png "Doxa documentation interface")
+```
+
+![Doxa screenshot](/screens/screen-1.png "Doxa documentation interface")
+
+## Math
+
+Inline math works with double-dollar syntax, so you can write search or ranking examples like $$score = relevance / latency$$.
+
+Block math uses fenced `math` code blocks:
+
+```math
+score = \frac{titleMatch + headingMatch + keywordMatch}{\log(contentLength + 1)}
+```
+
+<Note title="Use math only when it helps">
+  Math rendering is available, but most product docs are clearer with prose,
+  tables, and examples.
+</Note>
+
+## Authoring Checklist
+
+- Use h2 and h3 headings in MDX body content.
+- Do not repeat the page title as an h1.
+- Add language identifiers to every code block.
+- Keep tables narrow enough to scan on smaller screens.
+- Use MDX components for navigation, warnings, workflows, diagrams, and file structure.

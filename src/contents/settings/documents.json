@@ -1,105 +1,87 @@
 [
   {
-    "heading": "Introduction"
+    "heading": "Start Here"
   },
   {
-    "title": "Basic Setup",
-    "href": "/basic-setup"
+    "title": "Overview",
+    "href": "/overview"
   },
   {
-    "title": "Installation",
-    "href": "/basic-setup/installation"
+    "title": "Quickstart",
+    "href": "/quickstart"
   },
   {
-    "title": "Setup",
-    "href": "/basic-setup/setup"
+    "title": "Project Structure",
+    "href": "/project-structure"
   },
   {
-    "title": "Changelog",
-    "href": "/basic-setup/changelog"
-  },
-  {
-    "title": "New mage",
-    "href": "/basic-setup/new-page"
+    "title": "Configuration",
+    "href": "/configuration"
   },
   {
     "spacer": true
   },
   {
-    "heading": "Documents"
+    "heading": "Authoring"
+  },
+  {
+    "title": "Markdown",
+    "href": "/authoring/markdown"
+  },
+  {
+    "title": "MDX Components",
+    "href": "/authoring/mdx-components"
+  },
+  {
+    "title": "Code Blocks",
+    "href": "/authoring/code-blocks"
+  },
+  {
+    "title": "Diagrams And Math",
+    "href": "/authoring/diagrams-and-math"
+  },
+  {
+    "spacer": true
+  },
+  {
+    "heading": "AI & Search"
+  },
+  {
+    "title": "Chat With Docs",
+    "href": "/ai/chat-with-docs"
+  },
+  {
+    "title": "Agent Tools",
+    "href": "/ai/agent-tools"
+  },
+  {
+    "title": "llms.txt",
+    "href": "/ai/llms-txt"
+  },
+  {
+    "title": "Search",
+    "href": "/search"
+  },
+  {
+    "spacer": true
+  },
+  {
+    "heading": "Operations"
+  },
+  {
+    "title": "Content Sources",
+    "href": "/content-sources"
   },
   {
     "title": "Navigation",
     "href": "/navigation"
   },
   {
-    "title": "Structure",
-    "href": "/structure"
+    "title": "Customization",
+    "href": "/customization"
   },
   {
-    "title": "Deep",
-    "href": "/structure/deep"
-  },
-  {
-    "title": "Deeper",
-    "href": "/structure/deep/deeper"
-  },
-  {
-    "title": "Even Deeper",
-    "href": "/structure/deep/deeper/even-deeper"
-  },
-  {
-    "spacer": true
-  },
-  {
-    "heading": "Components"
-  },
-  {
-    "title": "Markdown",
-    "href": "/markdown"
-  },
-  {
-    "title": "Cards",
-    "href": "/markdown/cards"
-  },
-  {
-    "title": "Diagrams",
-    "href": "/markdown/diagrams"
-  },
-  {
-    "title": "Filetree",
-    "href": "/markdown/filetree"
-  },
-  {
-    "title": "Lists",
-    "href": "/markdown/lists"
-  },
-  {
-    "title": "Maths",
-    "href": "/markdown/maths"
-  },
-  {
-    "title": "Notes",
-    "href": "/markdown/notes"
-  },
-  {
-    "title": "Steps",
-    "href": "/markdown/steps"
-  },
-  {
-    "title": "Table",
-    "href": "/markdown/table"
-  },
-  {
-    "title": "Tabs",
-    "href": "/markdown/tabs"
-  },
-  {
-    "title": "Random",
-    "href": "/random"
-  },
-  {
-    "title": "Another Page",
-    "href": "/another-page"
+    "title": "Deployment",
+    "href": "/deployment"
   }
 ]

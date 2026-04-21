@@ -1,0 +1,93 @@
+---
+title: Agent Tools
+description: Learn how Doxa's documentation assistant searches and reads MDX through contentStore-backed tools.
+keywords: ["agent tools", "grep", "cat", "contentStore", "ai assistant", "system prompt"]
+---
+
+The Doxa assistant is intentionally narrow. It receives a system prompt with the docs file tree, then uses two tools to find and read documentation content.
+
+## Tool Surface
+
+| Tool | Purpose |
+| :-- | :-- |
+| `grep` | Search documentation content for a pattern and return file paths with line numbers. |
+| `cat` | Read the full raw MDX content for a documentation file. |
+
+Both tools read through `contentStore`, so they work with the bundled Vite source and the runtime GitHub adapter.
+
+## Agent Workflow
+
+<Step>
+  <StepItem title="Inspect the known file tree">
+    The system prompt lists all available MDX files relative to the docs root.
+  </StepItem>
+
+  <StepItem title="Search for likely matches">
+    The assistant uses `grep` when it needs to locate a topic.
+
+    ```json
+    { "pattern": "content source" }
+    ```
+  </StepItem>
+
+  <StepItem title="Read the relevant source">
+    After finding the page, it calls `cat`.
+
+    ```json
+    { "file": "content-sources/index.mdx" }
+    ```
+  </StepItem>
+
+  <StepItem title="Answer with links">
+    The assistant synthesizes the result and links to relevant sections, such as `[Content Sources](/docs/content-sources)`.
+  </StepItem>
+</Step>
+
+## Data Flow
+
+<Mermaid
+  chart={`graph LR;
+    Prompt[System prompt] --> Model[AI model];
+    Model --> Grep[grep tool];
+    Model --> Cat[cat tool];
+    Grep --> Store[contentStore];
+    Cat --> Store;
+    Store --> Adapter[Content adapter];
+    Adapter --> Vite[Vite bundled MDX];
+    Adapter --> GitHub[GitHub REST API];
+    Store --> Model;
+    Model --> Answer[Docs-grounded answer];`}
+/>
+
+## What The Assistant Is Told
+
+The system prompt defines strict behavior:
+
+- Answer using only available documentation content.
+- Use `grep` first when the right file is uncertain.
+- Use `cat` to read full context before answering.
+- Include links in the `/docs/path#section-anchor` format.
+- Include code snippets when `aiConfig.codeSnippets` is enabled.
+- Say when a question is outside the documentation scope.
+
+<Note title="Why raw MDX matters">
+  `cat` returns raw MDX, including frontmatter and component markup. That gives
+  the assistant the same source material writers review in Git.
+</Note>
+
+## Tool Result Example
+
+```text
+content-sources/index.mdx:17:Two content adapters ship with Doxa: Vite and GitHub.
+content-sources/index.mdx:41:Set CONTENT_SOURCE=github to fetch docs at runtime.
+```
+
+The answer should cite the relevant page instead of inventing deployment or configuration details.
+
+## Improving Agent Answers
+
+- Use specific h2 headings that match reader questions.
+- Put key terms in frontmatter keywords.
+- Keep examples complete.
+- Prefer explicit configuration tables over long prose.
+- Regenerate search data after content changes.

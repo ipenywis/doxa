@@ -1,0 +1,91 @@
+---
+title: llms.txt
+description: Expose Doxa documentation to external AI tools through llms.txt and llms-full.txt routes.
+keywords: ["llms.txt", "llms-full.txt", "ai native docs", "external ai tools", "citation"]
+---
+
+Doxa exposes AI-native text routes so external assistants and coding tools can discover, read, and cite your documentation.
+
+## Routes
+
+| Route | Output |
+| :-- | :-- |
+| `/llms.txt` | A plain-text index of all docs pages with titles, URLs, and descriptions. |
+| `/llms-full.txt` | The full docs corpus concatenated into one plain-text document with source URLs. |
+
+Both routes are generated at request time from `contentStore`, so they follow the active content adapter.
+
+## How It Works
+
+<Mermaid
+  chart={`graph TD;
+    Request[External AI requests llms route] --> Route[TanStack route handler];
+    Route --> Store[contentStore];
+    Store --> Entries[All content entries];
+    Entries --> Text[Plain-text response];
+    Text --> Tool[ChatGPT, Claude, Cursor, MCP client];`}
+/>
+
+## Example Index Shape
+
+```text showLineNumbers
+# doxa
+
+> Beautiful, fast documentation that stays out of your way.
+
+## Docs
+
+- [Overview](https://docs.example.com/docs/overview): See what Doxa Docs can do.
+- [Quickstart](https://docs.example.com/docs/quickstart): Install and run Doxa.
+```
+
+## Example Full-Corpus Shape
+
+```text showLineNumbers
+# doxa
+
+> Beautiful, fast documentation that stays out of your way.
+
+---
+
+## Overview
+Source: https://docs.example.com/docs/overview
+
+Doxa is a production-ready documentation template...
+```
+
+<Note title="Set the site URL" type="warning">
+  Set `VITE_SITE_URL` in production so generated source URLs use your real docs
+  host instead of the local or fallback URL.
+</Note>
+
+## When To Use Each Route
+
+| Need | Use |
+| :-- | :-- |
+| Let an AI tool discover available pages | `/llms.txt` |
+| Give an AI tool the full corpus in one fetch | `/llms-full.txt` |
+| Cite a specific docs page | URLs listed in either route |
+| Keep private docs private | Do not expose these routes publicly without access controls |
+
+## Verification
+
+<Step>
+  <StepItem title="Run the docs site">
+    ```bash
+    pnpm dev
+    ```
+  </StepItem>
+
+  <StepItem title="Open the index">
+    ```text
+    http://localhost:5173/llms.txt
+    ```
+  </StepItem>
+
+  <StepItem title="Open the full corpus">
+    ```text
+    http://localhost:5173/llms-full.txt
+    ```
+  </StepItem>
+</Step>

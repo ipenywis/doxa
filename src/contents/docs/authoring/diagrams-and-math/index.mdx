@@ -1,0 +1,87 @@
+---
+title: Diagrams And Math
+description: Render Mermaid diagrams and KaTeX math in Doxa for architecture, workflows, relationships, and formulas.
+keywords: ["mermaid", "diagrams", "katex", "math", "architecture diagrams"]
+---
+
+Doxa includes Mermaid for diagrams and KaTeX for mathematical notation. Use them when a visual model or equation clarifies the written explanation.
+
+## Architecture Diagram
+
+<Mermaid
+  chart={`graph TD;
+    MDX[MDX pages] --> Store[contentStore];
+    Store --> Renderer[Docs renderer];
+    Store --> Agent[AI agent];
+    Store --> Llms[llms.txt exports];
+    MDX --> Index[Search index script];
+    Index --> Search[Search modal];`}
+/>
+
+## Agent Sequence
+
+<Mermaid
+  chart={`sequenceDiagram
+    participant User
+    participant UI as Chat drawer
+    participant API as chatWithDocsStream
+    participant Agent
+    participant Tools as grep and cat
+    User->>UI: Ask about a docs topic
+    UI->>API: Send conversation
+    API->>Agent: Build docs-only prompt
+    Agent->>Tools: Search and read MDX
+    Tools-->>Agent: Matching content
+    Agent-->>UI: Stream answer`}
+/>
+
+## Entity Relationships
+
+<Mermaid
+  chart={`erDiagram
+    DOC_PAGE ||--o{ HEADING : contains
+    DOC_PAGE ||--o{ SEARCH_SNIPPET : generates
+    CONTENT_STORE ||--o{ DOC_PAGE : reads
+    AI_AGENT ||--o{ DOC_PAGE : cites
+    DOC_PAGE {
+      string slug
+      string title
+      string description
+    }
+    HEADING {
+      string text
+      string anchor
+    }`}
+/>
+
+## Math Examples
+
+Inline math is useful for small formulas like $$queryWords \ge 3$$.
+
+Use block math for scoring and ranking explanations:
+
+```math
+relevance = \frac{title + headings + keywords + content}{\log(length + 1)}
+```
+
+```math
+latencyBudget = renderTime + searchTime + modelTime
+```
+
+<Note title="Diagram budget">
+  Diagrams should explain relationships that are hard to scan in prose. If a
+  list or table is clearer, use a list or table.
+</Note>
+
+## Mermaid Patterns
+
+| Diagram type | Use it for |
+| :-- | :-- |
+| Flowchart | Architecture, routing, deployment, and content pipelines. |
+| Sequence diagram | AI calls, request lifecycles, and handoffs between systems. |
+| ER diagram | Data models and relationships. |
+| Decision tree | Configuration choices and troubleshooting paths. |
+
+## Practical Rule
+
+One good diagram can anchor a complex page. Several decorative diagrams make the page slower to read.

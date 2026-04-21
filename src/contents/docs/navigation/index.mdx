@@ -1,5 +1,112 @@
 ---
 title: Navigation
-description: How to build our your documents menu and navigations.
-keywords: ["navigation", "sidebar", "menus", "mdx", "nextjs", "documents"]
+description: Control sidebar order, page headings, spacers, and generated navigation metadata in Doxa.
+keywords: ["navigation", "sidebar", "documents.json", "docs generator", "doxa"]
 ---
+
+Doxa separates page discovery from navigation design. MDX files live in folders, while `src/contents/settings/documents.json` controls the sidebar order, section headings, spacers, and page titles shown in the docs shell.
+
+## Navigation Model
+
+Each route entry maps to a folder under `src/contents/docs`. The app prefixes these hrefs with `/docs` at render time.
+
+```json showLineNumbers
+[
+  { "heading": "Start Here" },
+  { "title": "Overview", "href": "/overview" },
+  { "title": "Quickstart", "href": "/quickstart" },
+  { "spacer": true },
+  { "heading": "Authoring" },
+  { "title": "Markdown", "href": "/authoring/markdown" }
+]
+```
+
+| Entry | Purpose |
+| :-- | :-- |
+| `heading` | Adds a non-clickable section label to the sidebar. |
+| `title` + `href` | Adds a clickable docs page. |
+| `spacer` | Adds visual separation between groups. |
+| `noLink` | Keeps a page in the route data without rendering it as a link. |
+
+<Note title="Route prefix">
+  Use hrefs like `/overview` in `documents.json`. The sidebar, search results,
+  and links add `/docs` when needed.
+</Note>
+
+## Folder Structure
+
+The physical folder names become the URL path. A page at `src/contents/docs/ai/chat-with-docs/index.mdx` resolves to `/docs/ai/chat-with-docs`.
+
+<FileTree>
+  <Folder name="src" label="Project source" defaultOpen>
+    <Folder name="contents" label="Content system" defaultOpen>
+      <Folder name="docs" label="MDX pages" defaultOpen>
+        <Folder name="ai" label="AI section">
+          <Folder name="chat-with-docs" label="Page slug">
+            <File name="index.mdx" label="Page content" />
+          </Folder>
+        </Folder>
+      </Folder>
+      <Folder name="settings" label="Navigation data" defaultOpen>
+        <File name="documents.json" label="Sidebar order" />
+      </Folder>
+    </Folder>
+  </Folder>
+</FileTree>
+
+## Adding A Page
+
+<Step>
+  <StepItem title="Create the folder">
+    Add an `index.mdx` file under the route you want.
+
+    ```bash
+    mkdir -p src/contents/docs/guides/release-notes
+    ```
+  </StepItem>
+
+  <StepItem title="Add frontmatter">
+    Every page needs a title and description because those values feed the h1, metadata, search index, and AI-native exports.
+
+    ```markdown showLineNumbers
+    ---
+    title: Release Notes
+    description: Track product updates and documentation changes.
+    keywords: ["release notes", "changelog", "updates"]
+    ---
+    ```
+  </StepItem>
+
+  <StepItem title="Place it in the sidebar">
+    Add the page to `documents.json` where it belongs.
+
+    ```json
+    { "title": "Release Notes", "href": "/guides/release-notes" }
+    ```
+  </StepItem>
+
+  <StepItem title="Refresh derived data">
+    Regenerate the search index after changing content.
+
+    ```bash
+    pnpm generate-content-json
+    ```
+  </StepItem>
+</Step>
+
+## Generator Behavior
+
+`pnpm generate:docs` discovers new MDX pages and appends missing entries to `documents.json`.
+
+<Note title="Manual ordering" type="warning">
+  The generator does not remove stale pages or reorder existing entries. Edit
+  `documents.json` directly when you want a curated sidebar.
+</Note>
+
+## Navigation Checklist
+
+- [x] Every visible page has a route entry.
+- [x] The first route is the page linked by the home page "Get Started" button.
+- [x] Section headings describe user intent, not file layout.
+- [x] Stale demo pages are removed from `documents.json`.
+- [x] Search data is regenerated after large content changes.

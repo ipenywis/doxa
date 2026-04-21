@@ -1,0 +1,95 @@
+---
+title: Project Structure
+description: Understand the Doxa folder layout, content pipeline, MDX registry, and generated assets.
+keywords: ["project structure", "file tree", "content store", "mdx registry", "doxa"]
+---
+
+Doxa keeps the authoring surface small: MDX content goes in one tree, reusable components live in predictable folders, and generated data is committed under `public/search-data`.
+
+## Important Paths
+
+<FileTree>
+  <Folder name="src" label="Application source" defaultOpen>
+    <Folder name="components" label="React components" defaultOpen>
+      <Folder name="markdown" label="MDX-only components">
+        <File name="card.tsx" label="Card and CardGrid" />
+        <File name="note.tsx" label="Callouts" />
+        <File name="step.tsx" label="Numbered steps" />
+        <Folder name="filetree" label="FileTree components">
+          <File name="index.tsx" label="Exports" />
+          <File name="component.tsx" label="Tree rendering" />
+        </Folder>
+      </Folder>
+      <Folder name="chat" label="Chat with Docs UI">
+        <File name="index.tsx" label="Streaming chat client" />
+        <File name="tool-call-display.tsx" label="Agent timeline" />
+      </Folder>
+    </Folder>
+    <Folder name="contents" label="Documentation content" defaultOpen>
+      <Folder name="docs" label="MDX pages" defaultOpen>
+        <File name="overview/index.mdx" label="A docs page" />
+      </Folder>
+      <Folder name="settings" label="Generated and curated settings">
+        <File name="documents.json" label="Sidebar navigation" />
+        <File name="theme.json" label="Theme selection" />
+      </Folder>
+    </Folder>
+    <Folder name="lib" label="Shared logic" defaultOpen>
+      <File name="components.ts" label="MDX component registry" />
+      <File name="chat-api.ts" label="AI streaming server function" />
+      <Folder name="content" label="Content adapters">
+        <File name="store.ts" label="Unified content API" />
+      </Folder>
+    </Folder>
+    <Folder name="settings" label="Runtime configuration">
+      <File name="main.ts" label="Site settings" />
+      <File name="ai.ts" label="AI provider settings" />
+      <File name="content.ts" label="Content source selection" />
+    </Folder>
+  </Folder>
+  <Folder name="public" label="Static assets" defaultOpen>
+    <Folder name="search-data" label="Generated search data">
+      <File name="documents.json" label="Search index" />
+    </Folder>
+  </Folder>
+  <Folder name="agent" label="Agent guidance">
+    <File name="component-playbook.md" label="MDX component reference" />
+  </Folder>
+</FileTree>
+
+## How Content Moves
+
+<Mermaid
+  chart={`graph LR;
+    M[MDX files] --> A[Content adapter];
+    A --> S[contentStore];
+    S --> R[Docs route renderer];
+    S --> C[Chat agent tools];
+    S --> L[llms.txt routes];
+    M --> I[Search index script];
+    I --> J[public/search-data/documents.json];
+    J --> Search[Search modal and page metadata];`}
+/>
+
+## Source Of Truth
+
+| Area | Source file | Notes |
+| :-- | :-- | :-- |
+| Page content | `src/contents/docs/**/index.mdx` | Markdown and MDX examples. |
+| Sidebar order | `src/contents/settings/documents.json` | Curated manually for order and headings. |
+| MDX components | `src/lib/components.ts` | Registers what MDX can render. |
+| Search metadata | `public/search-data/documents.json` | Generated from MDX content. |
+| AI behavior | `src/lib/agent/system-prompt.ts` | Constrains the assistant to documentation content. |
+| Content backend | `src/settings/content.ts` | Selects Vite or GitHub content. |
+
+<Note title="Keep the registry in sync">
+  When you add, remove, or change an MDX component, update
+  `src/lib/components.ts` and `agent/component-playbook.md` together.
+</Note>
+
+## Naming Rules
+
+- Use folder names for stable URL slugs.
+- Use frontmatter titles for human-readable page names.
+- Keep example pages focused on one job.
+- Prefer section names based on user intent: "AI & Search" is clearer than "Internals".

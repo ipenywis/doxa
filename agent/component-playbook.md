@@ -1,421 +1,262 @@
 # Doxa Component Playbook
 
-This is the authoritative reference for all MDX components and formatting features available in the Doxa documentation template. The documentation generation agent reads this file at runtime to understand what components exist, how to use them, and when to apply them.
+This is the authoritative reference for MDX components, Markdown features, and authoring patterns available in the Doxa documentation template. The documentation generation agent reads this file at runtime, so keep it aligned with `src/lib/components.ts` and the example docs under `src/contents/docs`.
 
-**Update this file whenever components are added, changed, or removed from the template.**
+**Update this file whenever components, props, examples, or authoring guidance changes.**
 
 ---
 
-## Frontmatter (Required)
+## Frontmatter
 
-Every page must start with YAML frontmatter. Values must be UNQUOTED:
+Every page must start with YAML frontmatter:
 
+```markdown
+---
+title: Page Title
+description: A specific one-sentence page description.
+keywords: ["keyword", "another keyword"]
+---
 ```
----
-title: Page Title Here
-description: A brief description of this page
-keywords: ["keyword1", "keyword2", "keyword3"]
----
-```
 
-- `title` (required): Page title — rendered as h1, do not repeat it in the body
-- `description` (required): Brief page description for SEO
-- `keywords` (optional): Array of SEO keywords
+- `title` is required and rendered as the page h1. Do not repeat it in the body.
+- `description` is required and feeds metadata, search, and page subtitles.
+- `keywords` should include user search terms and feature synonyms.
+- Use h2-h4 headings in body content.
+- Each page must be an `index.mdx` file inside a folder that becomes the route slug.
 
-## Page Structure
+## Current Example Docs Structure
 
-- Each page is an `index.mdx` file inside a folder (folder name = URL slug)
-- Use h2-h4 headings only (never h1 — the title from frontmatter is rendered as h1)
-- Nesting is supported to arbitrary depth: `docs/section/subsection/page/index.mdx`
-- The first line after frontmatter should be a paragraph or heading, never a component
+The template's example docs are organized as a self-demo of Doxa:
 
----
+- **Start Here**: Overview, Quickstart, Project Structure, Configuration
+- **Authoring**: Markdown, MDX Components, Code Blocks, Diagrams And Math
+- **AI & Search**: Chat With Docs, Agent Tools, llms.txt, Search
+- **Operations**: Content Sources, Navigation, Customization, Deployment
+
+Use this structure as the preferred model when generating or expanding starter documentation.
 
 ## Component Catalog
 
 ### Cards (`CardGrid` + `Card`)
 
-Display navigation or feature cards in a responsive grid (1 col mobile, 2 tablet, 3 desktop).
-
-**Large card** (default variant):
+Use cards for navigation, related pages, feature groups, and external resources.
 
 ```jsx
 <CardGrid>
   <Card
-    subtitle="Category Label"
-    title="Card Title"
-    description="Brief description of what this links to."
-    href="/docs/path/to/page"
+    subtitle="Start"
+    title="Quickstart"
+    description="Install dependencies and run the docs site locally."
+    href="/docs/quickstart"
   />
   <Card
-    subtitle="External"
-    title="External Link"
-    description="Links to an external site."
-    href="https://example.com"
+    title="Search"
+    href="/docs/search"
+    icon="alignJustify"
+    variant="small"
+    description="Understand generated search data."
+  />
+  <Card
+    title="Repository"
+    href="https://github.com/ipenywis/doxa-docs-template"
     external={true}
   />
 </CardGrid>
 ```
 
-**Small card** (compact, icon-based):
+**Props**: `title` (string), `subtitle?` (string), `description?` (string), `href?` (string), `icon?` (`"alignJustify"` or another key registered in `src/settings/icons.ts`), `image?` (string), `variant?` (`"normal"` | `"small"` | `"image"`), `external?` (boolean), `className?` (string)
+
+### Notes (`Note`)
+
+Use notes for information readers should not miss.
 
 ```jsx
-<CardGrid>
-  <Card
-    title="Page Title"
-    href="/docs/path"
-    icon="alignJustify"
-    variant="small"
-    description="Optional short description"
-  />
-</CardGrid>
-```
-
-**Image card**:
-
-```jsx
-<CardGrid>
-  <Card
-    title="Visual Card"
-    href="/docs/path"
-    image="/images/preview.png"
-    variant="image"
-  />
-</CardGrid>
-```
-
-**Props**: `title` (string), `subtitle?` (string), `description?` (string), `href` (string), `icon?` (keyof iconMap), `image?` (string), `variant?` ("small" | "image" | default large), `external?` (boolean), `className?` (string)
-
-**Available icons**: `alignJustify`, `arrowUpRight` (extendable via `src/settings/icons.ts`)
-
----
-
-### Notes / Callouts (`Note`)
-
-Highlight important information with styled callout boxes.
-
-```jsx
-<Note title="Note Title">
-  Content of the note. Supports **markdown** and `inline code`.
+<Note title="Search index">
+  Run `pnpm generate-content-json` after editing docs.
 </Note>
 
 <Note title="Success" type="success">
-  Operation completed successfully.
+  The local docs site is running.
 </Note>
 
 <Note title="Warning" type="warning">
-  Be careful with this setting.
+  Set `AI_API_KEY` before enabling Chat with Docs in production.
 </Note>
 
 <Note title="Danger" type="danger">
-  This action is irreversible.
+  Do not expose provider secrets as public Vite environment variables.
 </Note>
 ```
 
-**Props**: `title` (string), `type?` ("success" | "warning" | "danger" | default info/note)
-
----
+**Props**: `title?` (string), `type?` (`"note"` | `"success"` | `"warning"` | `"danger"`)
 
 ### Steps (`Step` + `StepItem`)
 
-Create numbered step-by-step guides with automatic numbering and a vertical connecting line.
+Use steps for sequential workflows.
 
 ```jsx
 <Step>
-  <StepItem title="Install Node.js">
-    Make sure you have Node.js installed. Verify with:
-
+  <StepItem title="Install dependencies">
     ```bash
-    node -v
+    pnpm install
     ```
-
   </StepItem>
 
-  <StepItem title="Install Dependencies">
-    Navigate to the project directory and install:
-
+  <StepItem title="Start the dev server">
     ```bash
-    npm install
+    pnpm dev
     ```
-
-  </StepItem>
-
-  <StepItem title="Run the Project">
-    Start the development server:
-
-    ```bash
-    npm run dev
-    ```
-
-    Access the application at `http://localhost:3000`.
-
   </StepItem>
 </Step>
 ```
 
-**StepItem props**: `title` (string)
+**StepItem props**: `title?` (string)
 
----
+Leave a blank line before and after code fences inside `StepItem`.
 
-### Tabs (`Tabs` + `TabsList` + `TabsTrigger` + `TabsContent`)
+### Tabs (`Tabs`, `TabsList`, `TabsTrigger`, `TabsContent`)
 
-Show alternative content (e.g., different languages, package managers, or platforms).
+Use tabs for mutually exclusive alternatives such as providers, package managers, or deployment targets.
 
 ```jsx
-<Tabs defaultValue="npm" className="pt-5 pb-1">
+<Tabs defaultValue="cloudflare" className="pt-5 pb-1">
   <TabsList>
-    <TabsTrigger value="npm">npm</TabsTrigger>
-    <TabsTrigger value="pnpm">pnpm</TabsTrigger>
-    <TabsTrigger value="yarn">yarn</TabsTrigger>
+    <TabsTrigger value="cloudflare">Cloudflare</TabsTrigger>
+    <TabsTrigger value="vercel">Vercel</TabsTrigger>
   </TabsList>
-  <TabsContent value="npm">
+  <TabsContent value="cloudflare">
     ```bash
-    npm install package-name
+    pnpm build:cloudflare
     ```
   </TabsContent>
-  <TabsContent value="pnpm">
+  <TabsContent value="vercel">
     ```bash
-    pnpm add package-name
-    ```
-  </TabsContent>
-  <TabsContent value="yarn">
-    ```bash
-    yarn add package-name
+    pnpm build:vercel
     ```
   </TabsContent>
 </Tabs>
 ```
 
-**Tabs props**: `defaultValue` (string matching a TabsTrigger value), `className?`
-**TabsTrigger props**: `value` (string)
-**TabsContent props**: `value` (string, must match a TabsTrigger)
+**Tabs props**: `defaultValue` (string matching a trigger), `className?` (string)
 
----
+### Mermaid (`Mermaid`)
 
-### Mermaid Diagrams (`Mermaid`)
-
-Render diagrams using Mermaid.js syntax. Supports flowcharts, sequence diagrams, ER diagrams, and more.
-
-**Flowchart**:
+Use Mermaid for architecture, request flow, sequence, and relationship diagrams.
 
 ```jsx
 <Mermaid
   chart={`graph TD;
-    A[Start] --> B{Decision};
-    B -->|Yes| C[Action 1];
-    B -->|No| D[Action 2];
-    C --> E[End];
-    D --> E;`}
+    MDX[MDX pages] --> Store[contentStore];
+    Store --> Routes[Docs routes];
+    Store --> Agent[AI agent];
+    Store --> Llms[llms.txt exports];`}
 />
 ```
 
-**ER diagram**:
+**Props**: `chart` (Mermaid syntax string), `className?` (string)
 
-```jsx
-<Mermaid
-  chart={`erDiagram
-    CUSTOMER ||--o{ ORDER : places
-    ORDER ||--|{ LINE-ITEM : contains
-    PRODUCT ||--o{ LINE-ITEM : "included in"
-    CUSTOMER {
-        string name
-        string email
-    }
-    ORDER {
-        int orderNumber
-        date orderDate
-    }`}
-/>
-```
+### File Tree (`FileTree`, `Folder`, `File`)
 
-**Props**: `chart` (string — Mermaid diagram syntax wrapped in template literal), `className?` (string)
-
----
-
-### File Tree (`FileTree` + `Folder` + `File`)
-
-Visualize project or directory structures with an interactive tree.
+Use file trees for physical structure and project layout.
 
 ```jsx
 <FileTree>
-  <Folder name="src" label="Source Code">
-    <File name="index.tsx" label="Entry Point" />
-    <Folder name="components" label="Components">
-      <File name="Button.tsx" label="Button Component" />
-      <File name="Input.tsx" label="Input Component" />
-    </Folder>
-    <Folder name="pages" label="Pages">
-      <File name="home.tsx" label="Home Page" />
-      <File name="about.tsx" label="About Page" />
+  <Folder name="src" label="Source" defaultOpen>
+    <Folder name="contents" label="Docs content">
+      <File name="docs/overview/index.mdx" label="Overview page" />
     </Folder>
   </Folder>
 </FileTree>
 ```
 
-**Folder props**: `name` (string), `label?` (string), `open?` (boolean), `defaultOpen?` (boolean)
-**File props**: `name` (string), `label?` (string)
-
----
+**Folder props**: `name` (string), `label?`, `open?` (boolean), `defaultOpen?` (boolean)  
+**File props**: `name` (string), `label?`
 
 ### Standard Markdown Features
 
-All standard markdown is supported:
+Doxa supports:
 
-**Code blocks** with syntax highlighting and line numbers:
+- GitHub-flavored tables
+- Checklists
+- Blockquotes
+- Images with optional titles
+- Inline and fenced code
+- Code copy buttons
+- Syntax highlighting
+- Line numbers with `showLineNumbers`
+- Line highlighting with `{3,5-7}`
+- KaTeX math with inline `$$...$$` and fenced `math` blocks
 
-````
-```tsx showLineNumbers
-const example = "highlighted";
+Example:
+
+````jsx
+```ts {4-6} showLineNumbers
+export const Settings = {
+  features: {
+    chatWithDocs: true,
+    tableOfContents: true,
+  },
+}
 ```
 ````
 
-**Line highlighting** — highlight specific lines:
+## Usage Patterns By Page Type
 
-````
-```tsx {3,5-7} showLineNumbers
-// line 3 and lines 5-7 will be highlighted
-```
-````
+### Overview Pages
 
-**Tables**:
+- Open with a clear value statement.
+- Use large cards for major paths.
+- Include one Mermaid architecture or capability flow when it clarifies the product.
+- Use a short feature table.
+- Avoid step-by-step instructions unless the page is explicitly a quickstart.
 
-```
-| Column 1    | Column 2    | Column 3    |
-| :---------- | :---------: | ----------: |
-| Left-align  | Centered    | Right-align |
-```
+### Quickstart And Guide Pages
 
-**Checklists**:
+- Use `Step` for the main workflow.
+- Use `Tabs` for package managers, deployment targets, or providers.
+- Use `Note type="warning"` for prerequisites and secrets.
+- Include complete commands.
+- End with related-page cards when useful.
 
-```
-- [x] Completed task
-- [ ] Pending task
-```
+### Authoring Reference Pages
 
-**Blockquotes**:
+- Show the rendered component first, then the MDX source.
+- Use tables for component props and selection guidance.
+- Include realistic Doxa examples, not placeholder content.
+- Keep examples small enough to copy.
 
-```
-> Important quote or callout text
-```
+### AI And Search Pages
 
-**Math** (LaTeX via KaTeX):
-- Inline: `$$E = mc^2$$`
-- Block:
-````
-```math
-x = \frac{-b \pm \sqrt{b^2 - 4ac}}{2a}
-```
-````
+- Use Mermaid for request flow and agent behavior.
+- Use tables for env vars, failure modes, and indexed data.
+- Use notes for security-sensitive provider keys.
+- Mention `contentStore`, `grep`, `cat`, `/llms.txt`, and `/llms-full.txt` only where relevant.
 
-**Images**:
+### Operations Pages
 
-```
-![Alt text](/images/filename.png "Optional caption")
-```
-
----
-
-## Usage Patterns by Doc Type
-
-These patterns describe WHEN and HOW to use each component depending on the type of documentation page being generated. Following these patterns produces consistent, professional documentation.
-
-### Overview / Introduction Pages
-
-- Open with a brief paragraph explaining what the project does
-- Use `CardGrid` + `Card` (large variant) to link to main documentation sections
-- Use a single `Mermaid` flowchart or architecture diagram if the project has complex structure
-- Use `Note type="info"` sparingly for key prerequisites or version requirements
-- Do NOT use Steps on overview pages — they belong on tutorial/getting-started pages
-
-### Getting Started / Installation Pages
-
-- Use `Step` + `StepItem` for the entire installation flow — every sequential action should be a step
-- Use `Tabs` for package manager alternatives (npm/pnpm/yarn) or OS-specific instructions (macOS/Linux/Windows)
-- Use `Note type="warning"` for prerequisites (Node.js version, required tools)
-- Use `Note type="success"` after the final verification step to confirm success
-- Include code blocks with `showLineNumbers` for config files
-
-### Architecture / Concepts Pages
-
-- Use `Mermaid` for architecture diagrams, data flow, and entity relationships
-- Use `FileTree` to show project directory structure
-- Use code blocks with line highlighting `{3,5-7}` to draw attention to key patterns
-- Use `Note type="info"` for important architectural decisions or trade-offs
-- Do NOT use Steps unless explaining a sequential process
-
-### API Reference Pages
-
-- Use markdown tables for every parameter, option, flag, and configuration field
-- Use code blocks with `showLineNumbers` for all usage examples
-- Use `Tabs` for language alternatives (JavaScript/TypeScript/Python) or different use cases
-- Use `Note type="danger"` for breaking changes or deprecated features
-- Use `Note type="warning"` for edge cases and important caveats
-- Do NOT use Cards or Steps on API reference pages
-
-### Guide / Tutorial Pages
-
-- Use `Step` + `StepItem` for the main tutorial flow
-- Use `Tabs` when steps differ by environment or platform
-- Use `Note type="warning"` for common pitfalls
-- Use `Note type="success"` for expected output verification
-- Include complete, runnable code examples — never abbreviate with "..."
-- Use `Mermaid` only if the guide involves a complex workflow that benefits from visualization
-
-### Configuration Pages
-
-- Use markdown tables for EVERY configurable field (name, type, default, description)
-- Show both minimal and production-ready example config files
-- Use `Tabs` for different config file formats (JSON/YAML/TOML) if applicable
-- Use `Note type="warning"` for security-sensitive settings
-- Use code blocks with line highlighting to point out critical fields
-
-### CLI Reference Pages
-
-- Use markdown tables for all commands, flags, and options
-- Use code blocks for every command example with expected output
-- Use `Note type="info"` for tips about common flag combinations
-- Do NOT use Steps for CLI reference — use them only in CLI tutorials/guides
-
----
+- Use tables for environment variables, commands, and adapter choices.
+- Use `Step` for deployment and validation workflows.
+- Use `FileTree` for folder or repo structure.
+- Include explicit verification commands.
 
 ## Anti-patterns
 
-These are common mistakes that degrade documentation quality. Avoid them.
+1. Do not use h1 headings in MDX body content.
+2. Do not write placeholder copy such as lorem ipsum or throwaway test text.
+3. Do not refer to the old Documents or Next.js template unless writing migration history.
+4. Do not call AI features "upcoming"; Chat with Docs and AI-native routes exist in Doxa.
+5. Do not overuse notes. More than three or four callouts on one page usually means the prose needs tightening.
+6. Do not put cards inside steps or notes inside notes.
+7. Do not use steps for non-sequential feature lists.
+8. Do not add Mermaid diagrams where a table or list is clearer.
+9. Do not omit language identifiers on code fences.
+10. Do not use `showLineNumbers` for one-line commands.
 
-1. **Don't overuse Notes** — If every other paragraph has a Note, they lose impact. Reserve them for genuinely important callouts (prerequisites, breaking changes, security warnings). A page with more than 3-4 Notes is likely overusing them.
+## Composition Rules
 
-2. **Don't use Cards inside Steps** — Cards are for navigation, Steps are for sequential instructions. They serve different purposes and should not be nested.
-
-3. **Don't nest Notes inside Notes** — The component doesn't support nesting and it creates visual clutter.
-
-4. **Don't use Steps for non-sequential content** — If the items don't need to happen in order, use bullet points or Cards instead.
-
-5. **Don't put Mermaid diagrams on every page** — Limit to 1-2 per page, and only when visual representation adds clarity that text alone cannot provide. Architecture and data flow pages benefit most.
-
-6. **Don't use image Cards without actual images** — If you don't have real image URLs, use the large or small card variants instead.
-
-7. **Don't forget `defaultValue` on Tabs** — Without it, no tab is selected by default and users see blank content.
-
-8. **Don't use h1 headings in the body** — The frontmatter `title` is rendered as h1. Start body headings at h2.
-
-9. **Don't write code blocks without language identifiers** — Always specify the language (```typescript, ```bash, etc.) for proper syntax highlighting.
-
-10. **Don't use `showLineNumbers` for single-line code** — Only add line numbers for code blocks longer than 3 lines.
-
----
-
-## Component Composition Rules
-
-These rules govern how components work together and what combinations produce the best results.
-
-1. **CardGrid placement**: Always at the top or bottom of a section, never in the middle of a paragraph. Best used on overview/index pages to provide navigation.
-
-2. **Tabs inside Steps**: This combination works well — a StepItem can contain a Tabs block for platform-specific instructions within a single step.
-
-3. **Code blocks inside StepItem**: Always leave a blank line before and after the code fence inside a StepItem to ensure proper MDX parsing.
-
-4. **Note after code blocks**: Place Notes immediately after code blocks to warn about edge cases or confirm expected output.
-
-5. **FileTree + Mermaid complement**: On architecture pages, use FileTree for physical structure and Mermaid for logical relationships. They show different perspectives of the same system.
-
-6. **Tables before code**: When documenting parameters/options, put the table first (what the options are), then the code example (how to use them).
+- `CardGrid` belongs at the beginning or end of a section.
+- `Tabs` can be used inside `StepItem` for target-specific commands.
+- Code fences inside JSX components need blank lines around them.
+- `FileTree` and `Mermaid` complement each other: FileTree shows physical structure, Mermaid shows logical flow.
+- Tables should introduce options before showing code examples that use those options.
+- Notes should explain consequences or requirements, not repeat surrounding prose.

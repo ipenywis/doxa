@@ -1,0 +1,120 @@
+---
+title: Customization
+description: Customize Doxa branding, theme, colors, icons, MDX components, navigation, and metadata.
+keywords: ["customization", "theme", "branding", "icons", "mdx registry", "doxa"]
+---
+
+Doxa is designed to be edited directly. Most customization happens through settings files, registered components, and static assets rather than a plugin system.
+
+## Customization Map
+
+| Area | File |
+| :-- | :-- |
+| Site name, URL, metadata, feature flags | `src/settings/main.ts` |
+| Navigation and GitHub link | `src/settings/navigation.ts` |
+| Theme choice and primary color | `src/contents/settings/theme.json` |
+| Logo assets | `public/doxa-logo-*.svg`, `public/logo.svg`, `public/favicon.svg` |
+| Icon aliases for MDX cards | `src/settings/icons.ts` |
+| MDX component registry | `src/lib/components.ts` |
+| Component usage guidance | `agent/component-playbook.md` |
+
+## Branding
+
+Update the site name and metadata in `Settings`.
+
+```ts {3-7} showLineNumbers
+export const Settings = {
+  site: {
+    name: "Acme Docs",
+    url: "https://docs.acme.com",
+    description: "Technical documentation for Acme developers.",
+    keywords: ["acme", "api", "developer docs"],
+    icon: "/favicon.svg",
+  },
+}
+```
+
+## Theme And Color
+
+The root route loads `theme.json`, resolves the selected theme, and injects CSS variables for the active font and primary color.
+
+```json showLineNumbers
+{
+  "activeTheme": "default",
+  "primaryColor": "zinc"
+}
+```
+
+<Note title="Visual consistency">
+  Keep docs examples restrained. Use components to clarify content, not to make
+  every section visually different.
+</Note>
+
+## Icons
+
+Cards accept icon keys from `src/settings/icons.ts`.
+
+```ts showLineNumbers
+export const iconMap = {
+  alignJustify: LuAlignJustify,
+  arrowUpRight: LuArrowUpRight,
+}
+```
+
+Then use the key in MDX:
+
+```jsx
+<Card
+  title="Navigation"
+  href="/docs/navigation"
+  icon="alignJustify"
+  variant="small"
+/>
+```
+
+## Register MDX Components
+
+Add MDX-available components to `src/lib/components.ts`.
+
+```ts {8-9} showLineNumbers
+export const components = {
+  a: RoutedLink,
+  Card,
+  CardGrid,
+  FileTree,
+  Mermaid,
+  Note,
+  Step,
+  StepItem,
+}
+```
+
+<Note title="Playbook required" type="warning">
+  When component behavior or examples change, update
+  `agent/component-playbook.md` so the Doxa CLI agent generates docs with the
+  current component knowledge.
+</Note>
+
+## Customization Workflow
+
+<Step>
+  <StepItem title="Change the setting or component">
+    Edit the smallest file that owns the behavior.
+  </StepItem>
+
+  <StepItem title="Update docs examples when needed">
+    If the public authoring surface changes, update the example pages and the component playbook.
+  </StepItem>
+
+  <StepItem title="Regenerate search data">
+    ```bash
+    pnpm generate-content-json
+    ```
+  </StepItem>
+
+  <StepItem title="Build the site">
+    ```bash
+    pnpm build
+    ```
+  </StepItem>
+</Step>

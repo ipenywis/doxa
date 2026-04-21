@@ -1,0 +1,123 @@
+---
+title: Quickstart
+description: Install Doxa Docs, run the development server, edit your first MDX page, and verify the generated search data.
+keywords: ["quickstart", "installation", "pnpm", "doxa", "local development"]
+---
+
+Use this guide to get from a fresh clone to a running Doxa site with editable content and working search metadata.
+
+<Note title="Requirements" type="warning">
+  Doxa expects Node.js `^24.x` and pnpm `10.25.0` or newer. The package manager
+  version is declared in `package.json`.
+</Note>
+
+## Install And Run
+
+<Step>
+  <StepItem title="Clone the repository">
+    ```bash
+    git clone https://github.com/ipenywis/doxa-docs-template.git
+    cd doxa-docs-template
+    ```
+  </StepItem>
+
+  <StepItem title="Install dependencies">
+    ```bash
+    pnpm install
+    ```
+  </StepItem>
+
+  <StepItem title="Start the dev server">
+    ```bash
+    pnpm dev
+    ```
+
+    `pnpm dev` starts the Cloudflare-targeted Vite dev server. Use the Vercel target when you need to test that adapter locally.
+
+    <Tabs defaultValue="cloudflare" className="pt-5 pb-1">
+      <TabsList>
+        <TabsTrigger value="cloudflare">Cloudflare</TabsTrigger>
+        <TabsTrigger value="vercel">Vercel</TabsTrigger>
+      </TabsList>
+      <TabsContent value="cloudflare">
+        ```bash
+        pnpm dev:cloudflare
+        ```
+      </TabsContent>
+      <TabsContent value="vercel">
+        ```bash
+        pnpm dev:vercel
+        ```
+      </TabsContent>
+    </Tabs>
+  </StepItem>
+
+  <StepItem title="Open the docs">
+    Visit the local URL printed by Vite, then open `/docs/overview`.
+
+    ```text
+    http://localhost:5173/docs/overview
+    ```
+  </StepItem>
+</Step>
+
+## Edit Your First Page
+
+Documentation pages live under `src/contents/docs`. Every page is an `index.mdx` file inside a folder that becomes the URL slug.
+
+```markdown showLineNumbers
+---
+title: First Guide
+description: A first guide written in Doxa.
+keywords: ["guide", "mdx", "doxa"]
+---
+
+This page supports **Markdown**, `inline code`, and MDX components.
+
+<Note title="Success" type="success">
+  You are writing Doxa documentation.
+</Note>
+```
+
+## Refresh Search Data
+
+Search, table of contents, and page metadata are derived from `public/search-data/documents.json`. Regenerate it after meaningful docs changes.
+
+```bash
+pnpm generate-content-json
+```
+
+<Note title="Search index" type="success">
+  Regenerating the search data keeps page titles, descriptions, snippets,
+  headings, and keywords aligned with the MDX source.
+</Note>
+
+## Common Commands
+
+| Command | Use |
+| :-- | :-- |
+| `pnpm dev` | Start local development using the default Cloudflare target. |
+| `pnpm build` | Create a production build using the default target. |
+| `pnpm start` | Preview a production build locally. |
+| `pnpm generate-content-json` | Rebuild the search and metadata JSON. |
+| `pnpm generate:docs` | Append newly discovered MDX pages to `documents.json`. |
+| `pnpm lint` | Run ESLint. |
+
+## Next Steps
+
+<CardGrid>
+  <Card
+    title="Project Structure"
+    href="/docs/project-structure"
+    icon="alignJustify"
+    variant="small"
+    description="Find the important files"
+  />
+  <Card
+    title="MDX Components"
+    href="/docs/authoring/mdx-components"
+    icon="alignJustify"
+    variant="small"
+    description="Use the built-in docs blocks"
+  />
+</CardGrid>

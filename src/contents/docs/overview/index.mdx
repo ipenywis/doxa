@@ -1,0 +1,98 @@
+---
+title: Overview
+description: See how Doxa Docs handles rich MDX authoring, AI chat, fast search, flexible content sources, and edge-ready deployment.
+keywords: ["doxa", "documentation template", "mdx", "ai docs", "tanstack start"]
+---
+
+Doxa is a production-ready documentation template for teams that want the docs site, authoring system, and AI experience to feel like one product. It pairs TanStack Start, React 19, Tailwind CSS v4, TypeScript, MDX, and TanStack AI with a focused set of documentation primitives.
+
+<CardGrid>
+  <Card
+    subtitle="Start"
+    title="Install Doxa"
+    description="Clone the template, install dependencies, and run the local docs site."
+    href="/docs/quickstart"
+  />
+  <Card
+    subtitle="Author"
+    title="Write Rich MDX"
+    description="Use Markdown, code blocks, tabs, callouts, cards, diagrams, file trees, tables, and math."
+    href="/docs/authoring/mdx-components"
+  />
+  <Card
+    subtitle="AI"
+    title="Chat With Docs"
+    description="Answer questions from your documentation with a constrained docs-aware assistant."
+    href="/docs/ai/chat-with-docs"
+  />
+</CardGrid>
+
+## What Doxa Ships
+
+| Capability | What it gives you |
+| :-- | :-- |
+| **MDX documentation** | Markdown plus React components registered in `src/lib/components.ts`. |
+| **AI chat** | A streaming chat drawer that searches and reads the docs before answering. |
+| **Search** | Fuzzy search backed by generated page metadata, headings, snippets, and keywords. |
+| **AI-native routes** | `/llms.txt` and `/llms-full.txt` for external AI tools and code assistants. |
+| **Content adapters** | Bundle docs with Vite or fetch them from GitHub at runtime. |
+| **Edge deployment** | Cloudflare Workers by default, with Vercel support included. |
+| **Customization** | Theme, color, logo, metadata, icons, navigation, and MDX registry settings. |
+
+## System Flow
+
+<Mermaid
+  chart={`graph TD;
+    Author[Writer edits MDX] --> Store[contentStore];
+    Store --> Routes[Docs pages];
+    Store --> Search[Search index];
+    Store --> Agent[AI agent tools];
+    Store --> Llms[llms.txt exports];
+    Search --> Reader[Reader finds pages];
+    Agent --> Reader;
+    Routes --> Reader;`}
+/>
+
+The important detail is that Doxa's rendering, search, AI agent, and AI-native exports all read from the same content access layer. Change the content source once and the rest of the app keeps the same contract.
+
+<Note title="Built for real docs">
+  The example pages in this template are intentionally written as product docs
+  for Doxa itself. They are both starter content and working examples of the
+  components available to your own documentation.
+</Note>
+
+## Best Fit
+
+Doxa is a good fit for:
+
+- Product documentation with code-heavy guides.
+- API or SDK docs that need great code blocks and predictable navigation.
+- Internal engineering handbooks that benefit from fast search.
+- AI-ready knowledge bases where `/llms.txt` and chat are first-class.
+- Teams that want content in GitHub but still need a polished reading experience.
+
+## Where To Go Next
+
+<CardGrid>
+  <Card
+    title="Quickstart"
+    href="/docs/quickstart"
+    icon="alignJustify"
+    variant="small"
+    description="Run Doxa locally"
+  />
+  <Card
+    title="Project Structure"
+    href="/docs/project-structure"
+    icon="alignJustify"
+    variant="small"
+    description="Learn the file layout"
+  />
+  <Card
+    title="Configuration"
+    href="/docs/configuration"
+    icon="alignJustify"
+    variant="small"
+    description="Set site and AI options"
+  />
+</CardGrid>

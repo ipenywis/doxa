@@ -1,0 +1,98 @@
+---
+title: Deployment
+description: Deploy Doxa Docs to Cloudflare Workers or Vercel with the right build target, environment variables, and validation steps.
+keywords: ["deployment", "cloudflare workers", "vercel", "build", "environment variables"]
+---
+
+Doxa includes scripts for Cloudflare Workers and Vercel. Cloudflare is the default target, and Vercel has dedicated build and deploy commands.
+
+## Deployment Targets
+
+<Tabs defaultValue="cloudflare" className="pt-5 pb-1">
+  <TabsList>
+    <TabsTrigger value="cloudflare">Cloudflare Workers</TabsTrigger>
+    <TabsTrigger value="vercel">Vercel</TabsTrigger>
+  </TabsList>
+  <TabsContent value="cloudflare">
+    ```bash
+    pnpm build:cloudflare
+    pnpm deploy:cloudflare
+    ```
+  </TabsContent>
+  <TabsContent value="vercel">
+    ```bash
+    pnpm build:vercel
+    pnpm deploy:vercel
+    ```
+  </TabsContent>
+</Tabs>
+
+## Required Production Settings
+
+| Setting | Why it matters |
+| :-- | :-- |
+| `VITE_SITE_URL` | Canonical tags, sitemap, robots, Open Graph URLs, and `llms.txt` source links. |
+| `AI_API_KEY` | Required when Chat with Docs is enabled. |
+| `CONTENT_SOURCE` | Selects bundled or runtime docs content. |
+| GitHub adapter vars | Required only when `CONTENT_SOURCE=github`. |
+
+## Cloudflare Workers
+
+<Step>
+  <StepItem title="Set environment variables and secrets">
+    Add public settings and private secrets in your Cloudflare project.
+
+    ```bash
+    wrangler secret put AI_API_KEY
+    ```
+  </StepItem>
+
+  <StepItem title="Build for Cloudflare">
+    ```bash
+    pnpm build:cloudflare
+    ```
+  </StepItem>
+
+  <StepItem title="Deploy">
+    ```bash
+    pnpm deploy:cloudflare
+    ```
+  </StepItem>
+</Step>
+
+## Vercel
+
+<Step>
+  <StepItem title="Link the project">
+    ```bash
+    vercel link
+    ```
+  </StepItem>
+
+  <StepItem title="Set environment variables">
+    ```bash
+    vercel env add VITE_SITE_URL
+    vercel env add AI_API_KEY
+    ```
+  </StepItem>
+
+  <StepItem title="Deploy">
+    ```bash
+    pnpm deploy:vercel
+    ```
+  </StepItem>
+</Step>
+
+## Preflight Checklist
+
+- [x] `pnpm generate-content-json` has been run after content changes.
+- [x] `src/contents/settings/documents.json` has no stale demo routes.
+- [x] `VITE_SITE_URL` points at the production docs URL.
+- [x] `AI_API_KEY` is set when chat is enabled.
+- [x] `/llms.txt` and `/llms-full.txt` return the expected content.
+- [x] Search opens with `Command+K` or `Ctrl+K`.
+
+<Note title="Build before deploy" type="success">
+  Run the same build target in CI that you deploy in production. That catches
+  route, MDX, and environment issues before traffic reaches the site.
+</Note>

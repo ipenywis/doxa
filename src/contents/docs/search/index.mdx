@@ -1,0 +1,73 @@
+---
+title: Search
+description: Understand Doxa's generated search index, fuzzy matching, highlighted snippets, and keyboard search flow.
+keywords: ["search", "fuzzy search", "search index", "snippets", "keyboard shortcut"]
+---
+
+Doxa includes a search modal for fast page discovery. It reads generated metadata from `public/search-data/documents.json`, ranks results client-side, and highlights matching terms in snippets.
+
+## Search Experience
+
+- Press `Command+K` on macOS or `Ctrl+K` on Windows and Linux.
+- Type at least three characters.
+- Press `Enter` to open the first result.
+- Click any result to navigate to that page.
+
+<Note title="Generated index">
+  Search uses `public/search-data/documents.json`. Regenerate it after editing
+  docs content.
+</Note>
+
+## Index Pipeline
+
+<Mermaid
+  chart={`graph LR;
+    MDX[MDX pages] --> Script[pnpm generate-content-json];
+    Script --> JSON[public/search-data/documents.json];
+    JSON --> Modal[Search modal];
+    Modal --> Rank[Relevance scoring];
+    Rank --> Results[Highlighted results];`}
+/>
+
+## What Gets Indexed
+
+| Source | Search use |
+| :-- | :-- |
+| Frontmatter `title` | High-weight result title. |
+| Frontmatter `description` | Result context and metadata. |
+| Frontmatter `keywords` | High-weight matching terms. |
+| h2 headings | Table of contents and relevance signals. |
+| Body content | Snippet extraction and general matching. |
+| Inline code and bold text | Additional extracted keywords. |
+
+## Regenerate Search Data
+
+```bash
+pnpm generate-content-json
+```
+
+The script parses MDX, removes component wrappers from indexed prose, extracts headings and keywords, and writes the combined JSON file.
+
+## Ranking Model
+
+Doxa combines title, heading, keyword, exact content, and proximity signals. A simplified form looks like this:
+
+```math
+score = \frac{title + headings + keywords + exactMatches + proximity}{\log(contentLength + 1)}
+```
+
+## Content Tips
+
+- Use reader-language titles such as "Chat With Docs" instead of internal names like "Agent UI".
+- Put synonyms in `keywords` when a feature has multiple names.
+- Keep descriptions specific because they appear in search and metadata.
+- Use h2 headings for major topics users may search for.
+
+## Search Troubleshooting
+
+| Problem | Fix |
+| :-- | :-- |
+| New page does not appear | Add it to `documents.json` and regenerate search data. |
+| Result title is wrong | Fix the page frontmatter title. |
+| Search finds stale content | Run `pnpm generate-content-json`. |
+| Relevant page ranks poorly | Improve headings, keywords, and repeated topic language. |

@@ -24,8 +24,8 @@ export type AiConfig =
 
 export const aiConfig: AiConfig = {
   provider: "openrouter",
-  /** Cast when using a model id not yet in the SDK list */
-  model: "moonshotai/kimi-k2.5" as OpenRouterModelId,
+  /** `:nitro` variant routes to the fastest provider for the base model. */
+  model: "z-ai/glm-4.7:nitro" as OpenRouterModelId,
   codeSnippets: true,
   maxContextChunks: 12,
   maxResponseTokens: 2048,

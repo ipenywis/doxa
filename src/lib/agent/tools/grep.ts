@@ -27,7 +27,7 @@ const grepToolDefinition = toolDefinition({
       path: {
         type: "string" as const,
         description:
-          "File or directory to search in, relative to docs root. Defaults to the entire docs directory. Example: basic-setup",
+          "File or directory to search in, relative to docs root. Defaults to the entire docs directory. Example: ai",
       },
       include: {
         type: "string" as const,

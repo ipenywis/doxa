@@ -1,0 +1,96 @@
+---
+title: Content Sources
+description: Choose between bundled Vite documentation and runtime GitHub documentation with Doxa's content adapter layer.
+keywords: ["content sources", "content adapter", "github docs", "vite docs", "contentStore"]
+---
+
+Doxa reads documentation through a single `contentStore` API. The active adapter decides where MDX comes from, while route rendering, AI tools, search-adjacent metadata, and AI-native routes keep the same interface.
+
+## Adapter Options
+
+| Source | Where content lives | Best for |
+| :-- | :-- | :-- |
+| `vite` | `src/contents/docs` in the app repo | Fast bundled docs shipped with the site. |
+| `github` | A GitHub repository fetched at runtime | Content teams editing docs separately from the app. |
+
+## Vite Source
+
+The Vite adapter is the default. It bundles MDX with the app at build time.
+
+```bash
+CONTENT_SOURCE=vite
+```
+
+Use this when docs and site code are shipped together.
+
+## GitHub Source
+
+The GitHub adapter fetches MDX through the GitHub REST API and caches results.
+
+```bash showLineNumbers
+CONTENT_SOURCE=github
+DOXA_GITHUB_OWNER=your-org
+DOXA_GITHUB_REPO=your-docs-repo
+DOXA_GITHUB_BRANCH=main
+DOXA_GITHUB_BASE_PATH=src/contents/docs
+DOXA_GITHUB_TOKEN=ghp_xxx
+DOXA_GITHUB_CACHE_TTL=300
+```
+
+<Note title="Private repositories" type="warning">
+  Private GitHub docs require a fine-grained token with read-only Contents
+  access for the docs repository.
+</Note>
+
+## Shared Contract
+
+<Mermaid
+  chart={`graph TD;
+    App[Docs app] --> Store[contentStore];
+    Store --> Vite[Vite adapter];
+    Store --> GitHub[GitHub adapter];
+    Store --> Routes[Route renderer];
+    Store --> Agent[AI tools];
+    Store --> Llms[llms routes];`}
+/>
+
+The adapters implement the same operations:
+
+| Method | Returns |
+| :-- | :-- |
+| `listFiles()` | All MDX paths relative to the docs root. |
+| `readFile(filePath)` | Raw MDX for a file, or `null` when missing. |
+| `name` | Adapter name for logs and debugging. |
+
+## Choosing A Source
+
+<Tabs defaultValue="vite" className="pt-5 pb-1">
+  <TabsList>
+    <TabsTrigger value="vite">Use Vite</TabsTrigger>
+    <TabsTrigger value="github">Use GitHub</TabsTrigger>
+  </TabsList>
+  <TabsContent value="vite">
+    Choose Vite when documentation changes should ship with application deployments.
+
+    ```bash
+    CONTENT_SOURCE=vite
+    pnpm build
+    ```
+  </TabsContent>
+  <TabsContent value="github">
+    Choose GitHub when writers need to update docs without redeploying the app.
+
+    ```bash
+    CONTENT_SOURCE=github
+    DOXA_GITHUB_OWNER=your-org
+    DOXA_GITHUB_REPO=your-docs-repo
+    ```
+  </TabsContent>
+</Tabs>
+
+## Operational Notes
+
+- Search data is generated from local MDX during build-time workflows.
+- Runtime GitHub content is ideal for route rendering and AI-native reads.
+- Keep folder structure consistent across sources.
+- Document custom adapters if you add R2, KV, Supabase, Notion, or another backend.

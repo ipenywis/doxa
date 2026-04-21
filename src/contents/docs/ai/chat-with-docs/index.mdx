@@ -1,0 +1,118 @@
+---
+title: Chat With Docs
+description: Configure and understand Doxa's built-in AI chat drawer for documentation-aware answers.
+keywords: ["ai chat", "chat with docs", "tanstack ai", "streaming", "documentation assistant"]
+---
+
+Chat with Docs gives readers a side panel where they can ask questions about the documentation they are reading. The assistant is constrained to the docs corpus and uses tools to search and read MDX before answering.
+
+## Reader Experience
+
+The chat button appears in the navigation on `/docs` routes when `Settings.features.chatWithDocs` is enabled. The drawer supports:
+
+- Streaming assistant responses.
+- Visible tool-call activity.
+- Expandable tool output.
+- Conversation history stored in the browser.
+- New conversation and delete controls.
+- Expanded and compact drawer widths.
+
+<Note title="Docs-only answers">
+  The system prompt tells the assistant to answer only from available
+  documentation files. If a question is outside the docs, it should say so.
+</Note>
+
+## Request Flow
+
+<Mermaid
+  chart={`graph TD;
+    Reader[Reader asks question] --> Drawer[Chat drawer];
+    Drawer --> Server[chatWithDocsStream];
+    Server --> Prompt[Docs-aware system prompt];
+    Prompt --> Model[TanStack AI model];
+    Model --> Grep[grep tool];
+    Model --> Cat[cat tool];
+    Grep --> Store[contentStore];
+    Cat --> Store;
+    Store --> Model;
+    Model --> Drawer;
+    Drawer --> Reader;`}
+/>
+
+## Enable Chat
+
+<Step>
+  <StepItem title="Turn on the feature flag">
+    ```ts {4} showLineNumbers
+    export const Settings = {
+      features: {
+        tableOfContents: true,
+        chatWithDocs: true,
+      },
+    }
+    ```
+  </StepItem>
+
+  <StepItem title="Choose a provider">
+    Configure `src/settings/ai.ts`.
+
+    ```ts showLineNumbers
+    export const aiConfig = {
+      provider: "openrouter",
+      model: "z-ai/glm-4.7:nitro",
+      codeSnippets: true,
+      maxContextChunks: 12,
+      maxResponseTokens: 2048,
+    }
+    ```
+  </StepItem>
+
+  <StepItem title="Set the API key">
+    ```bash
+    AI_API_KEY=your-provider-key
+    ```
+  </StepItem>
+
+  <StepItem title="Ask a docs question">
+    Try a question that exists in the docs, such as "How do I switch Doxa to GitHub content?"
+  </StepItem>
+</Step>
+
+## Provider Options
+
+<Tabs defaultValue="openrouter" className="pt-5 pb-1">
+  <TabsList>
+    <TabsTrigger value="openrouter">OpenRouter</TabsTrigger>
+    <TabsTrigger value="openai">OpenAI</TabsTrigger>
+    <TabsTrigger value="anthropic">Anthropic</TabsTrigger>
+  </TabsList>
+  <TabsContent value="openrouter">
+    ```ts
+    provider: "openrouter"
+    ```
+  </TabsContent>
+  <TabsContent value="openai">
+    ```ts
+    provider: "openai"
+    ```
+  </TabsContent>
+  <TabsContent value="anthropic">
+    ```ts
+    provider: "anthropic"
+    ```
+  </TabsContent>
+</Tabs>
+
+## Failure Modes
+
+| Symptom | Likely cause | Fix |
+| :-- | :-- | :-- |
+| Chat returns a missing key error | `AI_API_KEY` is not set | Add the provider key to the environment. |
+| Answers miss new pages | Search data is stale or docs were not deployed | Regenerate search data and redeploy. |
+| The assistant cannot cite a topic | The topic is not documented | Add or expand the relevant MDX page. |
+| Tool calls show no matches | Query terms do not appear in docs | Improve headings, descriptions, and keywords. |
+
+<Note title="Production guidance" type="warning">
+  Keep provider keys on the server. Do not expose `AI_API_KEY` as a Vite public
+  environment variable.
+</Note>
