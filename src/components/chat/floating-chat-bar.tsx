@@ -23,7 +23,7 @@ export function FloatingChatBar() {
 
   return (
     <div className="pointer-events-none fixed inset-x-0 bottom-5 z-40 flex justify-center px-4">
-      <div className="pointer-events-auto flex w-full max-w-sm items-center gap-2 rounded-xl border border-zinc-300 bg-zinc-200 py-1.5 pr-1.5 pl-4 shadow-lg dark:border-border dark:bg-muted dark:ring-1 dark:ring-white/5">
+      <div className="pointer-events-auto flex w-full max-w-sm items-center gap-2 rounded-xl border border-zinc-200 bg-zinc-50 py-1.5 pr-1.5 pl-4 shadow-lg dark:border-border dark:bg-muted dark:ring-1 dark:ring-white/5">
         <input
           type="text"
           value={value}

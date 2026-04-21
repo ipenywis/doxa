@@ -9,8 +9,8 @@ import {
 import { useLocation } from "@tanstack/react-router"
 import { useChatContext } from "@/src/components/chat/chat-context"
 
-const PANEL_WIDTH = "clamp(400px, 30vw, 720px)"
-const PANEL_WIDTH_EXPANDED = "clamp(533px, 45vw, 1040px)"
+const PANEL_WIDTH = "clamp(380px, 24vw, 720px)"
+const PANEL_WIDTH_EXPANDED = "clamp(520px, 34vw, 1040px)"
 
 interface ChatDrawerProps {
   onHistoryClick: () => void
