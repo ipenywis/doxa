@@ -9,9 +9,48 @@ export const READING_LINE_OFFSET = 80
 /** Bottom margin kept below the expanded reading line at max scroll. */
 const BOTTOM_MARGIN = 50
 
+export const APP_SCROLL_CONTAINER_ID = "app-scroll-container"
+
+export interface ScrollRootMetrics {
+  scrollTop: number
+  viewportHeight: number
+  scrollHeight: number
+  rootTop: number
+}
+
 /** Strip the leading `#` from a TOC href to get the element ID. */
 export function hrefToId(href: string): string {
   return href.startsWith("#") ? href.slice(1) : href
+}
+
+export function getAppScrollContainer(): HTMLElement | null {
+  return document.getElementById(APP_SCROLL_CONTAINER_ID)
+}
+
+function isWindowScrollRoot(
+  scrollRoot: HTMLElement | Window
+): scrollRoot is Window {
+  return typeof Window !== "undefined" && scrollRoot instanceof Window
+}
+
+export function getScrollRootMetrics(
+  scrollRoot: HTMLElement | Window
+): ScrollRootMetrics {
+  if (isWindowScrollRoot(scrollRoot)) {
+    return {
+      scrollTop: window.scrollY,
+      viewportHeight: window.innerHeight,
+      scrollHeight: document.documentElement.scrollHeight,
+      rootTop: 0,
+    }
+  }
+
+  return {
+    scrollTop: scrollRoot.scrollTop,
+    viewportHeight: scrollRoot.clientHeight,
+    scrollHeight: scrollRoot.scrollHeight,
+    rootTop: scrollRoot.getBoundingClientRect().top,
+  }
 }
 
 /**
@@ -37,19 +76,19 @@ export function findHeadingElements(tocIds: string[]): HTMLElement[] {
  * Compute the reading line (absolute document position) that determines
  * which heading is currently "active".
  *
- * Normally it sits at `scrollY + READING_LINE_OFFSET`. Near the page bottom
+ * Normally it sits at `scrollTop + READING_LINE_OFFSET`. Near the page bottom
  * it progressively expands toward the viewport bottom so that every section
  * — even short ones at the end — gets a proportional activation range.
  */
 export function computeReadingLine(
-  scrollY: number,
+  scrollTop: number,
   viewportHeight: number,
   docHeight: number
 ): number {
   const maxScrollY = docHeight - viewportHeight
-  const distToBottom = Math.max(0, maxScrollY - scrollY)
+  const distToBottom = Math.max(0, maxScrollY - scrollTop)
 
-  let readingLine = scrollY + READING_LINE_OFFSET
+  let readingLine = scrollTop + READING_LINE_OFFSET
 
   if (maxScrollY > 0 && distToBottom < viewportHeight) {
     const maxExpansion = Math.max(
@@ -71,11 +110,13 @@ export function computeReadingLine(
 export function findActiveHeadingId(
   headings: HTMLElement[],
   readingLine: number,
-  scrollY: number
+  metrics: ScrollRootMetrics
 ): string {
   for (let i = headings.length - 1; i >= 0; i--) {
     const absoluteTop =
-      headings[i].getBoundingClientRect().top + scrollY
+      headings[i].getBoundingClientRect().top -
+      metrics.rootTop +
+      metrics.scrollTop
     if (absoluteTop <= readingLine) {
       return headings[i].id
     }

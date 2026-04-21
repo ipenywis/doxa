@@ -3,6 +3,8 @@ import {
   computeReadingLine,
   findActiveHeadingId,
   findHeadingElements,
+  getAppScrollContainer,
+  getScrollRootMetrics,
   hrefToId,
 } from "@/src/lib/toc"
 
@@ -31,6 +33,7 @@ const HASH_POLL_MAX = 3000
 export function useScrollSpy(tocs: TocItem[]) {
   const [activeId, setActiveId] = useState("")
 
+  const scrollRootRef = useRef<HTMLElement | Window | null>(null)
   const scrollLockedRef = useRef(false)
   const rafRef = useRef<number | null>(null)
   const unlockTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
@@ -62,9 +65,10 @@ export function useScrollSpy(tocs: TocItem[]) {
           unlock()
           clearTimeout(fallback)
         }
-        window.addEventListener("scrollend", onEnd, { once: true })
+        const scrollRoot = scrollRootRef.current ?? window
+        scrollRoot.addEventListener("scrollend", onEnd, { once: true })
         const fallback = setTimeout(() => {
-          window.removeEventListener("scrollend", onEnd)
+          scrollRoot.removeEventListener("scrollend", onEnd)
           unlock()
         }, SCROLL_LOCK_TIMEOUT)
         unlockTimerRef.current = fallback
@@ -79,6 +83,8 @@ export function useScrollSpy(tocs: TocItem[]) {
 
   useEffect(() => {
     const tocIds = tocs.map(({ href }) => hrefToId(href))
+    const scrollRoot = getAppScrollContainer() ?? window
+    scrollRootRef.current = scrollRoot
 
     // ---- Scroll spy ------------------------------------------------------
 
@@ -89,13 +95,13 @@ export function useScrollSpy(tocs: TocItem[]) {
       const headings = findHeadingElements(tocIds)
       if (headings.length === 0) return
 
-      const scrollY = window.scrollY
+      const metrics = getScrollRootMetrics(scrollRoot)
       const readingLine = computeReadingLine(
-        scrollY,
-        window.innerHeight,
-        document.body.scrollHeight
+        metrics.scrollTop,
+        metrics.viewportHeight,
+        metrics.scrollHeight
       )
-      setActiveId(findActiveHeadingId(headings, readingLine, scrollY))
+      setActiveId(findActiveHeadingId(headings, readingLine, metrics))
     }
 
     const onScroll = () => {
@@ -104,7 +110,7 @@ export function useScrollSpy(tocs: TocItem[]) {
       }
     }
 
-    window.addEventListener("scroll", onScroll, { passive: true })
+    scrollRoot.addEventListener("scroll", onScroll, { passive: true })
 
     // ---- Hash scroll (page load / refresh) -------------------------------
     // Capture the hash NOW and lock immediately so that no scroll event
@@ -125,9 +131,7 @@ export function useScrollSpy(tocs: TocItem[]) {
 
     const attemptHashScroll = () => {
       if (hashHandled) return
-      const target = hashTargetId
-        ? document.getElementById(hashTargetId)
-        : null
+      const target = hashTargetId ? document.getElementById(hashTargetId) : null
 
       if (target) {
         hashHandled = true
@@ -135,10 +139,7 @@ export function useScrollSpy(tocs: TocItem[]) {
         requestAnimationFrame(() => {
           requestAnimationFrame(() => {
             target.scrollIntoView({ behavior: "instant" })
-            unlockTimerRef.current = setTimeout(
-              unlock,
-              INSTANT_SCROLL_SETTLE
-            )
+            unlockTimerRef.current = setTimeout(unlock, INSTANT_SCROLL_SETTLE)
           })
         })
       } else {
@@ -198,7 +199,7 @@ export function useScrollSpy(tocs: TocItem[]) {
       if (hashPollTimer) clearTimeout(hashPollTimer)
       if (hashGiveUpTimer) clearTimeout(hashGiveUpTimer)
       if (rafRef.current !== null) cancelAnimationFrame(rafRef.current)
-      window.removeEventListener("scroll", onScroll)
+      scrollRoot.removeEventListener("scroll", onScroll)
       window.removeEventListener("hashchange", onHashChange)
       if (moActive) mo.disconnect()
     }
