@@ -226,7 +226,7 @@
   text-align: right;
 }
 
-.highlight {
+.search-highlight {
   font-weight: 600;
   color: var(--foreground);
   background-color: oklch(0.95 0.05 90);
@@ -234,9 +234,7 @@
   border-radius: 3px;
 }
 
-.dark .highlight {
-  font-weight: 600;
-  color: var(--foreground);
+.dark .search-highlight {
   background-color: oklch(0.3 0.05 90);
 }
 

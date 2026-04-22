@@ -195,11 +195,11 @@ function RootDocument({
                   </main>
                   {!isDemoMode && <Footer />}
                 </div>
-                {Settings.features.chatWithDocs &&
+                {Settings.features.ai.chat &&
                   (isDemoMode ? <DemoChatWithDocs /> : <ChatWithDocs />)}
               </div>
-              {Settings.features.chatWithDocs &&
-                Settings.features.chatWithDocsFloatingBar &&
+              {Settings.features.ai.chat &&
+                Settings.features.ai.floatingInput &&
                 !isDemoMode && <FloatingChatBar />}
             </ChatProvider>
           </DemoModeProvider>

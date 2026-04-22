@@ -36,7 +36,9 @@ export const Route = createFileRoute("/docs/$")({
       const routeTitle = PageRoutes.find((r) => r.href === `/${slug}`)?.title ?? null
       // Deferred: not awaited. Streams in after initial HTML so copy-page can
       // read from a resolved promise on first interaction without blocking SSR.
-      const rawDoc = fetchRawDocument({ data: slug }).catch(() => null)
+      const rawDoc = Settings.features.copyPage.markdown
+        ? fetchRawDocument({ data: slug }).catch(() => null)
+        : null
       return { slug, document, routeTitle, rawDoc }
     } catch {
       return { slug, document: null, routeTitle: null, rawDoc: null }
@@ -118,6 +120,8 @@ function DocsContent() {
 
   const description = pageDocument?.frontmatter?.description
   const sectionHeading = findSectionHeading(slug)
+  const copyPageEnabled =
+    Settings.features.copyPage.markdown || Settings.features.copyPage.rawText
   const pageContext = useMemo<ChatPageContext | null>(() => {
     if (!slug || !pageDocument) return null
 
@@ -171,8 +175,17 @@ function DocsContent() {
             {title}
           </h1>
           <div className="flex shrink-0 flex-wrap items-center gap-2">
-            {pageContext && <ChatWithPage pageContext={pageContext} />}
-            <CopyPage rawDoc={rawDoc} title={title} description={description} />
+            {Settings.features.ai.chat &&
+              Settings.features.ai.chatWithPage &&
+              pageContext && <ChatWithPage pageContext={pageContext} />}
+            {copyPageEnabled && (
+              <CopyPage
+                options={Settings.features.copyPage}
+                rawDoc={rawDoc}
+                title={title}
+                description={description}
+              />
+            )}
           </div>
         </div>
         {description && (

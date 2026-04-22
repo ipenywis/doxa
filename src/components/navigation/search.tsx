@@ -1,37 +1,81 @@
-import { useEffect, useMemo, useState } from "react"
-import Anchor from "@/src/components/anchor"
+import { useCallback, useEffect, useMemo, useRef, useState } from "react"
+import { useChatContext } from "@/src/components/chat/chat-context"
 import {
   Dialog,
-  DialogClose,
   DialogContent,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
 } from "@/src/components/ui/dialog"
 import { ScrollArea } from "@/src/components/ui/scroll-area"
-import { advanceSearch, cn, debounce, highlight, search } from "@/src/lib/utils"
-import Documents from "@/src/contents/settings/documents.json"
-import { isRoute } from "@/src/lib/pageroutes"
-import { LuFileText, LuSearch } from "react-icons/lu"
+import { highlightTerms } from "@/src/lib/search/highlight"
+import {
+  preloadSearchIndex,
+  searchDocs,
+  type SearchResult,
+} from "@/src/lib/search"
+import { loadRecent, saveRecent } from "@/src/lib/search/recent"
+import { cn } from "@/src/lib/utils"
+import { useNavigate } from "@tanstack/react-router"
+import {
+  LuChevronRight,
+  LuClock,
+  LuFileText,
+  LuSearch,
+  LuSparkles,
+} from "react-icons/lu"
+
+const MIN_QUERY_LENGTH = 2
 
 export default function Search() {
-  const [searchedInput, setSearchedInput] = useState("")
+  const [query, setQuery] = useState("")
   const [isOpen, setIsOpen] = useState(false)
-  const [filteredResults, setFilteredResults] = useState<search[]>([])
-  const [isLoading, setIsLoading] = useState(false)
+  const [results, setResults] = useState<SearchResult[]>([])
+  const [selectedIndex, setSelectedIndex] = useState(0)
+  const [recent, setRecent] = useState<string[]>([])
+  const listRef = useRef<HTMLDivElement | null>(null)
+  const inputRef = useRef<HTMLInputElement | null>(null)
+  const navigate = useNavigate()
+  const { submitQuery } = useChatContext()
 
-  const debouncedSearch = useMemo(
-    () =>
-      debounce(async (input: string) => {
-        setIsLoading(true)
-        const results = await advanceSearch(input.trim())
-        setFilteredResults(results)
-        setIsLoading(false)
-      }, 300),
-    []
-  )
+  const trimmed = query.trim()
+  const hasQuery = trimmed.length >= MIN_QUERY_LENGTH
 
-  // ⌘K / Ctrl+K keyboard shortcut to open search
+  useEffect(() => {
+    if (typeof window === "undefined") return
+    const schedule =
+      (window as Window & typeof globalThis).requestIdleCallback ??
+      ((cb: () => void) => window.setTimeout(cb, 200))
+    const cancel =
+      (window as Window & typeof globalThis).cancelIdleCallback ??
+      ((id: number) => window.clearTimeout(id))
+    const handle = schedule(() => {
+      preloadSearchIndex()
+    })
+    return () => cancel(handle as number)
+  }, [])
+
+  useEffect(() => {
+    if (isOpen) setRecent(loadRecent())
+  }, [isOpen])
+
+  useEffect(() => {
+    if (!hasQuery) {
+      setResults([])
+      setSelectedIndex(0)
+      return
+    }
+    let cancelled = false
+    searchDocs(trimmed).then((hits) => {
+      if (cancelled) return
+      setResults(hits)
+      setSelectedIndex(0)
+    })
+    return () => {
+      cancelled = true
+    }
+  }, [trimmed, hasQuery])
+
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
       if ((event.metaKey || event.ctrlKey) && event.key === "k") {
@@ -39,152 +83,311 @@ export default function Search() {
         setIsOpen((prev) => !prev)
       }
     }
-
     window.addEventListener("keydown", handleKeyDown)
     return () => window.removeEventListener("keydown", handleKeyDown)
   }, [])
 
-  // Enter key to navigate to first result
+  const navigateToResult = useCallback(
+    (result: SearchResult) => {
+      saveRecent(trimmed)
+      const href = `/docs${result.slug}${result.snippetAnchor ? `#${result.snippetAnchor}` : ""}`
+      navigate({ to: href })
+      setIsOpen(false)
+    },
+    [navigate, trimmed]
+  )
+
+  const handleAskAi = useCallback(() => {
+    if (!hasQuery) return
+    saveRecent(trimmed)
+    submitQuery(`Tell me more about "${trimmed}"`)
+    setIsOpen(false)
+  }, [hasQuery, submitQuery, trimmed])
+
+  const runRecent = useCallback((q: string) => {
+    setQuery(q)
+    setSelectedIndex(0)
+    inputRef.current?.focus()
+  }, [])
+
+  const activations = useMemo<(() => void)[]>(() => {
+    if (hasQuery) {
+      return [
+        ...results.map((r) => () => navigateToResult(r)),
+        () => handleAskAi(),
+      ]
+    }
+    return recent.map((q) => () => runRecent(q))
+  }, [hasQuery, results, recent, navigateToResult, handleAskAi, runRecent])
+
+  const selectedIndexRef = useRef(selectedIndex)
+  const activationsRef = useRef(activations)
+  selectedIndexRef.current = selectedIndex
+  activationsRef.current = activations
+
+  const handleKey = useCallback((event: React.KeyboardEvent) => {
+    const items = activationsRef.current
+    if (items.length === 0) return
+    if (event.key === "ArrowDown") {
+      event.preventDefault()
+      event.stopPropagation()
+      setSelectedIndex((i) => (i + 1) % items.length)
+    } else if (event.key === "ArrowUp") {
+      event.preventDefault()
+      event.stopPropagation()
+      setSelectedIndex((i) => (i - 1 + items.length) % items.length)
+    } else if (event.key === "Home") {
+      event.preventDefault()
+      setSelectedIndex(0)
+    } else if (event.key === "End") {
+      event.preventDefault()
+      setSelectedIndex(items.length - 1)
+    } else if (event.key === "Enter") {
+      event.preventDefault()
+      event.stopPropagation()
+      const idx = selectedIndexRef.current
+      const fn = items[idx]
+      if (fn) fn()
+    }
+  }, [])
+
   useEffect(() => {
-    const handleKeyDown = (event: KeyboardEvent) => {
-      if (isOpen && event.key === "Enter" && filteredResults.length > 0) {
-        const selected = filteredResults[0]
-        if ("href" in selected) {
-          window.location.href = `/docs${selected.href}`
-          setIsOpen(false)
+    if (!listRef.current) return
+    const selected = listRef.current.querySelector<HTMLElement>(
+      "[data-search-selected='true']"
+    )
+    selected?.scrollIntoView({ block: "nearest" })
+  }, [selectedIndex])
+
+  return (
+    <Dialog
+      open={isOpen}
+      onOpenChange={(open) => {
+        setIsOpen(open)
+        if (!open) {
+          setTimeout(() => {
+            setQuery("")
+            setResults([])
+            setSelectedIndex(0)
+          }, 150)
         }
-      }
-    }
+      }}
+    >
+      <DialogTrigger asChild>
+        <div className="relative max-w-md flex-1 cursor-pointer">
+          <LuSearch className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+          <div className="flex h-9 w-full items-center rounded-md border bg-background pr-2 pl-10 text-sm text-muted-foreground shadow-sm md:w-[200px] lg:w-[260px]">
+            <span className="flex-1">Search...</span>
+            <kbd className="pointer-events-none hidden h-5 items-center gap-1 rounded border bg-muted px-1.5 font-mono text-[10px] font-medium text-muted-foreground sm:flex">
+              <span className="text-xs">⌘</span>K
+            </kbd>
+          </div>
+        </div>
+      </DialogTrigger>
+      <DialogContent
+        className="top-[45%] max-w-xs p-0 sm:top-[38%] sm:max-w-lg"
+        onKeyDown={handleKey}
+        onOpenAutoFocus={(event) => {
+          event.preventDefault()
+          inputRef.current?.focus()
+        }}
+      >
+        <DialogTitle className="sr-only">Search documentation</DialogTitle>
+        <DialogHeader>
+          <input
+            ref={inputRef}
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            placeholder="Search documentation..."
+            className="h-14 border-b bg-transparent px-4 text-[15px] outline-none"
+          />
+        </DialogHeader>
 
-    window.addEventListener("keydown", handleKeyDown)
+        {!hasQuery && query.length > 0 && (
+          <p className="mx-auto mt-3 pb-4 text-sm text-muted-foreground">
+            Keep typing… at least {MIN_QUERY_LENGTH} characters
+          </p>
+        )}
 
-    return () => {
-      window.removeEventListener("keydown", handleKeyDown)
-    }
-  }, [isOpen, filteredResults])
+        {!hasQuery && query.length === 0 && recent.length > 0 && (
+          <div
+            ref={listRef}
+            className="flex flex-col items-stretch gap-0.5 px-1 pt-1 pr-3 pb-2 sm:px-2 sm:pr-4"
+          >
+            <p className="px-3 pt-1 pb-1 text-[11px] font-medium tracking-wide text-muted-foreground uppercase">
+              Recent searches
+            </p>
+            {recent.map((q, i) => (
+              <RecentRow
+                key={q}
+                query={q}
+                selected={i === selectedIndex}
+                onHover={() => setSelectedIndex(i)}
+                onClick={() => runRecent(q)}
+              />
+            ))}
+          </div>
+        )}
 
-  useEffect(() => {
-    if (searchedInput.length < 3) {
-      Promise.resolve().then(() => setFilteredResults([]))
+        {hasQuery && (
+          <ScrollArea className="max-h-[400px] w-full overflow-hidden">
+            <div
+              ref={listRef}
+              className="flex w-full flex-col items-stretch gap-0.5 px-1 pt-1 pr-3 pb-2 sm:px-2 sm:pr-4"
+            >
+              {results.length === 0 && (
+                <p className="px-3 py-4 text-sm text-muted-foreground">
+                  No results for{" "}
+                  <span className="text-primary">{`"${trimmed}"`}</span>
+                </p>
+              )}
+
+              {results.map((result, index) => (
+                <SearchResultRow
+                  key={result.id}
+                  result={result}
+                  selected={index === selectedIndex}
+                  onHover={() => setSelectedIndex(index)}
+                  onClick={() => navigateToResult(result)}
+                />
+              ))}
+
+              <AskAiRow
+                query={trimmed}
+                selected={selectedIndex === results.length}
+                onHover={() => setSelectedIndex(results.length)}
+                onClick={handleAskAi}
+              />
+            </div>
+          </ScrollArea>
+        )}
+      </DialogContent>
+    </Dialog>
+  )
+}
+
+interface RowProps {
+  result: SearchResult
+  selected: boolean
+  onHover: () => void
+  onClick: () => void
+}
+
+function SearchResultRow({ result, selected, onHover, onClick }: RowProps) {
+  const href = `/docs${result.slug}${result.snippetAnchor ? `#${result.snippetAnchor}` : ""}`
+  const snippetHtml = useMemo(
+    () => highlightTerms(result.snippetLine, result.terms),
+    [result.snippetLine, result.terms]
+  )
+
+  const handleClick = (event: React.MouseEvent<HTMLAnchorElement>) => {
+    if (event.metaKey || event.ctrlKey || event.shiftKey || event.button !== 0) {
       return
     }
-
-    debouncedSearch(searchedInput)
-  }, [searchedInput, debouncedSearch])
-
-  function renderDocuments(): React.ReactNode[] {
-    return Documents.flatMap((doc) => {
-      if (!isRoute(doc) || doc.noLink) return []
-
-      const href = `/docs${doc.href}`
-
-      return [
-        <DialogClose key={href} asChild>
-          <Anchor
-            className={cn(
-              "flex w-full items-center gap-2.5 rounded-sm px-3 text-[15px] transition-colors duration-75 hover:bg-accent"
-            )}
-            href={href}
-          >
-            <div className="flex h-full w-fit items-center gap-1.5 py-3 whitespace-nowrap">
-              <LuFileText className="h-[1.1rem] w-[1.1rem]" /> {doc.title}
-            </div>
-          </Anchor>
-        </DialogClose>,
-      ]
-    })
+    event.preventDefault()
+    onClick()
   }
 
   return (
-    <>
-      <Dialog
-        open={isOpen}
-        onOpenChange={(open) => {
-          setIsOpen(open)
-          if (!open) {
-            setTimeout(() => setSearchedInput(""), 200)
-          }
-        }}
-      >
-        <DialogTrigger asChild>
-          <div className="relative max-w-md flex-1 cursor-pointer">
-            <LuSearch className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-            <div className="flex h-9 w-full items-center rounded-md border bg-background pr-2 pl-10 text-sm text-muted-foreground shadow-sm md:w-[200px] lg:w-[260px]">
-              <span className="flex-1">Search...</span>
-              <kbd className="pointer-events-none hidden h-5 items-center gap-1 rounded border bg-muted px-1.5 font-mono text-[10px] font-medium text-muted-foreground sm:flex">
-                <span className="text-xs">⌘</span>K
-              </kbd>
-            </div>
+    <a
+      href={href}
+      onClick={handleClick}
+      onMouseEnter={onHover}
+      data-search-selected={selected}
+      className={cn(
+        "flex w-full items-start gap-3 rounded-md px-3 py-2.5",
+        selected ? "bg-accent" : "hover:bg-accent/60"
+      )}
+    >
+      <span className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-md border bg-muted text-muted-foreground">
+        <LuFileText className="h-4 w-4" />
+      </span>
+      <div className="flex min-w-0 flex-1 flex-col gap-0.5">
+        {result.breadcrumb.length > 0 && (
+          <div className="flex items-center gap-1 text-xs text-muted-foreground">
+            {result.breadcrumb.map((crumb, i) => (
+              <span key={i} className="flex items-center gap-1 truncate">
+                {i > 0 && <LuChevronRight className="h-3 w-3 shrink-0" />}
+                <span className="truncate">{crumb}</span>
+              </span>
+            ))}
           </div>
-        </DialogTrigger>
-        <DialogContent className="top-[45%] max-w-xs p-0 sm:top-[38%] sm:max-w-lg">
-          <DialogTitle className="sr-only">Search</DialogTitle>
-          <DialogHeader>
-            <input
-              value={searchedInput}
-              onChange={(e) => setSearchedInput(e.target.value)}
-              placeholder="Search documentation..."
-              autoFocus
-              className="h-14 border-b bg-transparent px-4 text-[15px] outline-none"
-            />
-          </DialogHeader>
-          {searchedInput.length > 0 && searchedInput.length < 3 && (
-            <p className="text-warning mx-auto mt-2 text-sm">
-              Please enter at least 3 characters.
-            </p>
-          )}
-          {isLoading ? (
-            <p className="mx-auto mt-2 text-sm text-muted-foreground">
-              Searching...
-            </p>
-          ) : (
-            filteredResults.length === 0 &&
-            searchedInput.length >= 3 && (
-              <p className="mx-auto mt-2 text-sm text-muted-foreground">
-                No results found for{" "}
-                <span className="text-primary">{`"${searchedInput}"`}</span>
-              </p>
-            )
-          )}
-          <ScrollArea className="max-h-[350px] w-full overflow-hidden">
-            <div className="flex w-full flex-col items-start px-1 pt-1 pb-4 sm:px-3">
-              {searchedInput
-                ? filteredResults.map((item) => {
-                    if ("href" in item) {
-                      return (
-                        <DialogClose key={item.href} asChild>
-                          <Anchor
-                            className={cn(
-                              "flex w-full max-w-[310px] flex-col gap-0.5 rounded-sm p-3 text-[15px] transition-colors duration-75 hover:bg-accent sm:max-w-[480px]"
-                            )}
-                            href={`/docs${item.href}`}
-                          >
-                            <div className="flex h-full items-center gap-x-2">
-                              <LuFileText className="h-[1.1rem] w-[1.1rem]" />
-                              <span className="truncate">{item.title}</span>
-                            </div>
-                            {"snippet" in item && item.snippet && (
-                              <p
-                                className="truncate text-xs text-muted-foreground"
-                                dangerouslySetInnerHTML={{
-                                  __html: highlight(
-                                    item.snippet,
-                                    searchedInput
-                                  ),
-                                }}
-                              />
-                            )}
-                          </Anchor>
-                        </DialogClose>
-                      )
-                    }
-                    return null
-                  })
-                : renderDocuments()}
-            </div>
-          </ScrollArea>
-        </DialogContent>
-      </Dialog>
-    </>
+        )}
+        <span className="truncate text-[15px] font-semibold text-primary">
+          {result.title}
+        </span>
+        {result.snippetLine && (
+          <p
+            className="line-clamp-2 text-xs leading-snug text-muted-foreground"
+            dangerouslySetInnerHTML={{ __html: snippetHtml }}
+          />
+        )}
+      </div>
+    </a>
+  )
+}
+
+function AskAiRow({
+  query,
+  selected,
+  onHover,
+  onClick,
+}: {
+  query: string
+  selected: boolean
+  onHover: () => void
+  onClick: () => void
+}) {
+  return (
+    <button
+      type="button"
+      data-search-selected={selected}
+      onMouseEnter={onHover}
+      onClick={onClick}
+      className={cn(
+        "mt-1 flex w-full items-center gap-3 rounded-md border border-dashed px-3 py-2.5 text-left",
+        selected ? "border-primary/50 bg-accent" : "hover:bg-accent/60"
+      )}
+    >
+      <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-primary/10 text-primary">
+        <LuSparkles className="h-4 w-4" />
+      </span>
+      <span className="flex min-w-0 flex-1 flex-col gap-0.5">
+        <span className="text-xs text-muted-foreground">Ask AI</span>
+        <span className="truncate text-[14px] font-medium text-primary">
+          Tell me more about <span className="italic">&quot;{query}&quot;</span>
+        </span>
+      </span>
+    </button>
+  )
+}
+
+function RecentRow({
+  query,
+  selected,
+  onHover,
+  onClick,
+}: {
+  query: string
+  selected: boolean
+  onHover: () => void
+  onClick: () => void
+}) {
+  return (
+    <button
+      type="button"
+      data-search-selected={selected}
+      onClick={onClick}
+      onMouseEnter={onHover}
+      className={cn(
+        "flex w-full items-center gap-3 rounded-md px-3 py-2 text-left",
+        selected ? "bg-accent" : "hover:bg-accent/60"
+      )}
+    >
+      <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md border bg-muted text-muted-foreground">
+        <LuClock className="h-3.5 w-3.5" />
+      </span>
+      <span className="truncate text-[14px] text-foreground">{query}</span>
+    </button>
   )
 }

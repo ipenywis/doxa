@@ -8,7 +8,7 @@ Chat with Docs gives readers a side panel where they can ask questions about the
 
 ## Reader Experience
 
-The chat button appears in the navigation on `/docs` routes when `Settings.features.chatWithDocs` is enabled. The drawer supports:
+The chat button appears in the navigation on `/docs` routes when `Settings.features.ai.chat` is enabled. The drawer supports:
 
 - Streaming assistant responses.
 - Visible tool-call activity.
@@ -43,11 +43,15 @@ The chat button appears in the navigation on `/docs` routes when `Settings.featu
 
 <Step>
   <StepItem title="Turn on the feature flag">
-    ```ts {4} showLineNumbers
+    ```ts {4-8} showLineNumbers
     export const Settings = {
       features: {
         tableOfContents: true,
-        chatWithDocs: true,
+        ai: {
+          chat: true,
+          chatWithPage: true,
+          floatingInput: true,
+        },
       },
     }
     ```

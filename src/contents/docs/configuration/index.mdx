@@ -25,7 +25,15 @@ export const Settings = {
     feedbackEdit: true,
     tableOfContents: true,
     scrollToTop: true,
-    chatWithDocs: true,
+    ai: {
+      chat: true,
+      chatWithPage: true,
+      floatingInput: true,
+    },
+    copyPage: {
+      markdown: true,
+      rawText: true,
+    },
     loadFromGithub: false,
   },
 }
@@ -115,7 +123,10 @@ The docs chat uses TanStack AI. Configure the provider and model in `src/setting
 
 ## Feature Toggle Guidance
 
-- Keep `chatWithDocs` enabled for demos that showcase the AI assistant.
+- Keep `ai.chat` enabled for demos that showcase the AI assistant.
+- Disable `ai.chatWithPage` when readers should use only the main Chat with Docs drawer.
+- Disable `ai.floatingInput` when the bottom floating prompt is too prominent for your docs.
+- Use `copyPage.markdown` and `copyPage.rawText` to control page-level copy formats.
 - Disable `feedbackEdit` unless `GitHubLink.href` points at a real repository.
 - Keep `tableOfContents` enabled for long reference pages.
 - Use `loadFromGithub` as a product-facing toggle only after `CONTENT_SOURCE=github` is configured.

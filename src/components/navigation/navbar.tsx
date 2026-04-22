@@ -38,7 +38,7 @@ export function Navbar() {
               <LuGithub className="h-[1.1rem] w-[1.1rem]" />
             </a>
           )}
-          {Settings.features.chatWithDocs && <ChatButton />}
+          {Settings.features.ai.chat && <ChatButton />}
           <ModeToggle />
         </div>
       </div>

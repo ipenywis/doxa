@@ -21,6 +21,11 @@ type DeferredRawDoc =
   | null
   | undefined
 
+interface CopyPageOptions {
+  markdown: boolean
+  rawText: boolean
+}
+
 function composeMarkdown(doc: RawDocument) {
   const parts = [`# ${doc.title}`]
   if (doc.description) parts.push(doc.description)
@@ -38,16 +43,23 @@ function composeText(title: string, description?: string) {
 }
 
 export function CopyPage({
+  options,
   rawDoc,
   title,
   description,
 }: {
+  options: CopyPageOptions
   rawDoc: DeferredRawDoc
   title: string
   description?: string
 }) {
   const [copied, setCopied] = useState(false)
   const [open, setOpen] = useState(false)
+  const hasMultipleOptions = options.markdown && options.rawText
+  const primaryCopyAction = options.markdown ? copyMarkdown : copyText
+  const primaryCopyLabel = options.markdown
+    ? "Copy page as markdown"
+    : "Copy page as text"
 
   function flashCopied() {
     setCopied(true)
@@ -66,12 +78,14 @@ export function CopyPage({
     flashCopied()
   }
 
+  if (!options.markdown && !options.rawText) return null
+
   return (
     <div className="inline-flex h-8 shrink-0 items-stretch overflow-hidden rounded-md border bg-background shadow-xs dark:bg-input/30">
       <button
         type="button"
-        onClick={copyMarkdown}
-        aria-label="Copy page as markdown"
+        onClick={primaryCopyAction}
+        aria-label={primaryCopyLabel}
         className="inline-flex cursor-pointer items-center gap-1.5 px-3 text-xs font-medium outline-none hover:bg-accent hover:text-accent-foreground focus-visible:ring-2 focus-visible:ring-ring/50 focus-visible:ring-inset dark:hover:bg-input/50"
       >
         <span className="relative inline-flex size-3.5 items-center justify-center">
@@ -90,33 +104,42 @@ export function CopyPage({
         </span>
         <span>{copied ? "Copied" : "Copy page"}</span>
       </button>
-      <div className="w-px self-stretch bg-border" />
-      <DropdownMenu open={open} onOpenChange={setOpen}>
-        <DropdownMenuTrigger
-          aria-label="Copy options"
-          className="inline-flex cursor-pointer items-center px-2 outline-none hover:bg-accent hover:text-accent-foreground focus-visible:ring-2 focus-visible:ring-ring/50 focus-visible:ring-inset data-[state=open]:bg-accent dark:hover:bg-input/50"
-        >
-          <LuChevronDown className="size-3.5" />
-        </DropdownMenuTrigger>
-        <DropdownMenuContent align="end" className="min-w-44">
-          <DropdownMenuItem onSelect={copyMarkdown} className="cursor-pointer">
-            <LuFileCode className="size-4" />
-            <div className="flex flex-col">
-              <span>Copy as Markdown</span>
-              <span className="text-xs text-muted-foreground">
-                Raw MDX source
-              </span>
-            </div>
-          </DropdownMenuItem>
-          <DropdownMenuItem onSelect={copyText} className="cursor-pointer">
-            <LuFileText className="size-4" />
-            <div className="flex flex-col">
-              <span>Copy as Text</span>
-              <span className="text-xs text-muted-foreground">Plain text</span>
-            </div>
-          </DropdownMenuItem>
-        </DropdownMenuContent>
-      </DropdownMenu>
+      {hasMultipleOptions && (
+        <>
+          <div className="w-px self-stretch bg-border" />
+          <DropdownMenu open={open} onOpenChange={setOpen}>
+            <DropdownMenuTrigger
+              aria-label="Copy options"
+              className="inline-flex cursor-pointer items-center px-2 outline-none hover:bg-accent hover:text-accent-foreground focus-visible:ring-2 focus-visible:ring-ring/50 focus-visible:ring-inset data-[state=open]:bg-accent dark:hover:bg-input/50"
+            >
+              <LuChevronDown className="size-3.5" />
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="min-w-44">
+              <DropdownMenuItem
+                onSelect={copyMarkdown}
+                className="cursor-pointer"
+              >
+                <LuFileCode className="size-4" />
+                <div className="flex flex-col">
+                  <span>Copy as Markdown</span>
+                  <span className="text-xs text-muted-foreground">
+                    Copy as markdown
+                  </span>
+                </div>
+              </DropdownMenuItem>
+              <DropdownMenuItem onSelect={copyText} className="cursor-pointer">
+                <LuFileText className="size-4" />
+                <div className="flex flex-col">
+                  <span>Copy as text</span>
+                  <span className="text-xs text-muted-foreground">
+                    Plain text
+                  </span>
+                </div>
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </>
+      )}
     </div>
   )
 }

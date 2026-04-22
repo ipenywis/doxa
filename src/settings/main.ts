@@ -1,5 +1,16 @@
 import type { OpenGraph, TwitterCard } from "@/src/types/opengraph"
 
+interface AiFeatureSettings {
+  chat: boolean
+  chatWithPage: boolean
+  floatingInput: boolean
+}
+
+interface CopyPageFeatureSettings {
+  markdown: boolean
+  rawText: boolean
+}
+
 interface AppSettings {
   site: {
     name: string
@@ -27,8 +38,8 @@ interface AppSettings {
     feedbackEdit: boolean
     tableOfContents: boolean
     scrollToTop: boolean
-    chatWithDocs: boolean
-    chatWithDocsFloatingBar: boolean
+    ai: AiFeatureSettings
+    copyPage: CopyPageFeatureSettings
     loadFromGithub: boolean
   }
   openGraph: OpenGraph
@@ -68,8 +79,15 @@ export const Settings: AppSettings = {
     feedbackEdit: true,
     tableOfContents: true,
     scrollToTop: true,
-    chatWithDocs: true,
-    chatWithDocsFloatingBar: true,
+    ai: {
+      chat: true,
+      chatWithPage: true,
+      floatingInput: true,
+    },
+    copyPage: {
+      markdown: true,
+      rawText: true,
+    },
     loadFromGithub: false,
   },
   openGraph: {

@@ -193,7 +193,11 @@ Example:
 ```ts {4-6} showLineNumbers
 export const Settings = {
   features: {
-    chatWithDocs: true,
+    ai: {
+      chat: true,
+      chatWithPage: true,
+      floatingInput: true,
+    },
     tableOfContents: true,
   },
 }

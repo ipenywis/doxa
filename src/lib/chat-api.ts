@@ -15,6 +15,7 @@ import type {
 import { contentStore } from "@/src/lib/content/store"
 import { PageRoutes } from "@/src/lib/pageroutes"
 import { aiConfig } from "@/src/settings/ai"
+import { Settings } from "@/src/settings/main"
 
 const chatPageContextSchema = z.object({
   slug: z.string().min(1),
@@ -138,6 +139,13 @@ export const chatWithDocsStream = createServerFn({ method: "POST" })
   .inputValidator((data) => chatRequestSchema.parse(data))
   .handler(async ({ data }): Promise<Response> => {
     console.log("[chat-api-stream] Handler invoked, messages:", data.messages.length)
+    if (!Settings.features.ai.chat) {
+      return new Response(
+        JSON.stringify({ error: "Chat with Docs is disabled." }),
+        { status: 403, headers: { "Content-Type": "application/json" } }
+      )
+    }
+
     const apiKey = process.env.AI_API_KEY
     if (!apiKey) {
       return new Response(
