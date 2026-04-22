@@ -37,7 +37,7 @@ interface AppSettings {
 
 const siteUrl =
   import.meta.env.VITE_SITE_URL ??
-  "https://doxa-docs.islem-coderone.workers.dev"
+  "https://docs.doxa.so"
 const companyLink = import.meta.env.VITE_COMPANY_LINK ?? siteUrl
 
 export const Settings: AppSettings = {

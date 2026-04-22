@@ -8,6 +8,7 @@
 import { contentStore } from "@/src/lib/content/store"
 import { Settings } from "@/src/settings/main"
 import { aiConfig } from "@/src/settings/ai"
+import type { ChatPageContext } from "@/src/lib/chat-page-context"
 
 async function getDocsFileTree(): Promise<string> {
   try {
@@ -18,11 +19,39 @@ async function getDocsFileTree(): Promise<string> {
   }
 }
 
-export async function buildAgentSystemPrompt(): Promise<string> {
+function formatCurrentPageContext(
+  currentPageContext: ChatPageContext | null
+): string {
+  if (!currentPageContext) {
+    return "No page is attached to the latest user message."
+  }
+
+  const lines = [
+    "The latest user message is attached to this documentation page:",
+    `- Title: ${currentPageContext.title}`,
+    `- URL: ${currentPageContext.href}`,
+    `- Source file: ${currentPageContext.sourcePath}`,
+  ]
+
+  if (currentPageContext.description) {
+    lines.push(`- Description: ${currentPageContext.description}`)
+  }
+
+  return lines.join("\n")
+}
+
+export async function buildAgentSystemPrompt(
+  currentPageContext: ChatPageContext | null = null
+): Promise<string> {
   const fileTree = await getDocsFileTree()
+  const currentPageSection = formatCurrentPageContext(currentPageContext)
 
   return `You are a documentation assistant for ${Settings.site.name}.
 Your job is to answer user questions accurately using ONLY the documentation content available to you.
+
+## Current Reader Page
+
+${currentPageSection}
 
 ## Documentation Files
 
@@ -44,7 +73,7 @@ You have two tools to read and search the documentation:
 1. **Always start with grep.** Pick 2–4 distinctive keywords from the user's question and grep each one in a single batched turn (issue multiple grep calls in parallel — your runtime supports parallel tool calls, use it). Do not cat anything yet.
 2. **Read the grep hits.** If the answer is obvious from the matched lines, answer directly without cat. Many short questions can be fully answered from grep output.
 3. **Cat only the 1–2 files whose grep hits look most promising.** If you are tempted to cat more than 2 files, grep again with a narrower term instead.
-4. **Never cat files you haven't grep'd.** "Exploring" the docs file by file is forbidden. The file tree above is for orientation, not a checklist.
+4. **Never cat files you haven't grep'd, except the attached current reader page.** If the latest user question refers to "this page", "here", "the current page", or similar page-specific wording, read the attached source file directly with \`cat\` before broader search.
 5. **Batch cat calls in parallel** when you do need multiple files — issue them in a single turn, not one after another.
 6. **Stop as soon as you have enough.** You do not need to read every related page. One good file usually beats five mediocre ones.
 

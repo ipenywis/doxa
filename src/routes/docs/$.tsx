@@ -1,10 +1,12 @@
-import type { ComponentType } from "react"
+import { useEffect, useMemo, type ComponentType } from "react"
 import { useChatContext } from "@/src/components/chat/chat-context"
 import { ArticleBreadcrumb } from "@/src/components/article/breadcrumb"
+import { ChatWithPage } from "@/src/components/article/chat-with-page"
 import { CopyPage } from "@/src/components/article/copy-page"
 import { Pagination } from "@/src/components/article/pagination"
 import { TableOfContents } from "@/src/components/toc"
 import { components } from "@/src/lib/components"
+import type { ChatPageContext } from "@/src/lib/chat-page-context"
 import { fetchDocumentFromServer, fetchRawDocument } from "@/src/lib/markdown"
 import { PageRoutes, Routes, isHeading, isRoute } from "@/src/lib/pageroutes"
 import { Settings } from "@/src/settings/main"
@@ -102,7 +104,7 @@ function findSectionHeading(slug: string): string | undefined {
 }
 
 function DocsContent() {
-  const { isOpen: chatOpen } = useChatContext()
+  const { isOpen: chatOpen, setCurrentPageContext } = useChatContext()
   const { slug, document: pageDocument, rawDoc } = Route.useLoaderData()
   const paths = slug.split("/")
   const pathName = `docs/${slug}`
@@ -116,6 +118,21 @@ function DocsContent() {
 
   const description = pageDocument?.frontmatter?.description
   const sectionHeading = findSectionHeading(slug)
+  const pageContext = useMemo<ChatPageContext | null>(() => {
+    if (!slug || !pageDocument) return null
+
+    return {
+      slug,
+      href: `/docs/${slug}`,
+      sourcePath: `${slug}/index.mdx`,
+      title,
+      ...(description ? { description } : {}),
+    }
+  }, [description, pageDocument, slug, title])
+
+  useEffect(() => {
+    setCurrentPageContext(pageContext)
+  }, [pageContext, setCurrentPageContext])
 
   if (!pageDocument) {
     return (
@@ -149,11 +166,14 @@ function DocsContent() {
             {sectionHeading}
           </p>
         )}
-        <div className="not-prose flex items-start justify-between gap-4">
-          <h1 className="text-3xl font-bold tracking-tight lg:text-4xl">
+        <div className="not-prose flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+          <h1 className="min-w-0 text-3xl font-bold tracking-tight lg:text-4xl">
             {title}
           </h1>
-          <CopyPage rawDoc={rawDoc} title={title} description={description} />
+          <div className="flex shrink-0 flex-wrap items-center gap-2">
+            {pageContext && <ChatWithPage pageContext={pageContext} />}
+            <CopyPage rawDoc={rawDoc} title={title} description={description} />
+          </div>
         </div>
         {description && (
           <p className="not-prose mt-3 text-lg text-muted-foreground">

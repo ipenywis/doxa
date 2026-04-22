@@ -175,21 +175,21 @@
   padding: 0.75px 12.5px;
 }
 
-/* Docs page code blocks — scoped to .typography so chat code blocks are unaffected */
-.typography pre {
+/* Docs page code blocks — scoped to .prose-content so chat code blocks are unaffected */
+.prose-content pre {
   padding: 0 !important;
   width: inherit !important;
   overflow-x: auto;
 }
 
-.typography pre > code {
+.prose-content pre > code {
   display: grid;
   max-width: inherit !important;
   padding: 14px 0 !important;
   color: #1f2328;
 }
 
-.dark .typography pre > code {
+.dark .prose-content pre > code {
   color: #e6edf3;
 }
 

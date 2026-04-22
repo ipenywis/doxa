@@ -4,7 +4,8 @@ import { useLocation } from "@tanstack/react-router"
 import { useChatContext } from "@/src/components/chat/chat-context"
 
 export function FloatingChatBar() {
-  const { isOpen, submitQuery, setOpen } = useChatContext()
+  const { isOpen, requestChatInputFocus, submitQuery, setOpen } =
+    useChatContext()
   const location = useLocation()
   const [value, setValue] = useState("")
 
@@ -15,6 +16,7 @@ export function FloatingChatBar() {
     const trimmed = value.trim()
     if (!trimmed) {
       setOpen(true)
+      requestChatInputFocus()
       return
     }
     submitQuery(trimmed)

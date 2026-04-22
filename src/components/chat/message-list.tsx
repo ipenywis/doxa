@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef } from "react"
 import Markdown, { type Components } from "react-markdown"
+import { LuFileText } from "react-icons/lu"
 import remarkGfm from "remark-gfm"
 import rehypePrism from "rehype-prism-plus"
 import type {
@@ -296,8 +297,19 @@ export function MessageList({
               <div
                 key={msg.id}
                 data-msg-id={msg.id}
-                className="flex justify-end"
+                className="flex flex-col items-end gap-1"
               >
+                {msg.pageContext && (
+                  <div
+                    className="flex max-w-[85%] items-center gap-1.5 rounded-md border border-primary/20 bg-primary/5 px-2 py-1 text-xs text-primary"
+                    title={`Attached page: ${msg.pageContext.title}`}
+                  >
+                    <LuFileText className="size-3.5 shrink-0" />
+                    <span className="min-w-0 truncate">
+                      {msg.pageContext.title}
+                    </span>
+                  </div>
+                )}
                 <div className="max-w-[85%] rounded-2xl rounded-br-sm bg-primary px-4 py-2 text-sm text-primary-foreground">
                   {msg.content}
                 </div>

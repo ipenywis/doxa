@@ -4,7 +4,7 @@ import { useLocation } from "@tanstack/react-router"
 import { LuMessagesSquare } from "react-icons/lu"
 
 export function ChatButton() {
-  const { isOpen, setOpen } = useChatContext()
+  const { isOpen, requestChatInputFocus, setOpen } = useChatContext()
   const location = useLocation()
 
   if (!location.pathname.startsWith("/docs")) return null
@@ -13,7 +13,11 @@ export function ChatButton() {
     <Button
       variant="outline"
       size="icon"
-      onClick={() => setOpen(!isOpen)}
+      onClick={() => {
+        const nextOpen = !isOpen
+        setOpen(nextOpen)
+        if (nextOpen) requestChatInputFocus()
+      }}
       className="h-9 w-9 cursor-pointer"
       aria-label="Chat with docs"
     >

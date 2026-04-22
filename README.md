@@ -2,7 +2,7 @@
 
 A beautiful, fast documentation template built with **TanStack Start**, **AI Agents**, **React 19**, **Tailwind CSS v4**, **TypeScript**, and **MDX**. Designed for developers, product teams, and technical writers who care about the reading experience as much as the writing.
 
-> **Demo**: [https://doxa-docs.islem-coderone.workers.dev](https://doxa-docs.islem-coderone.workers.dev)
+> **Demo**: [https://docs.doxa.so](https://docs.doxa.so)
 
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 [![Top Language](https://img.shields.io/github/languages/top/ipenywis/doxa-docs-template)](https://github.com/ipenywis/doxa-docs-template)

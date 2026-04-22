@@ -7,6 +7,10 @@ import { MessageList } from "@/src/components/chat/message-list"
 import type { ToolCallStep } from "@/src/components/chat/tool-call-display"
 import { useConversationHistory } from "@/src/components/chat/use-conversation-history"
 import { chatWithDocsStream } from "@/src/lib/chat-api"
+import type {
+  ChatPageContext,
+  ChatRequestMessage,
+} from "@/src/lib/chat-page-context"
 
 export interface TextPart { type: "text"; id: string; content: string }
 export interface ToolPart { type: "tool"; id: string; step: ToolCallStep }
@@ -15,6 +19,7 @@ export type MessagePart = TextPart | ToolPart
 export interface ChatMessage {
   id: string
   role: "user" | "assistant"
+  pageContext?: ChatPageContext
   /** User messages: raw text. Assistant messages: legacy — prefer `parts`. */
   content?: string
   /** Assistant only: ordered text + tool timeline. */
@@ -76,9 +81,19 @@ export function ChatWithDocs() {
   const toolPartByIdRef = useRef<Map<string, ToolPart>>(new Map())
   /** ID of the assistant message currently being streamed into. */
   const streamingMsgIdRef = useRef<string | null>(null)
+  const dismissedAutoAttachSlugRef = useRef<string | null>(null)
 
   const history = useConversationHistory()
-  const { pendingQuery, consumePendingQuery } = useChatContext()
+  const {
+    currentPageContext,
+    attachedPageContext,
+    pendingPageConversationContext,
+    pendingQuery,
+    setAttachedPageContext,
+    consumePendingPageConversation,
+    consumePendingQuery,
+    removeAttachedPageContext,
+  } = useChatContext()
 
   useEffect(() => {
     if (!history.hasLoaded || conversationIdRef.current) return
@@ -154,10 +169,14 @@ export function ChatWithDocs() {
         conversationIdRef.current = history.generateId()
       }
 
+      const pageContextForMessage =
+        attachedPageContext ?? (startNew ? currentPageContext : null)
+
       const userMsg: ChatMessage = {
         id: `msg-${++msgCounter}`,
         role: "user",
         content: text,
+        ...(pageContextForMessage ? { pageContext: pageContextForMessage } : {}),
       }
 
       const assistantMsgId = `msg-${++msgCounter}`
@@ -172,6 +191,7 @@ export function ChatWithDocs() {
       } else {
         setMessages((prev) => [...prev, userMsg, assistantMsg])
       }
+      if (pageContextForMessage) setAttachedPageContext(null)
       setIsLoading(true)
       setIsStreaming(true)
       setError(null)
@@ -204,10 +224,15 @@ export function ChatWithDocs() {
 
       try {
         const prior = startNew ? [] : messages
-        const allMessages = [...prior, userMsg].map((m) => ({
-          role: m.role,
-          content: messageToApiContent(m),
-        }))
+        const allMessages: ChatRequestMessage[] = [...prior, userMsg].map(
+          (m) => ({
+            role: m.role,
+            content: messageToApiContent(m),
+            ...(m.role === "user" && m.pageContext
+              ? { pageContext: m.pageContext }
+              : {}),
+          })
+        )
 
         const response = (await chatWithDocsStream({
           data: { messages: allMessages },
@@ -308,6 +333,9 @@ export function ChatWithDocs() {
       history,
       messages,
       syncPartsToMessage,
+      attachedPageContext,
+      currentPageContext,
+      setAttachedPageContext,
     ]
   )
 
@@ -388,6 +416,46 @@ export function ChatWithDocs() {
   }, [])
 
   useEffect(() => {
+    if (!history.hasLoaded) return
+    if (!pendingPageConversationContext) return
+
+    resetStreamingRefs()
+    dismissedAutoAttachSlugRef.current = null
+    conversationIdRef.current = history.generateId()
+    setAttachedPageContext(pendingPageConversationContext)
+    setMessages([])
+    setError(null)
+    setIsLoading(false)
+    setIsStreaming(false)
+    setShowHistory(false)
+    consumePendingPageConversation()
+  }, [
+    consumePendingPageConversation,
+    history.generateId,
+    history.hasLoaded,
+    pendingPageConversationContext,
+    resetStreamingRefs,
+    setAttachedPageContext,
+  ])
+
+  useEffect(() => {
+    if (!history.hasLoaded) return
+    if (messages.length > 0) return
+    if (!currentPageContext) return
+    if (attachedPageContext?.slug === currentPageContext.slug) return
+    if (dismissedAutoAttachSlugRef.current === currentPageContext.slug) return
+
+    dismissedAutoAttachSlugRef.current = null
+    setAttachedPageContext(currentPageContext)
+  }, [
+    attachedPageContext?.slug,
+    currentPageContext,
+    history.hasLoaded,
+    messages.length,
+    setAttachedPageContext,
+  ])
+
+  useEffect(() => {
     if (!pendingQuery) return
     if (!history.hasLoaded) return
     if (isLoading || isStreaming) return
@@ -405,16 +473,26 @@ export function ChatWithDocs() {
 
   const handleNewConversation = useCallback(() => {
     resetStreamingRefs()
+    dismissedAutoAttachSlugRef.current = null
     conversationIdRef.current = history.generateId()
+    setAttachedPageContext(null)
     setMessages([])
     setError(null)
     setIsLoading(false)
     setIsStreaming(false)
-  }, [history.generateId, resetStreamingRefs])
+  }, [history.generateId, resetStreamingRefs, setAttachedPageContext])
+
+  const handleRemoveAttachedPageContext = useCallback(() => {
+    if (messages.length === 0 && attachedPageContext) {
+      dismissedAutoAttachSlugRef.current = attachedPageContext.slug
+    }
+    removeAttachedPageContext()
+  }, [attachedPageContext, messages.length, removeAttachedPageContext])
 
   const handleLoadConversation = useCallback(
     (id: string) => {
       resetStreamingRefs()
+      removeAttachedPageContext()
       const loaded = history.loadConversation(id)
       if (loaded) {
         conversationIdRef.current = id
@@ -424,7 +502,7 @@ export function ChatWithDocs() {
         setIsStreaming(false)
       }
     },
-    [history.loadConversation, resetStreamingRefs]
+    [history.loadConversation, removeAttachedPageContext, resetStreamingRefs]
   )
 
   const handleDeleteConversation = useCallback(
@@ -466,7 +544,12 @@ export function ChatWithDocs() {
           <p className="text-xs text-destructive">Error: {error}</p>
         </div>
       )}
-      <ChatInput onSend={handleSend} isLoading={isLoading} />
+      <ChatInput
+        onSend={handleSend}
+        isLoading={isLoading}
+        pageContext={attachedPageContext}
+        onRemovePageContext={handleRemoveAttachedPageContext}
+      />
     </ChatDrawer>
   )
 }
