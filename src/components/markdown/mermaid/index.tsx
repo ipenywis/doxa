@@ -1,13 +1,13 @@
-import { lazy, Suspense } from "react"
+import { lazy, Suspense } from "react";
 
 interface MermaidProps {
-  chart: string
-  className?: string
+  chart: string;
+  className?: string;
 }
 
 const MermaidLazy = lazy(
   () => import("@/src/components/markdown/mermaid/component")
-)
+);
 
 export default function Mermaid(props: MermaidProps) {
   return (
@@ -18,5 +18,5 @@ export default function Mermaid(props: MermaidProps) {
     >
       <MermaidLazy {...props} />
     </Suspense>
-  )
+  );
 }

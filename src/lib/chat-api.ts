@@ -1,21 +1,26 @@
-import { chat, toServerSentEventsResponse, type AnyTextAdapter, type ModelMessage } from "@tanstack/ai"
-import { createAnthropicChat } from "@tanstack/ai-anthropic"
-import { createGrokText } from "@tanstack/ai-grok"
-import { createOpenaiChat } from "@tanstack/ai-openai"
-import { createOpenRouterText } from "@tanstack/ai-openrouter"
-import { createServerFn } from "@tanstack/react-start"
-import { z } from "zod"
+import {
+  chat,
+  toServerSentEventsResponse,
+  type AnyTextAdapter,
+  type ModelMessage,
+} from "@tanstack/ai";
+import { createAnthropicChat } from "@tanstack/ai-anthropic";
+import { createGrokText } from "@tanstack/ai-grok";
+import { createOpenaiChat } from "@tanstack/ai-openai";
+import { createOpenRouterText } from "@tanstack/ai-openrouter";
+import { createServerFn } from "@tanstack/react-start";
+import { z } from "zod";
 
-import { agentTools } from "@/src/lib/agent/tools"
-import { buildAgentSystemPrompt } from "@/src/lib/agent/system-prompt"
+import { aiConfig } from "@/src/settings/ai";
+import { Settings } from "@/src/settings/main";
+import { buildAgentSystemPrompt } from "@/src/lib/agent/system-prompt";
+import { agentTools } from "@/src/lib/agent/tools";
 import type {
   ChatPageContext,
   ChatRequestMessage,
-} from "@/src/lib/chat-page-context"
-import { contentStore } from "@/src/lib/content/store"
-import { PageRoutes } from "@/src/lib/pageroutes"
-import { aiConfig } from "@/src/settings/ai"
-import { Settings } from "@/src/settings/main"
+} from "@/src/lib/chat-page-context";
+import { contentStore } from "@/src/lib/content/store";
+import { PageRoutes } from "@/src/lib/pageroutes";
 
 const chatPageContextSchema = z.object({
   slug: z.string().min(1),
@@ -23,7 +28,7 @@ const chatPageContextSchema = z.object({
   sourcePath: z.string().min(1),
   title: z.string().min(1),
   description: z.string().optional(),
-})
+});
 
 const chatRequestSchema = z.object({
   messages: z.array(
@@ -33,37 +38,37 @@ const chatRequestSchema = z.object({
       pageContext: chatPageContextSchema.optional().catch(undefined),
     })
   ),
-})
+});
 
 function getAdapter(apiKey: string): AnyTextAdapter {
   switch (aiConfig.provider) {
     case "openai":
-      return createOpenaiChat(aiConfig.model, apiKey)
+      return createOpenaiChat(aiConfig.model, apiKey);
     case "openrouter":
-      return createOpenRouterText(aiConfig.model, apiKey)
+      return createOpenRouterText(aiConfig.model, apiKey);
     case "grok":
-      return createGrokText(aiConfig.model, apiKey)
+      return createGrokText(aiConfig.model, apiKey);
     case "anthropic":
-      return createAnthropicChat(aiConfig.model, apiKey)
+      return createAnthropicChat(aiConfig.model, apiKey);
   }
 }
 
 function routeTitleForSlug(slug: string): string | null {
-  return PageRoutes.find((route) => route.href === slug)?.title ?? null
+  return PageRoutes.find((route) => route.href === slug)?.title ?? null;
 }
 
 async function resolvePageContext(
   context: ChatPageContext | undefined
 ): Promise<ChatPageContext | null> {
-  if (!context) return null
+  if (!context) return null;
 
-  const entryFromSlug = await contentStore.getEntry(context.slug)
-  const entryFromSource = await contentStore.getEntry(context.sourcePath)
-  if (!entryFromSlug || !entryFromSource) return null
-  if (entryFromSlug.filePath !== entryFromSource.filePath) return null
+  const entryFromSlug = await contentStore.getEntry(context.slug);
+  const entryFromSource = await contentStore.getEntry(context.sourcePath);
+  if (!entryFromSlug || !entryFromSource) return null;
+  if (entryFromSlug.filePath !== entryFromSource.filePath) return null;
 
   const title =
-    routeTitleForSlug(entryFromSlug.slug) || entryFromSlug.frontmatter.title
+    routeTitleForSlug(entryFromSlug.slug) || entryFromSlug.frontmatter.title;
 
   return {
     slug: entryFromSlug.slug.replace(/^\//, ""),
@@ -73,33 +78,33 @@ async function resolvePageContext(
     ...(entryFromSlug.frontmatter.description
       ? { description: entryFromSlug.frontmatter.description }
       : {}),
-  }
+  };
 }
 
 function pageContextCacheKey(context: ChatPageContext): string {
-  return `${context.slug}\u0000${context.sourcePath}`
+  return `${context.slug}\u0000${context.sourcePath}`;
 }
 
 async function resolveMessagePageContexts(
   messages: ChatRequestMessage[]
 ): Promise<(ChatPageContext | null)[]> {
-  const cache = new Map<string, Promise<ChatPageContext | null>>()
+  const cache = new Map<string, Promise<ChatPageContext | null>>();
 
   return Promise.all(
     messages.map((message) => {
       if (message.role !== "user" || !message.pageContext) {
-        return Promise.resolve(null)
+        return Promise.resolve(null);
       }
 
-      const key = pageContextCacheKey(message.pageContext)
-      const cached = cache.get(key)
-      if (cached) return cached
+      const key = pageContextCacheKey(message.pageContext);
+      const cached = cache.get(key);
+      if (cached) return cached;
 
-      const resolved = resolvePageContext(message.pageContext)
-      cache.set(key, resolved)
-      return resolved
+      const resolved = resolvePageContext(message.pageContext);
+      cache.set(key, resolved);
+      return resolved;
     })
-  )
+  );
 }
 
 function getLatestUserPageContext(
@@ -108,67 +113,75 @@ function getLatestUserPageContext(
 ): ChatPageContext | null {
   for (let index = messages.length - 1; index >= 0; index--) {
     if (messages[index].role === "user") {
-      return pageContexts[index] ?? null
+      return pageContexts[index] ?? null;
     }
   }
 
-  return null
+  return null;
 }
 
 function formatUserContentForModel(
   content: string,
   pageContext: ChatPageContext | null
 ): string {
-  if (!pageContext) return content
+  if (!pageContext) return content;
 
   const contextLines = [
     "Attached page context for this user message:",
     `- Title: ${pageContext.title}`,
     `- URL: ${pageContext.href}`,
     `- Source file: ${pageContext.sourcePath}`,
-  ]
+  ];
 
   if (pageContext.description) {
-    contextLines.push(`- Description: ${pageContext.description}`)
+    contextLines.push(`- Description: ${pageContext.description}`);
   }
 
-  return `${contextLines.join("\n")}\n\nUser message:\n${content}`
+  return `${contextLines.join("\n")}\n\nUser message:\n${content}`;
 }
 
 export const chatWithDocsStream = createServerFn({ method: "POST" })
   .inputValidator((data) => chatRequestSchema.parse(data))
   .handler(async ({ data }): Promise<Response> => {
-    console.log("[chat-api-stream] Handler invoked, messages:", data.messages.length)
+    console.log(
+      "[chat-api-stream] Handler invoked, messages:",
+      data.messages.length
+    );
     if (!Settings.features.ai.chat) {
       return new Response(
         JSON.stringify({ error: "Chat with Docs is disabled." }),
         { status: 403, headers: { "Content-Type": "application/json" } }
-      )
+      );
     }
 
-    const apiKey = process.env.AI_API_KEY
+    const apiKey = process.env.AI_API_KEY;
     if (!apiKey) {
       return new Response(
-        JSON.stringify({ error: "AI_API_KEY environment variable is not set." }),
+        JSON.stringify({
+          error: "AI_API_KEY environment variable is not set.",
+        }),
         { status: 500, headers: { "Content-Type": "application/json" } }
-      )
+      );
     }
 
-    const { messages } = data
+    const { messages } = data;
 
     if (messages.length > 50) {
-      return new Response(
-        JSON.stringify({ error: "Too many messages." }),
-        { status: 400, headers: { "Content-Type": "application/json" } }
-      )
+      return new Response(JSON.stringify({ error: "Too many messages." }), {
+        status: 400,
+        headers: { "Content-Type": "application/json" },
+      });
     }
 
     try {
-      const pageContexts = await resolveMessagePageContexts(messages)
-      const currentPageContext = getLatestUserPageContext(messages, pageContexts)
-      const systemPrompt = await buildAgentSystemPrompt(currentPageContext)
-      const adapter = getAdapter(apiKey)
-      const abortController = new AbortController()
+      const pageContexts = await resolveMessagePageContexts(messages);
+      const currentPageContext = getLatestUserPageContext(
+        messages,
+        pageContexts
+      );
+      const systemPrompt = await buildAgentSystemPrompt(currentPageContext);
+      const adapter = getAdapter(apiKey);
+      const abortController = new AbortController();
 
       const modelMessages: ModelMessage[] = messages.map((m, index) => ({
         role: m.role === "assistant" ? "assistant" : "user",
@@ -176,7 +189,7 @@ export const chatWithDocsStream = createServerFn({ method: "POST" })
           m.role === "user"
             ? formatUserContentForModel(m.content, pageContexts[index])
             : m.content,
-      }))
+      }));
 
       // OpenRouter: sort providers by throughput (fastest first) and allow
       // parallel tool calls so the model can batch multiple reads in one turn.
@@ -189,7 +202,7 @@ export const chatWithDocsStream = createServerFn({ method: "POST" })
               },
               parallelToolCalls: true,
             }
-          : undefined
+          : undefined;
 
       const stream = chat({
         adapter,
@@ -200,20 +213,20 @@ export const chatWithDocsStream = createServerFn({ method: "POST" })
         stream: true as const,
         agentLoopStrategy: ({ iterationCount }) => iterationCount < 5,
         ...(modelOptions ? { modelOptions } : {}),
-      } as Parameters<typeof chat>[0])
+      } as Parameters<typeof chat>[0]);
 
-      return toServerSentEventsResponse(stream, { abortController })
+      return toServerSentEventsResponse(stream, { abortController });
     } catch (err: unknown) {
-      console.error("Chat API stream error:", err)
+      console.error("Chat API stream error:", err);
       const message =
         err instanceof Error
           ? err.message
-          : "Failed to get a response from the AI provider."
+          : "Failed to get a response from the AI provider.";
       return new Response(
         JSON.stringify({
           error: message,
         }),
         { status: 500, headers: { "Content-Type": "application/json" } }
-      )
+      );
     }
-  })
+  });

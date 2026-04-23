@@ -5,7 +5,7 @@
  * the documents.ts configuration file automatically.
  */
 
-import type { Paths } from "@/src/lib/pageroutes"
+import type { Paths } from "@/src/lib/pageroutes";
 
 /**
  * Configuration for a single document or folder
@@ -13,15 +13,15 @@ import type { Paths } from "@/src/lib/pageroutes"
  */
 export interface DocItemConfig {
   /** Custom title (overrides frontmatter title) */
-  title?: string
+  title?: string;
   /** Section heading displayed above this item */
-  heading?: string
+  heading?: string;
   /** If true, this item won't be a clickable link */
-  noLink?: boolean
+  noLink?: boolean;
   /** Custom order for children (array of folder/file names) */
-  order?: string[]
+  order?: string[];
   /** If true, this item is hidden from the menu */
-  hidden?: boolean
+  hidden?: boolean;
 }
 
 /**
@@ -32,40 +32,40 @@ export interface DocsGeneratorConfig {
    * Configuration for specific paths
    * Keys are relative paths from the docs folder (e.g., "basic-setup", "markdown/cards")
    */
-  items?: Record<string, DocItemConfig>
+  items?: Record<string, DocItemConfig>;
 
   /**
    * Spacers to insert at specific positions
    * Keys are the path BEFORE which to insert a spacer
    */
-  spacersBefore?: string[]
+  spacersBefore?: string[];
 
   /**
    * Root level ordering of items
    * Array of folder/file names in desired order
    * Items not in this array will be appended alphabetically
    */
-  order?: string[]
+  order?: string[];
 
   /**
    * Default heading for the first item in the list
    */
-  defaultHeading?: string
+  defaultHeading?: string;
 }
 
 /**
  * Frontmatter extracted from MDX files
  */
 export interface MdxFrontmatter {
-  title?: string
-  description?: string
-  keywords?: string[]
+  title?: string;
+  description?: string;
+  keywords?: string[];
   /** Optional: order for child items */
-  order?: number
+  order?: number;
   /** Optional: heading for this section */
-  heading?: string
+  heading?: string;
   /** Optional: hide from menu */
-  hidden?: boolean
+  hidden?: boolean;
 }
 
 /**
@@ -73,28 +73,28 @@ export interface MdxFrontmatter {
  */
 export interface DocNode {
   /** The folder/file name (slug) */
-  name: string
+  name: string;
   /** Full relative path from docs folder */
-  path: string
+  path: string;
   /** Title from frontmatter or derived from name */
-  title: string
+  title: string;
   /** Whether this has an index.mdx file */
-  hasIndex: boolean
+  hasIndex: boolean;
   /** Child documents/folders */
-  children: DocNode[]
+  children: DocNode[];
   /** Frontmatter data from index.mdx */
-  frontmatter: MdxFrontmatter
+  frontmatter: MdxFrontmatter;
 }
 
 /**
  * Result of scanning the docs folder
  */
 export interface ScanResult {
-  nodes: DocNode[]
-  errors: string[]
+  nodes: DocNode[];
+  errors: string[];
 }
 
 /**
  * Export the Paths type for convenience
  */
-export type { Paths }
+export type { Paths };

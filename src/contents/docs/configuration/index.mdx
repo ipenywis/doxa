@@ -36,17 +36,17 @@ export const Settings = {
     },
     loadFromGithub: false,
   },
-}
+};
 ```
 
-| Setting group | Purpose |
-| :-- | :-- |
-| `site` | Name, URL, description, keywords, and favicon. |
-| `company` | Footer company name and link. |
-| `seo` | Open Graph image, alt text, and social handle. |
-| `analytics` | Google Tag Manager id and enablement flag. |
-| `features` | Toggles for docs shell behavior. |
-| `openGraph` / `twitter` | Social metadata used by the root document. |
+| Setting group           | Purpose                                        |
+| :---------------------- | :--------------------------------------------- |
+| `site`                  | Name, URL, description, keywords, and favicon. |
+| `company`               | Footer company name and link.                  |
+| `seo`                   | Open Graph image, alt text, and social handle. |
+| `analytics`             | Google Tag Manager id and enablement flag.     |
+| `features`              | Toggles for docs shell behavior.               |
+| `openGraph` / `twitter` | Social metadata used by the root document.     |
 
 ## AI Provider
 
@@ -112,14 +112,14 @@ The docs chat uses TanStack AI. Configure the provider and model in `src/setting
 
 ## Environment Variables
 
-| Variable | Required | Used for |
-| :-- | :--: | :-- |
-| `VITE_SITE_URL` | Production | Canonical URLs, sitemap, Open Graph, and AI-native route URLs. |
-| `AI_API_KEY` | When chat is enabled | Provider authentication for Chat with Docs. |
-| `CONTENT_SOURCE` | Optional | Selects `vite` or `github`. Defaults to `vite`. |
-| `DOXA_GITHUB_OWNER` | GitHub source | Repository owner for runtime docs loading. |
-| `DOXA_GITHUB_REPO` | GitHub source | Repository name for runtime docs loading. |
-| `DOXA_GITHUB_TOKEN` | Private GitHub docs | Read-only token for private docs repositories. |
+| Variable            |       Required       | Used for                                                       |
+| :------------------ | :------------------: | :------------------------------------------------------------- |
+| `VITE_SITE_URL`     |      Production      | Canonical URLs, sitemap, Open Graph, and AI-native route URLs. |
+| `AI_API_KEY`        | When chat is enabled | Provider authentication for Chat with Docs.                    |
+| `CONTENT_SOURCE`    |       Optional       | Selects `vite` or `github`. Defaults to `vite`.                |
+| `DOXA_GITHUB_OWNER` |    GitHub source     | Repository owner for runtime docs loading.                     |
+| `DOXA_GITHUB_REPO`  |    GitHub source     | Repository name for runtime docs loading.                      |
+| `DOXA_GITHUB_TOKEN` | Private GitHub docs  | Read-only token for private docs repositories.                 |
 
 ## Feature Toggle Guidance
 
@@ -140,11 +140,9 @@ The docs chat uses TanStack AI. Configure the provider and model in `src/setting
     ```
   </StepItem>
 
-  <StepItem title="Regenerate search data after content changes">
-    ```bash
-    pnpm generate-content-json
-    ```
-  </StepItem>
+<StepItem title="Regenerate search data after content changes">
+  ```bash pnpm generate-content-json ```
+</StepItem>
 
   <StepItem title="Build the target you plan to deploy">
     <Tabs defaultValue="cloudflare" className="pt-5 pb-1">

@@ -1,18 +1,19 @@
-import { useState } from "react"
-import { Button } from "@/src/components/ui/button"
-import { cn } from "@/src/lib/utils"
-import { LuCheck, LuCopy } from "react-icons/lu"
+import { useState } from "react";
+import { LuCheck, LuCopy } from "react-icons/lu";
+
+import { cn } from "@/src/lib/utils";
+import { Button } from "@/src/components/ui/button";
 
 export default function Copy({ content }: { content: string }) {
-  const [isCopied, setIsCopied] = useState(false)
+  const [isCopied, setIsCopied] = useState(false);
 
   async function handleCopy() {
-    await navigator.clipboard.writeText(content)
-    setIsCopied(true)
+    await navigator.clipboard.writeText(content);
+    setIsCopied(true);
 
     setTimeout(() => {
-      setIsCopied(false)
-    }, 2000)
+      setIsCopied(false);
+    }, 2000);
   }
 
   return (
@@ -35,5 +36,5 @@ export default function Copy({ content }: { content: string }) {
         )}
       />
     </Button>
-  )
+  );
 }

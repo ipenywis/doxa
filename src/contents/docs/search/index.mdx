@@ -1,7 +1,8 @@
 ---
 title: Search
 description: Understand Doxa's generated search index, fuzzy matching, highlighted snippets, and keyboard search flow.
-keywords: ["search", "fuzzy search", "search index", "snippets", "keyboard shortcut"]
+keywords:
+  ["search", "fuzzy search", "search index", "snippets", "keyboard shortcut"]
 ---
 
 Doxa includes a search modal for fast page discovery. It reads generated metadata from `public/search-data/documents.json`, ranks results client-side, and highlights matching terms in snippets.
@@ -31,14 +32,14 @@ Doxa includes a search modal for fast page discovery. It reads generated metadat
 
 ## What Gets Indexed
 
-| Source | Search use |
-| :-- | :-- |
-| Frontmatter `title` | High-weight result title. |
-| Frontmatter `description` | Result context and metadata. |
-| Frontmatter `keywords` | High-weight matching terms. |
-| h2 headings | Table of contents and relevance signals. |
-| Body content | Snippet extraction and general matching. |
-| Inline code and bold text | Additional extracted keywords. |
+| Source                    | Search use                               |
+| :------------------------ | :--------------------------------------- |
+| Frontmatter `title`       | High-weight result title.                |
+| Frontmatter `description` | Result context and metadata.             |
+| Frontmatter `keywords`    | High-weight matching terms.              |
+| h2 headings               | Table of contents and relevance signals. |
+| Body content              | Snippet extraction and general matching. |
+| Inline code and bold text | Additional extracted keywords.           |
 
 ## Regenerate Search Data
 
@@ -65,9 +66,9 @@ score = \frac{title + headings + keywords + exactMatches + proximity}{\log(conte
 
 ## Search Troubleshooting
 
-| Problem | Fix |
-| :-- | :-- |
-| New page does not appear | Add it to `documents.json` and regenerate search data. |
-| Result title is wrong | Fix the page frontmatter title. |
-| Search finds stale content | Run `pnpm generate-content-json`. |
+| Problem                    | Fix                                                      |
+| :------------------------- | :------------------------------------------------------- |
+| New page does not appear   | Add it to `documents.json` and regenerate search data.   |
+| Result title is wrong      | Fix the page frontmatter title.                          |
+| Search finds stale content | Run `pnpm generate-content-json`.                        |
 | Relevant page ranks poorly | Improve headings, keywords, and repeated topic language. |

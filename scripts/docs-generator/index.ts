@@ -9,5 +9,5 @@
  *   pnpm generate:docs --watch  # Watch for new files
  */
 
-export { syncDocs, watchDocs } from "./generator"
-export type { MdxFrontmatter, Paths } from "./types"
+export { syncDocs, watchDocs } from "./generator";
+export type { MdxFrontmatter, Paths } from "./types";

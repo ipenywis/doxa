@@ -1,19 +1,20 @@
-import { Link } from "@/src/lib/transition"
-import type { ElementType } from "react"
+import type { ElementType } from "react";
 
-type LogoVariant = "full" | "icon"
+import { Link } from "@/src/lib/transition";
+
+type LogoVariant = "full" | "icon";
 
 interface LogoProps {
-  variant?: LogoVariant
-  size?: number
-  className?: string
-  as?: ElementType
+  variant?: LogoVariant;
+  size?: number;
+  className?: string;
+  as?: ElementType;
 }
 
-const LOGO_ASPECT = 193 / 160
+const LOGO_ASPECT = 193 / 160;
 
 export function LogoMark({ size = 28 }: { size?: number }) {
-  const height = size * LOGO_ASPECT
+  const height = size * LOGO_ASPECT;
   return (
     <span
       className="inline-block shrink-0"
@@ -37,12 +38,17 @@ export function LogoMark({ size = 28 }: { size?: number }) {
         draggable={false}
       />
     </span>
-  )
+  );
 }
 
-export function Logo({ variant = "full", size = 16, className, as: Tag = "span" }: LogoProps) {
+export function Logo({
+  variant = "full",
+  size = 16,
+  className,
+  as: Tag = "span",
+}: LogoProps) {
   if (variant === "icon") {
-    return <LogoMark size={size} />
+    return <LogoMark size={size} />;
   }
 
   return (
@@ -54,11 +60,11 @@ export function Logo({ variant = "full", size = 16, className, as: Tag = "span" 
     >
       <LogoMark size={size} />
       <Tag
-        className="font-semibold text-foreground text-[1em]"
+        className="text-[1em] font-semibold text-foreground"
         style={{ fontFamily: "'Sora', sans-serif" }}
       >
         doxa
       </Tag>
     </Link>
-  )
+  );
 }

@@ -1,14 +1,15 @@
-import { useChatContext } from "@/src/components/chat/chat-context"
-import { Button } from "@/src/components/ui/button"
-import type { ChatPageContext } from "@/src/lib/chat-page-context"
-import { LuMessageSquareText } from "react-icons/lu"
+import { LuMessageSquareText } from "react-icons/lu";
+
+import type { ChatPageContext } from "@/src/lib/chat-page-context";
+import { Button } from "@/src/components/ui/button";
+import { useChatContext } from "@/src/components/chat/chat-context";
 
 interface ChatWithPageProps {
-  pageContext: ChatPageContext
+  pageContext: ChatPageContext;
 }
 
 export function ChatWithPage({ pageContext }: ChatWithPageProps) {
-  const { startConversationWithPage } = useChatContext()
+  const { startConversationWithPage } = useChatContext();
 
   return (
     <Button
@@ -22,5 +23,5 @@ export function ChatWithPage({ pageContext }: ChatWithPageProps) {
       <LuMessageSquareText className="size-4" />
       <span>Chat with page</span>
     </Button>
-  )
+  );
 }

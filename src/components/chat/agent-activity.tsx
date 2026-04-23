@@ -1,49 +1,49 @@
-import { useEffect, useState } from "react"
+import { useEffect, useState } from "react";
 
-const BRAILLE_FRAMES = ["⠋", "⠙", "⠹", "⠸", "⠼", "⠴", "⠦", "⠧", "⠇", "⠏"]
-const FRAME_INTERVAL_MS = 90
+const BRAILLE_FRAMES = ["⠋", "⠙", "⠹", "⠸", "⠼", "⠴", "⠦", "⠧", "⠇", "⠏"];
+const FRAME_INTERVAL_MS = 90;
 
 interface BrailleSpinnerProps {
-  className?: string
+  className?: string;
 }
 
 export function BrailleSpinner({ className }: BrailleSpinnerProps) {
-  const [frame, setFrame] = useState(0)
+  const [frame, setFrame] = useState(0);
 
   useEffect(() => {
-    let id: ReturnType<typeof setInterval> | null = null
+    let id: ReturnType<typeof setInterval> | null = null;
 
     const start = () => {
-      if (id !== null) return
+      if (id !== null) return;
       id = setInterval(() => {
-        setFrame((f) => (f + 1) % BRAILLE_FRAMES.length)
-      }, FRAME_INTERVAL_MS)
-    }
+        setFrame((f) => (f + 1) % BRAILLE_FRAMES.length);
+      }, FRAME_INTERVAL_MS);
+    };
     const stop = () => {
       if (id !== null) {
-        clearInterval(id)
-        id = null
+        clearInterval(id);
+        id = null;
       }
-    }
+    };
 
-    if (typeof document === "undefined" || !document.hidden) start()
+    if (typeof document === "undefined" || !document.hidden) start();
 
     const onVisibility = () => {
-      if (typeof document !== "undefined" && document.hidden) stop()
-      else start()
-    }
+      if (typeof document !== "undefined" && document.hidden) stop();
+      else start();
+    };
 
     if (typeof document !== "undefined") {
-      document.addEventListener("visibilitychange", onVisibility)
+      document.addEventListener("visibilitychange", onVisibility);
     }
 
     return () => {
-      stop()
+      stop();
       if (typeof document !== "undefined") {
-        document.removeEventListener("visibilitychange", onVisibility)
+        document.removeEventListener("visibilitychange", onVisibility);
       }
-    }
-  }, [])
+    };
+  }, []);
 
   return (
     <span
@@ -52,11 +52,11 @@ export function BrailleSpinner({ className }: BrailleSpinnerProps) {
     >
       {BRAILLE_FRAMES[frame]}
     </span>
-  )
+  );
 }
 
 interface AgentActivityFooterProps {
-  status: string
+  status: string;
 }
 
 export function AgentActivityFooter({ status }: AgentActivityFooterProps) {
@@ -69,5 +69,5 @@ export function AgentActivityFooter({ status }: AgentActivityFooterProps) {
       <BrailleSpinner className="size-3 text-primary" />
       <span className="truncate">{status}</span>
     </div>
-  )
+  );
 }

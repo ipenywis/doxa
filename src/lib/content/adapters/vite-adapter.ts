@@ -18,15 +18,15 @@
  * Don't use when: you need runtime content updates without redeploys.
  */
 
-import type { ContentAdapter } from "@/src/lib/content/types"
+import type { ContentAdapter } from "@/src/lib/content/types";
 
 /**
  * Shape of each compiled MDX module. `default` is the React component
  * (consumed by `src/routes/docs/$.tsx`); `__rawSource` is the verbatim
  * source text injected by `mdxSourceCapturePlugin`.
  */
-type MdxModule = {
-  __rawSource: string
+interface MdxModule {
+  __rawSource: string;
 }
 
 /**
@@ -36,9 +36,9 @@ type MdxModule = {
 const mdxModules = import.meta.glob<MdxModule>(
   "/src/contents/docs/**/index.mdx",
   { eager: true }
-)
+);
 
-const DOCS_ROOT_PREFIX = "/src/contents/docs/"
+const DOCS_ROOT_PREFIX = "/src/contents/docs/";
 
 /**
  * Normalize a Vite glob key to a docs-root-relative path.
@@ -48,23 +48,23 @@ const DOCS_ROOT_PREFIX = "/src/contents/docs/"
 function toRelativePath(viteKey: string): string {
   return viteKey.startsWith(DOCS_ROOT_PREFIX)
     ? viteKey.slice(DOCS_ROOT_PREFIX.length)
-    : viteKey
+    : viteKey;
 }
 
 const fileMap = new Map<string, string>(
   Object.entries(mdxModules).map(([viteKey, mod]) => {
-    const source = mod?.__rawSource
+    const source = mod?.__rawSource;
     if (typeof source !== "string") {
       throw new Error(
         `[vite-adapter] Missing __rawSource on ${viteKey}. ` +
           `mdxSourceCapturePlugin is not wired correctly in vite.config.ts.`
-      )
+      );
     }
-    return [toRelativePath(viteKey), source]
+    return [toRelativePath(viteKey), source];
   })
-)
+);
 
-const filePaths = Array.from(fileMap.keys()).sort()
+const filePaths = Array.from(fileMap.keys()).sort();
 
 // DEBUG: memory footprint of bundled raw MDX.
 // Cloudflare workerd hard limit = 128 MB per isolate (paid plans up to 512 MB
@@ -73,23 +73,23 @@ const filePaths = Array.from(fileMap.keys()).sort()
 // import.meta.env.* is replaced at build time by Vite — works on edge runtimes
 // where process.env isn't populated at module init.
 if (import.meta.env.VITE_DEBUG_CONTENT === "true") {
-  let totalChars = 0
-  let totalUtf8Bytes = 0
-  let largestFile = { path: "", bytes: 0 }
-  const encoder = new TextEncoder()
+  let totalChars = 0;
+  let totalUtf8Bytes = 0;
+  let largestFile = { path: "", bytes: 0 };
+  const encoder = new TextEncoder();
   for (const [path, content] of fileMap) {
-    totalChars += content.length
-    const bytes = encoder.encode(content).byteLength
-    totalUtf8Bytes += bytes
-    if (bytes > largestFile.bytes) largestFile = { path, bytes }
+    totalChars += content.length;
+    const bytes = encoder.encode(content).byteLength;
+    totalUtf8Bytes += bytes;
+    if (bytes > largestFile.bytes) largestFile = { path, bytes };
   }
   // JS strings are UTF-16 in memory (2 bytes/char minimum, up to 4 for surrogate pairs)
-  const approxHeapBytes = totalChars * 2
-  const CF_LIMIT_BYTES = 128 * 1024 * 1024
+  const approxHeapBytes = totalChars * 2;
+  const CF_LIMIT_BYTES = 128 * 1024 * 1024;
   const fmt = (n: number) =>
     n >= 1024 * 1024
       ? `${(n / 1024 / 1024).toFixed(2)} MB`
-      : `${(n / 1024).toFixed(2)} KB`
+      : `${(n / 1024).toFixed(2)} KB`;
   console.log("[vite-adapter] mdxModules memory footprint:", {
     files: fileMap.size,
     utf8Bytes: fmt(totalUtf8Bytes),
@@ -97,17 +97,17 @@ if (import.meta.env.VITE_DEBUG_CONTENT === "true") {
     largestFile: `${largestFile.path} (${fmt(largestFile.bytes)})`,
     cfWorkerLimit: fmt(CF_LIMIT_BYTES),
     percentOfLimit: `${((approxHeapBytes / CF_LIMIT_BYTES) * 100).toFixed(3)}%`,
-  })
+  });
 }
 
 export const viteAdapter: ContentAdapter = {
   name: "vite",
 
   async listFiles() {
-    return filePaths
+    return filePaths;
   },
 
   async readFile(filePath) {
-    return fileMap.get(filePath) ?? null
+    return fileMap.get(filePath) ?? null;
   },
-}
+};

@@ -6,29 +6,30 @@ import {
   useCallback,
   useContext,
   useState,
-} from "react"
-import { cn } from "@/src/lib/utils"
-import { FiFileText } from "react-icons/fi"
-import { LuFolder, LuFolderClosed } from "react-icons/lu"
+} from "react";
+import { FiFileText } from "react-icons/fi";
+import { LuFolder, LuFolderClosed } from "react-icons/lu";
 
-const ctx = createContext(0)
+import { cn } from "@/src/lib/utils";
+
+const ctx = createContext(0);
 
 interface FolderProps {
-  name: string
-  label?: ReactElement
-  open?: boolean
-  defaultOpen?: boolean
-  onToggle?: (open: boolean) => void
-  children: ReactNode
+  name: string;
+  label?: ReactElement;
+  open?: boolean;
+  defaultOpen?: boolean;
+  onToggle?: (open: boolean) => void;
+  children: ReactNode;
 }
 
 interface FileProps {
-  name: string
-  label?: ReactElement
+  name: string;
+  label?: ReactElement;
 }
 
 function useIndent() {
-  return useContext(ctx)
+  return useContext(ctx);
 }
 
 function Tree({ children }: { children: ReactNode }): ReactElement {
@@ -36,7 +37,7 @@ function Tree({ children }: { children: ReactNode }): ReactElement {
     <ul className="m-0! w-full list-none overflow-hidden rounded-lg border p-2!">
       {children}
     </ul>
-  )
+  );
 }
 
 export const Folder = memo(
@@ -48,15 +49,15 @@ export const Folder = memo(
     onToggle,
     children,
   }: FolderProps) => {
-    const indent = useIndent()
-    const [isOpen, setIsOpen] = useState(defaultOpen)
+    const indent = useIndent();
+    const [isOpen, setIsOpen] = useState(defaultOpen);
 
     const toggle = useCallback(() => {
-      onToggle?.(!isOpen)
-      setIsOpen(!isOpen)
-    }, [isOpen, onToggle])
+      onToggle?.(!isOpen);
+      setIsOpen(!isOpen);
+    }, [isOpen, onToggle]);
 
-    const isFolderOpen = open === undefined ? isOpen : open
+    const isFolderOpen = open === undefined ? isOpen : open;
 
     return (
       <li className="list-none">
@@ -89,11 +90,11 @@ export const Folder = memo(
           </div>
         </div>
       </li>
-    )
+    );
   }
-)
+);
 
-Folder.displayName = "Folder"
+Folder.displayName = "Folder";
 
 export const File = memo(({ label, name }: FileProps) => (
   <li className="list-none">
@@ -104,8 +105,8 @@ export const File = memo(({ label, name }: FileProps) => (
       <span className="mr-2 ml-2">{label ?? name}</span>
     </div>
   </li>
-))
+));
 
-File.displayName = "File"
+File.displayName = "File";
 
-export default Tree
+export default Tree;

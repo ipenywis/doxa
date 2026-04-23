@@ -1,13 +1,19 @@
-export type ColorPreset = "default" | "indigo" | "emerald" | "rose" | "amber" | "violet"
+export type ColorPreset =
+  | "default"
+  | "indigo"
+  | "emerald"
+  | "rose"
+  | "amber"
+  | "violet";
 
 interface ColorValues {
-  primary: string
-  primaryForeground: string
+  primary: string;
+  primaryForeground: string;
 }
 
 interface ColorPresetConfig {
-  light: ColorValues
-  dark: ColorValues
+  light: ColorValues;
+  dark: ColorValues;
 }
 
 export const colorPresets: Record<ColorPreset, ColorPresetConfig> = {
@@ -71,8 +77,8 @@ export const colorPresets: Record<ColorPreset, ColorPresetConfig> = {
       primaryForeground: "oklch(0.985 0 0)",
     },
   },
-}
+};
 
 export function getColorPreset(name: ColorPreset): ColorPresetConfig {
-  return colorPresets[name]
+  return colorPresets[name];
 }

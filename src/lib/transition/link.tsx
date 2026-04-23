@@ -1,11 +1,15 @@
-import { useCallback, type ComponentProps, type MouseEvent } from "react"
-import { Link as RouterLink, useNavigate, useSearch } from "@tanstack/react-router"
+import { useCallback, type ComponentProps, type MouseEvent } from "react";
+import {
+  Link as RouterLink,
+  useNavigate,
+  useSearch,
+} from "@tanstack/react-router";
 
-import { startViewTransitionIfSupported } from "@/src/lib/transition/document-view-transition"
+import { startViewTransitionIfSupported } from "@/src/lib/transition/document-view-transition";
 
 function isModifiedEvent(event: MouseEvent): boolean {
-  const eventTarget = event.currentTarget as HTMLAnchorElement | SVGAElement
-  const target = eventTarget.getAttribute("target")
+  const eventTarget = event.currentTarget as HTMLAnchorElement | SVGAElement;
+  const target = eventTarget.getAttribute("target");
   return (
     (target && target !== "_self") ||
     event.metaKey ||
@@ -13,27 +17,27 @@ function isModifiedEvent(event: MouseEvent): boolean {
     event.shiftKey ||
     event.altKey ||
     (event.nativeEvent && event.button === 1)
-  )
+  );
 }
 
 function shouldPreserveDefault(e: MouseEvent<HTMLAnchorElement>): boolean {
-  const { nodeName } = e.currentTarget
+  const { nodeName } = e.currentTarget;
 
-  const isAnchorNodeName = nodeName.toUpperCase() === "A"
+  const isAnchorNodeName = nodeName.toUpperCase() === "A";
 
   if (isAnchorNodeName && isModifiedEvent(e)) {
-    return true
+    return true;
   }
 
-  return false
+  return false;
 }
 
 interface LinkProps extends Omit<ComponentProps<"a">, "href"> {
-  href: string
-  replace?: boolean
-  scroll?: boolean
-  preload?: ComponentProps<typeof RouterLink>["preload"]
-  preloadDelay?: ComponentProps<typeof RouterLink>["preloadDelay"]
+  href: string;
+  replace?: boolean;
+  scroll?: boolean;
+  preload?: ComponentProps<typeof RouterLink>["preload"];
+  preloadDelay?: ComponentProps<typeof RouterLink>["preloadDelay"];
 }
 
 export function Link({
@@ -46,9 +50,9 @@ export function Link({
   children,
   ...rest
 }: LinkProps) {
-  const navigate = useNavigate()
-  const rootSearch = useSearch({ from: "__root__" })
-  const demoSearch = rootSearch.demo ? { demo: true as const } : undefined
+  const navigate = useNavigate();
+  const rootSearch = useSearch({ from: "__root__" });
+  const demoSearch = rootSearch.demo ? { demo: true as const } : undefined;
 
   // Handle external links
   if (href.startsWith("http") || href.startsWith("//")) {
@@ -56,25 +60,25 @@ export function Link({
       <a href={href} {...rest}>
         {children}
       </a>
-    )
+    );
   }
 
   const handleClick = useCallback(
     (e: MouseEvent<HTMLAnchorElement>) => {
       if (onClick) {
-        onClick(e)
+        onClick(e);
       }
 
       if (e.defaultPrevented) {
-        return
+        return;
       }
 
       if ("startViewTransition" in document) {
         if (shouldPreserveDefault(e)) {
-          return
+          return;
         }
 
-        e.preventDefault()
+        e.preventDefault();
 
         startViewTransitionIfSupported(() => {
           navigate({
@@ -82,12 +86,12 @@ export function Link({
             replace,
             resetScroll: scroll,
             search: demoSearch,
-          })
-        })
+          });
+        });
       }
     },
     [onClick, href, replace, scroll, navigate, demoSearch]
-  )
+  );
 
   return (
     <RouterLink
@@ -101,5 +105,5 @@ export function Link({
     >
       {children}
     </RouterLink>
-  )
+  );
 }

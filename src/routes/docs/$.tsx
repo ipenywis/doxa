@@ -1,17 +1,18 @@
-import { useEffect, useMemo, type ComponentType } from "react"
-import { useChatContext } from "@/src/components/chat/chat-context"
-import { ArticleBreadcrumb } from "@/src/components/article/breadcrumb"
-import { ChatWithPage } from "@/src/components/article/chat-with-page"
-import { CopyPage } from "@/src/components/article/copy-page"
-import { Pagination } from "@/src/components/article/pagination"
-import { TableOfContents } from "@/src/components/toc"
-import { components } from "@/src/lib/components"
-import type { ChatPageContext } from "@/src/lib/chat-page-context"
-import { fetchDocumentFromServer, fetchRawDocument } from "@/src/lib/markdown"
-import { PageRoutes, Routes, isHeading, isRoute } from "@/src/lib/pageroutes"
-import { Settings } from "@/src/settings/main"
-import { createFileRoute } from "@tanstack/react-router"
-import { z } from "zod"
+import { useEffect, useMemo, type ComponentType } from "react";
+import { createFileRoute } from "@tanstack/react-router";
+import { z } from "zod";
+
+import { Settings } from "@/src/settings/main";
+import type { ChatPageContext } from "@/src/lib/chat-page-context";
+import { components } from "@/src/lib/components";
+import { fetchDocumentFromServer, fetchRawDocument } from "@/src/lib/markdown";
+import { isHeading, isRoute, PageRoutes, Routes } from "@/src/lib/pageroutes";
+import { ArticleBreadcrumb } from "@/src/components/article/breadcrumb";
+import { ChatWithPage } from "@/src/components/article/chat-with-page";
+import { CopyPage } from "@/src/components/article/copy-page";
+import { Pagination } from "@/src/components/article/pagination";
+import { useChatContext } from "@/src/components/chat/chat-context";
+import { TableOfContents } from "@/src/components/toc";
 
 // `import: "default"` pulls only the compiled React component, skipping the
 // sibling `__rawSource` export injected by mdxSourceCapturePlugin. This keeps
@@ -19,29 +20,30 @@ import { z } from "zod"
 // bundle where `vite-adapter.ts` references them.
 const mdxModules = import.meta.glob<
   ComponentType<{ components?: typeof components }>
->("/src/contents/docs/**/index.mdx", { eager: true, import: "default" })
+>("/src/contents/docs/**/index.mdx", { eager: true, import: "default" });
 
 export const Route = createFileRoute("/docs/$")({
   validateSearch: z.object({
     _splat: z.string().optional(),
   }),
   loader: async ({ params }) => {
-    const firstRoute = PageRoutes[0]?.href?.replace(/^\//, "")
-    const slug = params._splat || firstRoute || ""
+    const firstRoute = PageRoutes[0]?.href?.replace(/^\//, "");
+    const slug = params._splat || firstRoute || "";
     if (!slug) {
-      return { slug: "", document: null, routeTitle: null, rawDoc: null }
+      return { slug: "", document: null, routeTitle: null, rawDoc: null };
     }
     try {
-      const document = await fetchDocumentFromServer({ data: slug })
-      const routeTitle = PageRoutes.find((r) => r.href === `/${slug}`)?.title ?? null
+      const document = await fetchDocumentFromServer({ data: slug });
+      const routeTitle =
+        PageRoutes.find((r) => r.href === `/${slug}`)?.title ?? null;
       // Deferred: not awaited. Streams in after initial HTML so copy-page can
       // read from a resolved promise on first interaction without blocking SSR.
       const rawDoc = Settings.features.copyPage.markdown
         ? fetchRawDocument({ data: slug }).catch(() => null)
-        : null
-      return { slug, document, routeTitle, rawDoc }
+        : null;
+      return { slug, document, routeTitle, rawDoc };
     } catch {
-      return { slug, document: null, routeTitle: null, rawDoc: null }
+      return { slug, document: null, routeTitle: null, rawDoc: null };
     }
   },
   preload: true,
@@ -49,15 +51,17 @@ export const Route = createFileRoute("/docs/$")({
   component: DocsContent,
   ssr: true,
   head: ({ loaderData }) => {
-    const slug = loaderData?.slug ?? ""
-    const document = loaderData?.document ?? null
-    const title = loaderData?.routeTitle || document?.frontmatter?.title
-    const description = document?.frontmatter?.description
-    const keywords = document?.frontmatter?.keywords
+    const slug = loaderData?.slug ?? "";
+    const document = loaderData?.document ?? null;
+    const title = loaderData?.routeTitle || document?.frontmatter?.title;
+    const description = document?.frontmatter?.description;
+    const keywords = document?.frontmatter?.keywords;
 
-    const pageTitle = title ? `${title} – ${Settings.site.name}` : Settings.site.name
-    const pageDescription = description || Settings.site.description
-    const pageUrl = `${Settings.site.url}/docs/${slug}`
+    const pageTitle = title
+      ? `${title} – ${Settings.site.name}`
+      : Settings.site.name;
+    const pageDescription = description || Settings.site.description;
+    const pageUrl = `${Settings.site.url}/docs/${slug}`;
 
     return {
       meta: [
@@ -74,56 +78,56 @@ export const Route = createFileRoute("/docs/$")({
         { name: "twitter:description", content: pageDescription },
       ],
       links: [{ rel: "canonical", href: pageUrl }],
-    }
+    };
   },
-})
+});
 
 function MdxContent({ slug }: { slug: string }) {
-  const MDXContent = mdxModules[`/src/contents/docs/${slug}/index.mdx`]
+  const MDXContent = mdxModules[`/src/contents/docs/${slug}/index.mdx`];
 
   if (!MDXContent) {
     return (
       <p className="text-red-500">
         Failed to render content. Please refresh the page.
       </p>
-    )
+    );
   }
 
-  return <MDXContent components={components} />
+  return <MDXContent components={components} />;
 }
 
 function findSectionHeading(slug: string): string | undefined {
-  const targetHref = `/${slug}`
-  let currentHeading: string | undefined
+  const targetHref = `/${slug}`;
+  let currentHeading: string | undefined;
   for (const route of Routes) {
     if (isHeading(route)) {
-      currentHeading = route.heading
+      currentHeading = route.heading;
     } else if (isRoute(route) && route.href === targetHref) {
-      return currentHeading
+      return currentHeading;
     }
   }
-  return undefined
+  return undefined;
 }
 
 function DocsContent() {
-  const { isOpen: chatOpen, setCurrentPageContext } = useChatContext()
-  const { slug, document: pageDocument, rawDoc } = Route.useLoaderData()
-  const paths = slug.split("/")
-  const pathName = `docs/${slug}`
+  const { isOpen: chatOpen, setCurrentPageContext } = useChatContext();
+  const { slug, document: pageDocument, rawDoc } = Route.useLoaderData();
+  const paths = slug.split("/");
+  const pathName = `docs/${slug}`;
 
-  const currentRoute = PageRoutes.find((r) => r.href === `/${slug}`)
+  const currentRoute = PageRoutes.find((r) => r.href === `/${slug}`);
   const title =
     currentRoute?.title ||
     pageDocument?.frontmatter?.title ||
     slug.split("/").pop() ||
-    "Documentation"
+    "Documentation";
 
-  const description = pageDocument?.frontmatter?.description
-  const sectionHeading = findSectionHeading(slug)
+  const description = pageDocument?.frontmatter?.description;
+  const sectionHeading = findSectionHeading(slug);
   const copyPageEnabled =
-    Settings.features.copyPage.markdown || Settings.features.copyPage.rawText
+    Settings.features.copyPage.markdown || Settings.features.copyPage.rawText;
   const pageContext = useMemo<ChatPageContext | null>(() => {
-    if (!slug || !pageDocument) return null
+    if (!slug || !pageDocument) return null;
 
     return {
       slug,
@@ -131,17 +135,17 @@ function DocsContent() {
       sourcePath: `${slug}/index.mdx`,
       title,
       ...(description ? { description } : {}),
-    }
-  }, [description, pageDocument, slug, title])
+    };
+  }, [description, pageDocument, slug, title]);
 
   useEffect(() => {
-    setCurrentPageContext(pageContext)
-  }, [pageContext, setCurrentPageContext])
+    setCurrentPageContext(pageContext);
+  }, [pageContext, setCurrentPageContext]);
 
   if (!pageDocument) {
     return (
       <div key={slug} className="flex items-start gap-10">
-        <article className="prose-code:font-code prose-code:before:content-none prose-code:after:content-none prose max-w-3xl flex-1 prose-zinc dark:prose-invert prose-headings:scroll-m-20 prose-pre:border prose-pre:bg-muted/25 prose-img:rounded-md">
+        <article className="prose-code:font-code prose max-w-3xl flex-1 prose-zinc dark:prose-invert prose-headings:scroll-m-20 prose-code:before:content-none prose-code:after:content-none prose-pre:border prose-pre:bg-muted/25 prose-img:rounded-md">
           <ArticleBreadcrumb paths={paths} />
           <h1 className="text-3xl font-bold tracking-tight lg:text-4xl">
             Document Not Found
@@ -152,19 +156,18 @@ function DocsContent() {
               found.
             </p>
             <p>
-              Expected file at:{" "}
-              <code>src/contents/docs/{slug}/index.mdx</code>
+              Expected file at: <code>src/contents/docs/{slug}/index.mdx</code>
             </p>
           </div>
           <Pagination pathname={pathName} />
         </article>
       </div>
-    )
+    );
   }
 
   return (
     <div key={slug} className="flex items-start gap-10">
-      <article className="prose-code:font-code prose-code:before:content-none prose-code:after:content-none prose max-w-3xl flex-1 prose-zinc dark:prose-invert prose-headings:scroll-m-20 prose-pre:border prose-pre:bg-muted/25 prose-img:rounded-md">
+      <article className="prose-code:font-code prose max-w-3xl flex-1 prose-zinc dark:prose-invert prose-headings:scroll-m-20 prose-code:before:content-none prose-code:after:content-none prose-pre:border prose-pre:bg-muted/25 prose-img:rounded-md">
         {sectionHeading && (
           <p className="not-prose mb-2 text-sm font-medium text-primary">
             {sectionHeading}
@@ -206,5 +209,5 @@ function DocsContent() {
         />
       )}
     </div>
-  )
+  );
 }

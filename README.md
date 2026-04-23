@@ -149,17 +149,17 @@ All site settings live in `src/settings/main.ts`:
 
 ## Available Scripts
 
-| Script | Description |
-|--------|-------------|
-| `pnpm dev` | Start dev server (Cloudflare) |
-| `pnpm dev:vercel` | Start dev server (Vercel) |
-| `pnpm build` | Production build (Cloudflare) |
-| `pnpm build:vercel` | Production build (Vercel) |
-| `pnpm deploy` | Deploy to Cloudflare Workers |
-| `pnpm deploy:vercel` | Deploy to Vercel |
+| Script               | Description                                 |
+| -------------------- | ------------------------------------------- |
+| `pnpm dev`           | Start dev server (Cloudflare)               |
+| `pnpm dev:vercel`    | Start dev server (Vercel)                   |
+| `pnpm build`         | Production build (Cloudflare)               |
+| `pnpm build:vercel`  | Production build (Vercel)                   |
+| `pnpm deploy`        | Deploy to Cloudflare Workers                |
+| `pnpm deploy:vercel` | Deploy to Vercel                            |
 | `pnpm generate:docs` | Regenerate navigation from folder structure |
-| `pnpm lint` | Run ESLint |
-| `pnpm format` | Format with Prettier |
+| `pnpm lint`          | Run ESLint                                  |
+| `pnpm format`        | Format with Prettier                        |
 
 ---
 
@@ -169,13 +169,13 @@ Doxa ships a **unified content access layer** with pluggable adapters. The AI ch
 
 Two adapters ship out of the box:
 
-| | `vite` (default) | `github` |
-|---|---|---|
-| Where content lives | `src/contents/docs/` in this repo | Separate GitHub repo |
-| Update model | Redeploy to ship changes | Edits appear within cache TTL |
-| Latency | Zero (bundled at build time) | GitHub API + TTL cache |
-| External calls | None | GitHub REST API |
-| Best for | Site + docs shipped together | Content team edits in GitHub web UI; docs decoupled from site repo |
+|                     | `vite` (default)                  | `github`                                                           |
+| ------------------- | --------------------------------- | ------------------------------------------------------------------ |
+| Where content lives | `src/contents/docs/` in this repo | Separate GitHub repo                                               |
+| Update model        | Redeploy to ship changes          | Edits appear within cache TTL                                      |
+| Latency             | Zero (bundled at build time)      | GitHub API + TTL cache                                             |
+| External calls      | None                              | GitHub REST API                                                    |
+| Best for            | Site + docs shipped together      | Content team edits in GitHub web UI; docs decoupled from site repo |
 
 ### Switching to GitHub mode
 
@@ -194,6 +194,7 @@ Two adapters ship out of the box:
 3. Redeploy. Content now streams from GitHub — doc edits appear on the site within `DOXA_GITHUB_CACHE_TTL` with no redeploy.
 
 **Creating a GitHub token:**
+
 - Public repos: no token needed (60 req/hr limit; set one anyway for 5,000/hr).
 - Private repos: create a fine-grained PAT at [github.com/settings/tokens?type=beta](https://github.com/settings/tokens?type=beta) with **Contents: Read-only** permission on the docs repo.
 
@@ -211,9 +212,9 @@ All consumers keep working unchanged — they only see the stable `contentStore`
 
 Doxa exposes its documentation in the [llms.txt](https://llmstxt.org/) format so external AI tools (ChatGPT, Claude, Cursor, MCP clients) can discover and cite content directly:
 
-| Route | What |
-|---|---|
-| `/llms.txt` | Index of all pages with titles, URLs, descriptions |
+| Route            | What                                                 |
+| ---------------- | ---------------------------------------------------- |
+| `/llms.txt`      | Index of all pages with titles, URLs, descriptions   |
 | `/llms-full.txt` | Full corpus concatenated — paste into an LLM for Q&A |
 
 Both are generated on-demand from `contentStore`, so they stay in sync regardless of adapter.

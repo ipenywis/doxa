@@ -94,21 +94,13 @@ Use notes for information readers should not miss.
 
 Use steps for sequential workflows.
 
-```jsx
+````jsx
 <Step>
-  <StepItem title="Install dependencies">
-    ```bash
-    pnpm install
-    ```
-  </StepItem>
+  <StepItem title="Install dependencies">```bash pnpm install ```</StepItem>
 
-  <StepItem title="Start the dev server">
-    ```bash
-    pnpm dev
-    ```
-  </StepItem>
+  <StepItem title="Start the dev server">```bash pnpm dev ```</StepItem>
 </Step>
-```
+````
 
 **StepItem props**: `title?` (string)
 
@@ -118,24 +110,18 @@ Leave a blank line before and after code fences inside `StepItem`.
 
 Use tabs for mutually exclusive alternatives such as providers, package managers, or deployment targets.
 
-```jsx
+````jsx
 <Tabs defaultValue="cloudflare" className="pt-5 pb-1">
   <TabsList>
     <TabsTrigger value="cloudflare">Cloudflare</TabsTrigger>
     <TabsTrigger value="vercel">Vercel</TabsTrigger>
   </TabsList>
   <TabsContent value="cloudflare">
-    ```bash
-    pnpm build:cloudflare
-    ```
+    ```bash pnpm build:cloudflare ```
   </TabsContent>
-  <TabsContent value="vercel">
-    ```bash
-    pnpm build:vercel
-    ```
-  </TabsContent>
+  <TabsContent value="vercel">```bash pnpm build:vercel ```</TabsContent>
 </Tabs>
-```
+````
 
 **Tabs props**: `defaultValue` (string matching a trigger), `className?` (string)
 
@@ -201,7 +187,7 @@ export const Settings = {
     tableOfContents: true,
   },
 }
-```
+```;
 ````
 
 ## Usage Patterns By Page Type

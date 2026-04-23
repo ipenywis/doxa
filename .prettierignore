@@ -10,19 +10,27 @@
 .pnpm-debug.log
 pnpm-lock.yaml
 
-# next.js
+# framework/cache output
 /.next/
+/.vite/
+/.vinxi/
+/.output/
+/.tanstack/
+/.wrangler/
+/.vercel/
 /out/
 
 # production
 /build
 /dist
+/coverage
 
 # misc
 .DS_Store
 *.pem
-.env
+.env*
+*.tsbuildinfo
 
-dist
+# generated data
+src/routeTree.gen.ts
 public/search-data
-contents/docs

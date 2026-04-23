@@ -10,28 +10,28 @@
  */
 
 export interface DocFrontmatter {
-  title: string
-  description: string
-  keywords: string[]
+  title: string;
+  description: string;
+  keywords: string[];
 }
 
 export interface ContentEntry {
   /** URL-style slug, e.g. "/basic-setup/installation" */
-  slug: string
+  slug: string;
   /** Virtual file path, e.g. "basic-setup/installation/index.mdx" */
-  filePath: string
+  filePath: string;
   /** Full raw MDX including frontmatter delimiters */
-  rawContent: string
+  rawContent: string;
   /** Parsed YAML frontmatter */
-  frontmatter: DocFrontmatter
+  frontmatter: DocFrontmatter;
   /** MDX body with frontmatter stripped */
-  body: string
+  body: string;
 }
 
 export interface GrepMatch {
-  filePath: string
-  lineNumber: number
-  line: string
+  filePath: string;
+  lineNumber: number;
+  line: string;
 }
 
 /**
@@ -42,9 +42,9 @@ export interface GrepMatch {
  */
 export interface ContentAdapter {
   /** All known file paths relative to the docs root */
-  listFiles(): Promise<string[]>
+  listFiles(): Promise<string[]>;
   /** Raw MDX content for a path, or null if not found */
-  readFile(filePath: string): Promise<string | null>
+  readFile(filePath: string): Promise<string | null>;
   /** Human-readable adapter name for logs/errors */
-  readonly name: string
+  readonly name: string;
 }

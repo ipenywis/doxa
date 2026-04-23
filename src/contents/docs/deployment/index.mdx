@@ -1,7 +1,14 @@
 ---
 title: Deployment
 description: Deploy Doxa Docs to Cloudflare Workers or Vercel with the right build target, environment variables, and validation steps.
-keywords: ["deployment", "cloudflare workers", "vercel", "build", "environment variables"]
+keywords:
+  [
+    "deployment",
+    "cloudflare workers",
+    "vercel",
+    "build",
+    "environment variables",
+  ]
 ---
 
 Doxa includes scripts for Cloudflare Workers and Vercel. Cloudflare is the default target, and Vercel has dedicated build and deploy commands.
@@ -14,27 +21,21 @@ Doxa includes scripts for Cloudflare Workers and Vercel. Cloudflare is the defau
     <TabsTrigger value="vercel">Vercel</TabsTrigger>
   </TabsList>
   <TabsContent value="cloudflare">
-    ```bash
-    pnpm build:cloudflare
-    pnpm deploy:cloudflare
-    ```
+    ```bash pnpm build:cloudflare pnpm deploy:cloudflare ```
   </TabsContent>
   <TabsContent value="vercel">
-    ```bash
-    pnpm build:vercel
-    pnpm deploy:vercel
-    ```
+    ```bash pnpm build:vercel pnpm deploy:vercel ```
   </TabsContent>
 </Tabs>
 
 ## Required Production Settings
 
-| Setting | Why it matters |
-| :-- | :-- |
-| `VITE_SITE_URL` | Canonical tags, sitemap, robots, Open Graph URLs, and `llms.txt` source links. |
-| `AI_API_KEY` | Required when Chat with Docs is enabled. |
-| `CONTENT_SOURCE` | Selects bundled or runtime docs content. |
-| GitHub adapter vars | Required only when `CONTENT_SOURCE=github`. |
+| Setting             | Why it matters                                                                 |
+| :------------------ | :----------------------------------------------------------------------------- |
+| `VITE_SITE_URL`     | Canonical tags, sitemap, robots, Open Graph URLs, and `llms.txt` source links. |
+| `AI_API_KEY`        | Required when Chat with Docs is enabled.                                       |
+| `CONTENT_SOURCE`    | Selects bundled or runtime docs content.                                       |
+| GitHub adapter vars | Required only when `CONTENT_SOURCE=github`.                                    |
 
 ## Cloudflare Workers
 
@@ -45,13 +46,12 @@ Doxa includes scripts for Cloudflare Workers and Vercel. Cloudflare is the defau
     ```bash
     wrangler secret put AI_API_KEY
     ```
+
   </StepItem>
 
-  <StepItem title="Build for Cloudflare">
-    ```bash
-    pnpm build:cloudflare
-    ```
-  </StepItem>
+<StepItem title="Build for Cloudflare">
+  ```bash pnpm build:cloudflare ```
+</StepItem>
 
   <StepItem title="Deploy">
     ```bash
@@ -69,12 +69,9 @@ Doxa includes scripts for Cloudflare Workers and Vercel. Cloudflare is the defau
     ```
   </StepItem>
 
-  <StepItem title="Set environment variables">
-    ```bash
-    vercel env add VITE_SITE_URL
-    vercel env add AI_API_KEY
-    ```
-  </StepItem>
+<StepItem title="Set environment variables">
+  ```bash vercel env add VITE_SITE_URL vercel env add AI_API_KEY ```
+</StepItem>
 
   <StepItem title="Deploy">
     ```bash

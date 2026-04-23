@@ -1,59 +1,59 @@
-export type ThemeColorMode = "light-dark" | "dark-only"
+export type ThemeColorMode = "light-dark" | "dark-only";
 
 export interface ThemeTokens {
-  background: string
-  foreground: string
-  card: string
-  cardForeground: string
-  popover: string
-  popoverForeground: string
-  primary: string
-  primaryForeground: string
-  secondary: string
-  secondaryForeground: string
-  muted: string
-  mutedForeground: string
-  accent: string
-  accentForeground: string
-  destructive: string
-  destructiveForeground: string
-  border: string
-  input: string
-  ring: string
-  radius: string
+  background: string;
+  foreground: string;
+  card: string;
+  cardForeground: string;
+  popover: string;
+  popoverForeground: string;
+  primary: string;
+  primaryForeground: string;
+  secondary: string;
+  secondaryForeground: string;
+  muted: string;
+  mutedForeground: string;
+  accent: string;
+  accentForeground: string;
+  destructive: string;
+  destructiveForeground: string;
+  border: string;
+  input: string;
+  ring: string;
+  radius: string;
   // Chart tokens
-  chart1: string
-  chart2: string
-  chart3: string
-  chart4: string
-  chart5: string
+  chart1: string;
+  chart2: string;
+  chart3: string;
+  chart4: string;
+  chart5: string;
   // Sidebar tokens
-  sidebar: string
-  sidebarForeground: string
-  sidebarPrimary: string
-  sidebarPrimaryForeground: string
-  sidebarAccent: string
-  sidebarAccentForeground: string
-  sidebarBorder: string
-  sidebarRing: string
+  sidebar: string;
+  sidebarForeground: string;
+  sidebarPrimary: string;
+  sidebarPrimaryForeground: string;
+  sidebarAccent: string;
+  sidebarAccentForeground: string;
+  sidebarBorder: string;
+  sidebarRing: string;
   // Inline code tokens
-  codeBg: string
-  codeFg: string
-  codeBorder: string
+  codeBg: string;
+  codeFg: string;
+  codeBorder: string;
 }
 
 export interface ThemeDefinition {
-  name: string
-  colorMode: ThemeColorMode
-  light: ThemeTokens
-  dark?: ThemeTokens
-  bodyFont: string
-  codeFont: string
-  fonts: { href: string }[]
-  extraCss?: string
+  name: string;
+  colorMode: ThemeColorMode;
+  light: ThemeTokens;
+  dark?: ThemeTokens;
+  bodyFont: string;
+  codeFont: string;
+  fonts: { href: string }[];
+  extraCss?: string;
 }
 
-export type ThemeName = "default" | "brutalist"
+export type ThemeName = "default" | "brutalist";
 
 // ---------------------------------------------------------------------------
 // Default theme — reproduces the current globals.css light/dark values exactly
@@ -145,7 +145,7 @@ const defaultTheme: ThemeDefinition = {
       href: "https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700&display=swap",
     },
   ],
-}
+};
 
 // ---------------------------------------------------------------------------
 // Brutalist theme — pure black, monospace-first, sharp corners, blue accent
@@ -209,7 +209,7 @@ const brutalistTheme: ThemeDefinition = {
     ".terminal-window-header { border-bottom: 1px solid oklch(0.18 0 0); background: oklch(0.06 0 0); padding: 8px 12px; display: flex; align-items: center; gap: 6px; }",
     ".terminal-dot { width: 8px; height: 8px; border-radius: 50%; background: oklch(0.25 0 0); }",
   ].join("\n"),
-}
+};
 
 // ---------------------------------------------------------------------------
 // Theme registry
@@ -218,10 +218,10 @@ const brutalistTheme: ThemeDefinition = {
 const themes: Record<ThemeName, ThemeDefinition> = {
   default: defaultTheme,
   brutalist: brutalistTheme,
-}
+};
 
 export function getTheme(name: ThemeName): ThemeDefinition {
-  return themes[name]
+  return themes[name];
 }
 
 // ---------------------------------------------------------------------------
@@ -266,27 +266,27 @@ function tokensToCss(tokens: ThemeTokens): string {
     `--code-bg: ${tokens.codeBg}`,
     `--code-fg: ${tokens.codeFg}`,
     `--code-border: ${tokens.codeBorder}`,
-  ].join("; ")
+  ].join("; ");
 }
 
 export function generateThemeCss(theme: ThemeDefinition): string {
-  const parts: string[] = []
+  const parts: string[] = [];
 
-  const fontVars = `--font-body: ${theme.bodyFont}; --font-code: ${theme.codeFont}`
+  const fontVars = `--font-body: ${theme.bodyFont}; --font-code: ${theme.codeFont}`;
 
   if (theme.colorMode === "dark-only") {
     // Output under :root, .dark to override both globals.css :root and .dark
-    parts.push(`:root, .dark { ${tokensToCss(theme.light)}; ${fontVars} }`)
+    parts.push(`:root, .dark { ${tokensToCss(theme.light)}; ${fontVars} }`);
   } else {
-    parts.push(`:root { ${tokensToCss(theme.light)}; ${fontVars} }`)
+    parts.push(`:root { ${tokensToCss(theme.light)}; ${fontVars} }`);
     if (theme.dark) {
-      parts.push(`.dark { ${tokensToCss(theme.dark)} }`)
+      parts.push(`.dark { ${tokensToCss(theme.dark)} }`);
     }
   }
 
   if (theme.extraCss) {
-    parts.push(theme.extraCss)
+    parts.push(theme.extraCss);
   }
 
-  return parts.join("\n")
+  return parts.join("\n");
 }

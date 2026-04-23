@@ -21,12 +21,12 @@ Each route entry maps to a folder under `src/contents/docs`. The app prefixes th
 ]
 ```
 
-| Entry | Purpose |
-| :-- | :-- |
-| `heading` | Adds a non-clickable section label to the sidebar. |
-| `title` + `href` | Adds a clickable docs page. |
-| `spacer` | Adds visual separation between groups. |
-| `noLink` | Keeps a page in the route data without rendering it as a link. |
+| Entry            | Purpose                                                        |
+| :--------------- | :------------------------------------------------------------- |
+| `heading`        | Adds a non-clickable section label to the sidebar.             |
+| `title` + `href` | Adds a clickable docs page.                                    |
+| `spacer`         | Adds visual separation between groups.                         |
+| `noLink`         | Keeps a page in the route data without rendering it as a link. |
 
 <Note title="Route prefix">
   Use hrefs like `/overview` in `documents.json`. The sidebar, search results,
@@ -63,6 +63,7 @@ The physical folder names become the URL path. A page at `src/contents/docs/ai/c
     ```bash
     mkdir -p src/contents/docs/guides/release-notes
     ```
+
   </StepItem>
 
   <StepItem title="Add frontmatter">
@@ -75,6 +76,7 @@ The physical folder names become the URL path. A page at `src/contents/docs/ai/c
     keywords: ["release notes", "changelog", "updates"]
     ---
     ```
+
   </StepItem>
 
   <StepItem title="Place it in the sidebar">
@@ -83,6 +85,7 @@ The physical folder names become the URL path. A page at `src/contents/docs/ai/c
     ```json
     { "title": "Release Notes", "href": "/guides/release-notes" }
     ```
+
   </StepItem>
 
   <StepItem title="Refresh derived data">
@@ -91,6 +94,7 @@ The physical folder names become the URL path. A page at `src/contents/docs/ai/c
     ```bash
     pnpm generate-content-json
     ```
+
   </StepItem>
 </Step>
 

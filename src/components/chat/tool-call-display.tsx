@@ -1,47 +1,51 @@
-import { useCallback, useState } from "react"
-import { LuChevronDown, LuChevronRight, LuTerminal } from "react-icons/lu"
-import { BrailleSpinner } from "@/src/components/chat/agent-activity"
+import { useCallback, useState } from "react";
+import { LuChevronDown, LuChevronRight, LuTerminal } from "react-icons/lu";
+
+import { BrailleSpinner } from "@/src/components/chat/agent-activity";
 
 export interface ToolCallStep {
-  id: string
-  name: string
-  args: string
-  result?: string
-  status: "calling" | "executing" | "completed" | "error"
+  id: string;
+  name: string;
+  args: string;
+  result?: string;
+  status: "calling" | "executing" | "completed" | "error";
 }
 
 interface ToolCallDisplayProps {
-  step: ToolCallStep
+  step: ToolCallStep;
 }
 
 function parseArgs(raw: string): string {
   try {
-    const parsed = JSON.parse(raw)
-    if (parsed.command) return parsed.command
-    return raw
+    const parsed = JSON.parse(raw);
+    if (parsed.command) return parsed.command;
+    return raw;
   } catch {
-    return raw
+    return raw;
   }
 }
 
-function truncateResult(result: string, maxLines = 8): { text: string; truncated: boolean } {
-  const lines = result.split("\n")
-  if (lines.length <= maxLines) return { text: result, truncated: false }
+function truncateResult(
+  result: string,
+  maxLines = 8
+): { text: string; truncated: boolean } {
+  const lines = result.split("\n");
+  if (lines.length <= maxLines) return { text: result, truncated: false };
   return {
     text: lines.slice(0, maxLines).join("\n"),
     truncated: true,
-  }
+  };
 }
 
 export function ToolCallDisplay({ step }: ToolCallDisplayProps) {
-  const [expanded, setExpanded] = useState(false)
-  const toggle = useCallback(() => setExpanded((v) => !v), [])
+  const [expanded, setExpanded] = useState(false);
+  const toggle = useCallback(() => setExpanded((v) => !v), []);
 
-  const isActive = step.status === "calling" || step.status === "executing"
-  const isDone = step.status === "completed"
-  const isError = step.status === "error"
+  const isActive = step.status === "calling" || step.status === "executing";
+  const isDone = step.status === "completed";
+  const isError = step.status === "error";
 
-  const displayCommand = step.args ? parseArgs(step.args) : "..."
+  const displayCommand = step.args ? parseArgs(step.args) : "...";
 
   return (
     <div className="my-1.5 max-w-[90%] overflow-hidden rounded-lg border border-border/50 bg-muted/30 text-xs">
@@ -57,14 +61,26 @@ export function ToolCallDisplay({ step }: ToolCallDisplayProps) {
         )}
         {isDone && (
           <span className="flex size-4 shrink-0 items-center justify-center rounded-full bg-emerald-500/15 text-emerald-600 dark:text-emerald-400">
-            <svg viewBox="0 0 12 12" className="size-2.5" fill="none" stroke="currentColor" strokeWidth="2">
+            <svg
+              viewBox="0 0 12 12"
+              className="size-2.5"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+            >
               <path d="M2 6l3 3 5-5" />
             </svg>
           </span>
         )}
         {isError && (
           <span className="flex size-4 shrink-0 items-center justify-center rounded-full bg-destructive/15 text-destructive">
-            <svg viewBox="0 0 12 12" className="size-2.5" fill="none" stroke="currentColor" strokeWidth="2">
+            <svg
+              viewBox="0 0 12 12"
+              className="size-2.5"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+            >
               <path d="M3 3l6 6M9 3l-6 6" />
             </svg>
           </span>
@@ -77,11 +93,12 @@ export function ToolCallDisplay({ step }: ToolCallDisplayProps) {
           {displayCommand}
         </code>
 
-        {step.result && (
-          expanded
-            ? <LuChevronDown className="size-3 shrink-0 text-muted-foreground" />
-            : <LuChevronRight className="size-3 shrink-0 text-muted-foreground" />
-        )}
+        {step.result &&
+          (expanded ? (
+            <LuChevronDown className="size-3 shrink-0 text-muted-foreground" />
+          ) : (
+            <LuChevronRight className="size-3 shrink-0 text-muted-foreground" />
+          ))}
       </button>
 
       {/* Expanded result */}
@@ -91,16 +108,16 @@ export function ToolCallDisplay({ step }: ToolCallDisplayProps) {
         </div>
       )}
     </div>
-  )
+  );
 }
 
 function ResultContent({ result }: { result: string }) {
-  const [showFull, setShowFull] = useState(false)
-  const { text, truncated } = truncateResult(result, 12)
+  const [showFull, setShowFull] = useState(false);
+  const { text, truncated } = truncateResult(result, 12);
 
   return (
     <div>
-      <pre className="overflow-x-auto whitespace-pre-wrap break-all font-mono text-[10px] leading-relaxed text-muted-foreground">
+      <pre className="overflow-x-auto font-mono text-[10px] leading-relaxed break-all whitespace-pre-wrap text-muted-foreground">
         {showFull ? result : text}
       </pre>
       {truncated && !showFull && (
@@ -112,15 +129,15 @@ function ResultContent({ result }: { result: string }) {
         </button>
       )}
     </div>
-  )
+  );
 }
 
 interface ToolCallListProps {
-  steps: ToolCallStep[]
+  steps: ToolCallStep[];
 }
 
 export function ToolCallList({ steps }: ToolCallListProps) {
-  if (steps.length === 0) return null
+  if (steps.length === 0) return null;
 
   return (
     <div className="flex flex-col">
@@ -128,5 +145,5 @@ export function ToolCallList({ steps }: ToolCallListProps) {
         <ToolCallDisplay key={step.id} step={step} />
       ))}
     </div>
-  )
+  );
 }

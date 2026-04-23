@@ -1,7 +1,8 @@
 ---
 title: Code Blocks
 description: Show commands, config files, source snippets, line numbers, line highlights, and language alternatives in Doxa docs.
-keywords: ["code blocks", "syntax highlighting", "copy button", "line numbers", "mdx"]
+keywords:
+  ["code blocks", "syntax highlighting", "copy button", "line numbers", "mdx"]
 ---
 
 Code examples are one of Doxa's core reading surfaces. Fenced code blocks support language-aware highlighting, optional line numbers, line highlighting, and a copy button.
@@ -33,7 +34,7 @@ export const Settings = {
     },
     tableOfContents: true,
   },
-}
+};
 ```
 
 ## Highlight Important Lines
@@ -47,7 +48,7 @@ export const aiConfig = {
   codeSnippets: true,
   maxContextChunks: 12,
   maxResponseTokens: 2048,
-}
+};
 ```
 
 ## Titles In Surrounding Text
@@ -67,7 +68,7 @@ export const components = {
   TabsContent,
   TabsList,
   TabsTrigger,
-}
+};
 ```
 
 ## Provider Alternatives
@@ -80,16 +81,10 @@ Tabs keep related alternatives in one place.
     <TabsTrigger value="vercel">Vercel</TabsTrigger>
   </TabsList>
   <TabsContent value="cloudflare">
-    ```bash
-    pnpm build:cloudflare
-    pnpm deploy:cloudflare
-    ```
+    ```bash pnpm build:cloudflare pnpm deploy:cloudflare ```
   </TabsContent>
   <TabsContent value="vercel">
-    ```bash
-    pnpm build:vercel
-    pnpm deploy:vercel
-    ```
+    ```bash pnpm build:vercel pnpm deploy:vercel ```
   </TabsContent>
 </Tabs>
 

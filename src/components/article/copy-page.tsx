@@ -1,45 +1,46 @@
-import { useState } from "react"
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/src/components/ui/dropdown-menu"
-import { type RawDocument } from "@/src/lib/markdown"
-import { cn } from "@/src/lib/utils"
+import { useState } from "react";
 import {
   LuCheck,
   LuChevronDown,
   LuCopy,
   LuFileCode,
   LuFileText,
-} from "react-icons/lu"
+} from "react-icons/lu";
+
+import { type RawDocument } from "@/src/lib/markdown";
+import { cn } from "@/src/lib/utils";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/src/components/ui/dropdown-menu";
 
 type DeferredRawDoc =
   | RawDocument
   | Promise<RawDocument | null>
   | null
-  | undefined
+  | undefined;
 
 interface CopyPageOptions {
-  markdown: boolean
-  rawText: boolean
+  markdown: boolean;
+  rawText: boolean;
 }
 
 function composeMarkdown(doc: RawDocument) {
-  const parts = [`# ${doc.title}`]
-  if (doc.description) parts.push(doc.description)
-  parts.push(doc.body.trim())
-  return parts.join("\n\n")
+  const parts = [`# ${doc.title}`];
+  if (doc.description) parts.push(doc.description);
+  parts.push(doc.body.trim());
+  return parts.join("\n\n");
 }
 
 function composeText(title: string, description?: string) {
-  const article = document.querySelector<HTMLElement>(".prose-content")
-  const body = article?.innerText.trim() ?? ""
-  const parts = [title]
-  if (description) parts.push(description)
-  if (body) parts.push(body)
-  return parts.join("\n\n")
+  const article = document.querySelector<HTMLElement>(".prose-content");
+  const body = article?.innerText.trim() ?? "";
+  const parts = [title];
+  if (description) parts.push(description);
+  if (body) parts.push(body);
+  return parts.join("\n\n");
 }
 
 export function CopyPage({
@@ -48,37 +49,37 @@ export function CopyPage({
   title,
   description,
 }: {
-  options: CopyPageOptions
-  rawDoc: DeferredRawDoc
-  title: string
-  description?: string
+  options: CopyPageOptions;
+  rawDoc: DeferredRawDoc;
+  title: string;
+  description?: string;
 }) {
-  const [copied, setCopied] = useState(false)
-  const [open, setOpen] = useState(false)
-  const hasMultipleOptions = options.markdown && options.rawText
-  const primaryCopyAction = options.markdown ? copyMarkdown : copyText
+  const [copied, setCopied] = useState(false);
+  const [open, setOpen] = useState(false);
+  const hasMultipleOptions = options.markdown && options.rawText;
+  const primaryCopyAction = options.markdown ? copyMarkdown : copyText;
   const primaryCopyLabel = options.markdown
     ? "Copy page as markdown"
-    : "Copy page as text"
+    : "Copy page as text";
 
   function flashCopied() {
-    setCopied(true)
-    setTimeout(() => setCopied(false), 2000)
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
   }
 
   async function copyMarkdown() {
-    const doc = await Promise.resolve(rawDoc)
-    if (!doc) return
-    await navigator.clipboard.writeText(composeMarkdown(doc))
-    flashCopied()
+    const doc = await Promise.resolve(rawDoc);
+    if (!doc) return;
+    await navigator.clipboard.writeText(composeMarkdown(doc));
+    flashCopied();
   }
 
   async function copyText() {
-    await navigator.clipboard.writeText(composeText(title, description))
-    flashCopied()
+    await navigator.clipboard.writeText(composeText(title, description));
+    flashCopied();
   }
 
-  if (!options.markdown && !options.rawText) return null
+  if (!options.markdown && !options.rawText) return null;
 
   return (
     <div className="inline-flex h-8 shrink-0 items-stretch overflow-hidden rounded-md border bg-background shadow-xs dark:bg-input/30">
@@ -141,5 +142,5 @@ export function CopyPage({
         </>
       )}
     </div>
-  )
+  );
 }

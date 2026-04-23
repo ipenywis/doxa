@@ -1,21 +1,22 @@
 ---
 title: MDX Components
 description: Use Doxa's built-in MDX components for navigation cards, callouts, steps, tabs, diagrams, and file trees.
-keywords: ["mdx components", "cards", "notes", "steps", "tabs", "filetree", "mermaid"]
+keywords:
+  ["mdx components", "cards", "notes", "steps", "tabs", "filetree", "mermaid"]
 ---
 
 Doxa registers a focused component set for documentation pages in `src/lib/components.ts`. These components are available directly in MDX without per-page imports.
 
 ## Component Catalog
 
-| Component | Use it for |
-| :-- | :-- |
-| `CardGrid` and `Card` | Navigation, feature groups, related pages, and external links. |
-| `Note` | Important callouts, prerequisites, warnings, and success states. |
-| `Step` and `StepItem` | Sequential workflows. |
-| `Tabs` | Alternative commands, providers, platforms, or languages. |
-| `Mermaid` | Architecture diagrams, agent flows, and process charts. |
-| `FileTree`, `Folder`, and `File` | Project structure and content layout. |
+| Component                        | Use it for                                                       |
+| :------------------------------- | :--------------------------------------------------------------- |
+| `CardGrid` and `Card`            | Navigation, feature groups, related pages, and external links.   |
+| `Note`                           | Important callouts, prerequisites, warnings, and success states. |
+| `Step` and `StepItem`            | Sequential workflows.                                            |
+| `Tabs`                           | Alternative commands, providers, platforms, or languages.        |
+| `Mermaid`                        | Architecture diagrams, agent flows, and process charts.          |
+| `FileTree`, `Folder`, and `File` | Project structure and content layout.                            |
 
 ## Cards
 
@@ -70,7 +71,8 @@ Use notes for information a reader should not miss.
 </Note>
 
 <Note title="Danger" type="danger">
-  Use danger notes for irreversible actions, security risks, or destructive commands.
+  Use danger notes for irreversible actions, security risks, or destructive
+  commands.
 </Note>
 
 ## Steps
@@ -82,9 +84,9 @@ Use `Step` for workflows that must happen in order.
     Add frontmatter and body content under `src/contents/docs`.
   </StepItem>
 
-  <StepItem title="Update navigation">
-    Add the page to `src/contents/settings/documents.json`.
-  </StepItem>
+<StepItem title="Update navigation">
+  Add the page to `src/contents/settings/documents.json`.
+</StepItem>
 
   <StepItem title="Regenerate search data">
     ```bash
@@ -103,21 +105,9 @@ Tabs are useful when the user chooses one option from a small set.
     <TabsTrigger value="npm">npm</TabsTrigger>
     <TabsTrigger value="yarn">yarn</TabsTrigger>
   </TabsList>
-  <TabsContent value="pnpm">
-    ```bash
-    pnpm install
-    ```
-  </TabsContent>
-  <TabsContent value="npm">
-    ```bash
-    npm install
-    ```
-  </TabsContent>
-  <TabsContent value="yarn">
-    ```bash
-    yarn install
-    ```
-  </TabsContent>
+  <TabsContent value="pnpm">```bash pnpm install ```</TabsContent>
+  <TabsContent value="npm">```bash npm install ```</TabsContent>
+  <TabsContent value="yarn">```bash yarn install ```</TabsContent>
 </Tabs>
 
 ## File Tree

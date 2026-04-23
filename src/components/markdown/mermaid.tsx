@@ -1,1 +1,1 @@
-export { default } from "@/src/components/markdown/mermaid/component"
+export { default } from "@/src/components/markdown/mermaid/component";

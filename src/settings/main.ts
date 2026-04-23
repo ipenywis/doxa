@@ -1,55 +1,53 @@
-import type { OpenGraph, TwitterCard } from "@/src/types/opengraph"
+import type { OpenGraph, TwitterCard } from "@/src/types/opengraph";
 
 interface AiFeatureSettings {
-  chat: boolean
-  chatWithPage: boolean
-  floatingInput: boolean
+  chat: boolean;
+  chatWithPage: boolean;
+  floatingInput: boolean;
 }
 
 interface CopyPageFeatureSettings {
-  markdown: boolean
-  rawText: boolean
+  markdown: boolean;
+  rawText: boolean;
 }
 
 interface AppSettings {
   site: {
-    name: string
-    url: string
-    description: string
-    keywords: string[]
-    icon: string
-  }
+    name: string;
+    url: string;
+    description: string;
+    keywords: string[];
+    icon: string;
+  };
   company: {
-    name: string
-    link: string
-  }
+    name: string;
+    link: string;
+  };
   seo: {
-    ogImage: string
-    ogImageAlt: string
-    twitterHandle: string
-  }
+    ogImage: string;
+    ogImageAlt: string;
+    twitterHandle: string;
+  };
   analytics: {
-    gtmId: string
-    gtmEnabled: boolean
-  }
+    gtmId: string;
+    gtmEnabled: boolean;
+  };
   features: {
-    branding: boolean
-    rightSidebar: boolean
-    feedbackEdit: boolean
-    tableOfContents: boolean
-    scrollToTop: boolean
-    ai: AiFeatureSettings
-    copyPage: CopyPageFeatureSettings
-    loadFromGithub: boolean
-  }
-  openGraph: OpenGraph
-  twitter: TwitterCard
+    branding: boolean;
+    rightSidebar: boolean;
+    feedbackEdit: boolean;
+    tableOfContents: boolean;
+    scrollToTop: boolean;
+    ai: AiFeatureSettings;
+    copyPage: CopyPageFeatureSettings;
+    loadFromGithub: boolean;
+  };
+  openGraph: OpenGraph;
+  twitter: TwitterCard;
 }
 
-const siteUrl =
-  import.meta.env.VITE_SITE_URL ??
-  "https://docs.doxa.so"
-const companyLink = import.meta.env.VITE_COMPANY_LINK ?? siteUrl
+const siteUrl = import.meta.env.VITE_SITE_URL ?? "https://docs.doxa.so";
+const companyLink = import.meta.env.VITE_COMPANY_LINK ?? siteUrl;
 
 export const Settings: AppSettings = {
   site: {
@@ -118,4 +116,4 @@ export const Settings: AppSettings = {
       },
     ],
   },
-}
+};

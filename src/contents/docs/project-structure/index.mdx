@@ -1,7 +1,8 @@
 ---
 title: Project Structure
 description: Understand the Doxa folder layout, content pipeline, MDX registry, and generated assets.
-keywords: ["project structure", "file tree", "content store", "mdx registry", "doxa"]
+keywords:
+  ["project structure", "file tree", "content store", "mdx registry", "doxa"]
 ---
 
 Doxa keeps the authoring surface small: MDX content goes in one tree, reusable components live in predictable folders, and generated data is committed under `public/search-data`.
@@ -73,14 +74,14 @@ Doxa keeps the authoring surface small: MDX content goes in one tree, reusable c
 
 ## Source Of Truth
 
-| Area | Source file | Notes |
-| :-- | :-- | :-- |
-| Page content | `src/contents/docs/**/index.mdx` | Markdown and MDX examples. |
-| Sidebar order | `src/contents/settings/documents.json` | Curated manually for order and headings. |
-| MDX components | `src/lib/components.ts` | Registers what MDX can render. |
-| Search metadata | `public/search-data/documents.json` | Generated from MDX content. |
-| AI behavior | `src/lib/agent/system-prompt.ts` | Constrains the assistant to documentation content. |
-| Content backend | `src/settings/content.ts` | Selects Vite or GitHub content. |
+| Area            | Source file                            | Notes                                              |
+| :-------------- | :------------------------------------- | :------------------------------------------------- |
+| Page content    | `src/contents/docs/**/index.mdx`       | Markdown and MDX examples.                         |
+| Sidebar order   | `src/contents/settings/documents.json` | Curated manually for order and headings.           |
+| MDX components  | `src/lib/components.ts`                | Registers what MDX can render.                     |
+| Search metadata | `public/search-data/documents.json`    | Generated from MDX content.                        |
+| AI behavior     | `src/lib/agent/system-prompt.ts`       | Constrains the assistant to documentation content. |
+| Content backend | `src/settings/content.ts`              | Selects Vite or GitHub content.                    |
 
 <Note title="Keep the registry in sync">
   When you add, remove, or change an MDX component, update

@@ -1,27 +1,28 @@
-import { useState } from "react"
-import { LuArrowUp } from "react-icons/lu"
-import { useLocation } from "@tanstack/react-router"
-import { useChatContext } from "@/src/components/chat/chat-context"
+import { useState } from "react";
+import { useLocation } from "@tanstack/react-router";
+import { LuArrowUp } from "react-icons/lu";
+
+import { useChatContext } from "@/src/components/chat/chat-context";
 
 export function FloatingChatBar() {
   const { isOpen, requestChatInputFocus, submitQuery, setOpen } =
-    useChatContext()
-  const location = useLocation()
-  const [value, setValue] = useState("")
+    useChatContext();
+  const location = useLocation();
+  const [value, setValue] = useState("");
 
-  if (!location.pathname.startsWith("/docs")) return null
-  if (isOpen) return null
+  if (!location.pathname.startsWith("/docs")) return null;
+  if (isOpen) return null;
 
   const handleSubmit = () => {
-    const trimmed = value.trim()
+    const trimmed = value.trim();
     if (!trimmed) {
-      setOpen(true)
-      requestChatInputFocus()
-      return
+      setOpen(true);
+      requestChatInputFocus();
+      return;
     }
-    submitQuery(trimmed)
-    setValue("")
-  }
+    submitQuery(trimmed);
+    setValue("");
+  };
 
   return (
     <div className="pointer-events-none fixed inset-x-0 bottom-5 z-40 flex justify-center px-4">
@@ -32,8 +33,8 @@ export function FloatingChatBar() {
           onChange={(e) => setValue(e.target.value)}
           onKeyDown={(e) => {
             if (e.key === "Enter" && !e.shiftKey) {
-              e.preventDefault()
-              handleSubmit()
+              e.preventDefault();
+              handleSubmit();
             }
           }}
           placeholder="Chat with the Docs"
@@ -50,5 +51,5 @@ export function FloatingChatBar() {
         </button>
       </div>
     </div>
-  )
+  );
 }

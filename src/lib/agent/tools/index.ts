@@ -5,8 +5,8 @@
  * To add a new tool, create it in its own file and add it to the array below.
  */
 
-import { catTool } from "@/src/lib/agent/tools/cat"
-import { grepTool } from "@/src/lib/agent/tools/grep"
+import { catTool } from "@/src/lib/agent/tools/cat";
+import { grepTool } from "@/src/lib/agent/tools/grep";
 
 /** All tools available to the documentation agent. */
-export const agentTools = [catTool, grepTool]
+export const agentTools = [catTool, grepTool];

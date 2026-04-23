@@ -1,10 +1,11 @@
-import { PropsWithChildren } from "react"
-import { cn } from "@/src/lib/utils"
+import { PropsWithChildren } from "react";
+
+import { cn } from "@/src/lib/utils";
 
 type NoteProps = PropsWithChildren & {
-  title?: string
-  type?: "note" | "success" | "warning" | "danger"
-}
+  title?: string;
+  type?: "note" | "success" | "warning" | "danger";
+};
 
 export default function Note({
   children,
@@ -19,7 +20,7 @@ export default function Note({
       type === "warning",
     "dark:bg-red-950 bg-red-100 border-red-300 dark:border-red-900":
       type === "danger",
-  })
+  });
 
   return (
     <div
@@ -31,5 +32,5 @@ export default function Note({
       <p className="-mb-3 text-sm font-semibold">{title}:</p>
       {children}
     </div>
-  )
+  );
 }

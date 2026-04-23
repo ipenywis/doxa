@@ -1,16 +1,17 @@
-import { GitHubLink } from "@/src/settings/navigation"
-import { LuPencil, LuMessageSquare } from "react-icons/lu"
+import { LuMessageSquare, LuPencil } from "react-icons/lu";
+
+import { GitHubLink } from "@/src/settings/navigation";
 
 interface SideBarEdit {
-  title: string
-  slug: string
+  title: string;
+  slug: string;
 }
 
 export default function RightSideBar({ slug, title }: SideBarEdit) {
-  if (!GitHubLink.href) return null
+  if (!GitHubLink.href) return null;
 
-  const feedbackUrl = `${GitHubLink.href}/issues/new?title=Feedback for "${title}"&labels=feedback`
-  const editUrl = `${GitHubLink.href}/edit/main/contents/docs/${slug}/index.mdx`
+  const feedbackUrl = `${GitHubLink.href}/issues/new?title=Feedback for "${title}"&labels=feedback`;
+  const editUrl = `${GitHubLink.href}/edit/main/contents/docs/${slug}/index.mdx`;
 
   return (
     <div className="flex flex-col gap-2">
@@ -39,5 +40,5 @@ export default function RightSideBar({ slug, title }: SideBarEdit) {
         </a>
       </div>
     </div>
-  )
+  );
 }

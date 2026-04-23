@@ -4,33 +4,33 @@
  * link (which scrolls the heading to 80px) and scroll-based activation stay
  * perfectly in sync.
  */
-export const READING_LINE_OFFSET = 80
+export const READING_LINE_OFFSET = 80;
 
 /** Bottom margin kept below the expanded reading line at max scroll. */
-const BOTTOM_MARGIN = 50
+const BOTTOM_MARGIN = 50;
 
-export const APP_SCROLL_CONTAINER_ID = "app-scroll-container"
+export const APP_SCROLL_CONTAINER_ID = "app-scroll-container";
 
 export interface ScrollRootMetrics {
-  scrollTop: number
-  viewportHeight: number
-  scrollHeight: number
-  rootTop: number
+  scrollTop: number;
+  viewportHeight: number;
+  scrollHeight: number;
+  rootTop: number;
 }
 
 /** Strip the leading `#` from a TOC href to get the element ID. */
 export function hrefToId(href: string): string {
-  return href.startsWith("#") ? href.slice(1) : href
+  return href.startsWith("#") ? href.slice(1) : href;
 }
 
 export function getAppScrollContainer(): HTMLElement | null {
-  return document.getElementById(APP_SCROLL_CONTAINER_ID)
+  return document.getElementById(APP_SCROLL_CONTAINER_ID);
 }
 
 function isWindowScrollRoot(
   scrollRoot: HTMLElement | Window
 ): scrollRoot is Window {
-  return typeof Window !== "undefined" && scrollRoot instanceof Window
+  return typeof Window !== "undefined" && scrollRoot instanceof Window;
 }
 
 export function getScrollRootMetrics(
@@ -42,7 +42,7 @@ export function getScrollRootMetrics(
       viewportHeight: window.innerHeight,
       scrollHeight: document.documentElement.scrollHeight,
       rootTop: 0,
-    }
+    };
   }
 
   return {
@@ -50,7 +50,7 @@ export function getScrollRootMetrics(
     viewportHeight: scrollRoot.clientHeight,
     scrollHeight: scrollRoot.scrollHeight,
     rootTop: scrollRoot.getBoundingClientRect().top,
-  }
+  };
 }
 
 /**
@@ -61,15 +61,15 @@ export function getScrollRootMetrics(
 export function findHeadingElements(tocIds: string[]): HTMLElement[] {
   const byId = tocIds
     .map((id) => document.getElementById(id))
-    .filter(Boolean) as HTMLElement[]
+    .filter(Boolean) as HTMLElement[];
 
-  if (byId.length > 0) return byId
+  if (byId.length > 0) return byId;
 
-  const article = document.querySelector("article")
-  if (!article) return []
+  const article = document.querySelector("article");
+  if (!article) return [];
   return Array.from(
     article.querySelectorAll<HTMLElement>("h2[id], h3[id], h4[id]")
-  )
+  );
 }
 
 /**
@@ -85,21 +85,21 @@ export function computeReadingLine(
   viewportHeight: number,
   docHeight: number
 ): number {
-  const maxScrollY = docHeight - viewportHeight
-  const distToBottom = Math.max(0, maxScrollY - scrollTop)
+  const maxScrollY = docHeight - viewportHeight;
+  const distToBottom = Math.max(0, maxScrollY - scrollTop);
 
-  let readingLine = scrollTop + READING_LINE_OFFSET
+  let readingLine = scrollTop + READING_LINE_OFFSET;
 
   if (maxScrollY > 0 && distToBottom < viewportHeight) {
     const maxExpansion = Math.max(
       0,
       viewportHeight - READING_LINE_OFFSET - BOTTOM_MARGIN
-    )
-    const progress = 1 - distToBottom / viewportHeight
-    readingLine += Math.round(progress * maxExpansion)
+    );
+    const progress = 1 - distToBottom / viewportHeight;
+    readingLine += Math.round(progress * maxExpansion);
   }
 
-  return readingLine
+  return readingLine;
 }
 
 /**
@@ -116,10 +116,10 @@ export function findActiveHeadingId(
     const absoluteTop =
       headings[i].getBoundingClientRect().top -
       metrics.rootTop +
-      metrics.scrollTop
+      metrics.scrollTop;
     if (absoluteTop <= readingLine) {
-      return headings[i].id
+      return headings[i].id;
     }
   }
-  return headings[0].id
+  return headings[0].id;
 }

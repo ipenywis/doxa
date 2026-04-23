@@ -7,39 +7,39 @@ import {
   type Dispatch,
   type ReactNode,
   type SetStateAction,
-} from "react"
+} from "react";
 
-import { useBrowserNativeTransitions } from "./browser-native"
+import { useBrowserNativeTransitions } from "./browser-native";
 
 const ViewTransitionsContext = createContext<
   Dispatch<SetStateAction<(() => void) | null>>
->(() => () => {})
+>(() => () => {});
 
 export function useSetFinishViewTransition() {
-  return use(ViewTransitionsContext)
+  return use(ViewTransitionsContext);
 }
 
 export function ViewTransitions({
   children,
 }: Readonly<{
-  children: ReactNode
+  children: ReactNode;
 }>) {
   const [finishViewTransition, setFinishViewTransition] = useState<
     (() => void) | null
-  >(null)
+  >(null);
 
   useEffect(() => {
     if (finishViewTransition) {
-      finishViewTransition()
-      setFinishViewTransition(null)
+      finishViewTransition();
+      setFinishViewTransition(null);
     }
-  }, [finishViewTransition])
+  }, [finishViewTransition]);
 
-  useBrowserNativeTransitions()
+  useBrowserNativeTransitions();
 
   return (
     <ViewTransitionsContext.Provider value={setFinishViewTransition}>
       {children}
     </ViewTransitionsContext.Provider>
-  )
+  );
 }

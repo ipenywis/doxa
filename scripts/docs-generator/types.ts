@@ -10,26 +10,26 @@
  */
 export type Paths =
   | {
-      title: string
-      href: string
-      noLink?: true
-      heading?: string
-      items?: Paths[]
+      title: string;
+      href: string;
+      noLink?: true;
+      heading?: string;
+      items?: Paths[];
     }
   | {
-      heading: string
+      heading: string;
     }
   | {
-      spacer: true
-    }
+      spacer: true;
+    };
 
 /**
  * Frontmatter extracted from MDX files
  */
 export interface MdxFrontmatter {
-  title?: string
-  description?: string
-  keywords?: string[]
+  title?: string;
+  description?: string;
+  keywords?: string[];
   /** Optional: hide from menu */
-  hidden?: boolean
+  hidden?: boolean;
 }

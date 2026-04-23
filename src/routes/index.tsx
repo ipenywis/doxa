@@ -1,25 +1,31 @@
-import { Logo } from "@/src/components/navigation/logo"
-import { buttonVariants } from "@/src/components/ui/button"
-import { PageRoutes } from "@/src/lib/pageroutes"
-import { Link } from "@/src/lib/transition"
-import { GitHubLink } from "@/src/settings/navigation"
-import { Settings } from "@/src/settings/main"
-import { createFileRoute } from "@tanstack/react-router"
-import { LuArrowRight, LuGithub } from "react-icons/lu"
+import { createFileRoute } from "@tanstack/react-router";
+import { LuArrowRight, LuGithub } from "react-icons/lu";
+
+import { Settings } from "@/src/settings/main";
+import { GitHubLink } from "@/src/settings/navigation";
+import { PageRoutes } from "@/src/lib/pageroutes";
+import { Link } from "@/src/lib/transition";
+import { buttonVariants } from "@/src/components/ui/button";
+import { Logo } from "@/src/components/navigation/logo";
 
 export const Route = createFileRoute("/")({
   component: Home,
   head: () => ({
     links: [{ rel: "canonical", href: Settings.site.url }],
   }),
-})
+});
 
 function Home() {
   return (
     <main className="flex min-h-[88vh] flex-col items-center justify-center px-4">
       <div className="flex max-w-2xl flex-col items-center text-center">
         <div className="mb-8">
-          <Logo variant="full" size={48} as="h1" className="gap-3 text-5xl lg:text-7xl" />
+          <Logo
+            variant="full"
+            size={48}
+            as="h1"
+            className="gap-3 text-5xl lg:text-7xl"
+          />
         </div>
 
         <p className="mb-4 text-lg text-muted-foreground sm:text-xl">
@@ -60,5 +66,5 @@ function Home() {
         </div>
       </div>
     </main>
-  )
+  );
 }

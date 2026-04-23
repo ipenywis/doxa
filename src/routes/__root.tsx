@@ -1,30 +1,31 @@
 /// <reference types="vite/client" />
-import type { ReactNode } from "react"
-import { ChatWithDocs } from "@/src/components/chat"
-import { ChatProvider } from "@/src/components/chat/chat-context"
-import { DemoChatWithDocs } from "@/src/components/chat/demo-chat"
-import { FloatingChatBar } from "@/src/components/chat/floating-chat-bar"
-import { Footer } from "@/src/components/navigation/footer"
-import { Navbar } from "@/src/components/navigation/navbar"
-import themeSettings from "@/src/contents/settings/theme.json"
-import { DemoModeProvider } from "@/src/contexts/demo-mode"
-import { getColorPreset } from "@/src/lib/colors"
-import { generateThemeCss, getTheme } from "@/src/lib/themes"
-import { Providers } from "@/src/providers"
-import { Settings } from "@/src/settings/main"
-import globalsCss from "@/src/styles/globals.css?url"
+import type { ReactNode } from "react";
+import { DemoModeProvider } from "@/src/contexts/demo-mode";
+import { Providers } from "@/src/providers";
 import {
   createRootRoute,
   HeadContent,
   Outlet,
   Scripts,
-} from "@tanstack/react-router"
+} from "@tanstack/react-router";
 
-const theme = getTheme(themeSettings.activeTheme)
-const themeCss = generateThemeCss(theme)
+import { Settings } from "@/src/settings/main";
+import themeSettings from "@/src/settings/theme";
+import { getColorPreset } from "@/src/lib/colors";
+import { generateThemeCss, getTheme } from "@/src/lib/themes";
+import { ChatWithDocs } from "@/src/components/chat";
+import { ChatProvider } from "@/src/components/chat/chat-context";
+import { DemoChatWithDocs } from "@/src/components/chat/demo-chat";
+import { FloatingChatBar } from "@/src/components/chat/floating-chat-bar";
+import { Footer } from "@/src/components/navigation/footer";
+import { Navbar } from "@/src/components/navigation/navbar";
+import globalsCss from "@/src/styles/globals.css?url";
 
-const colorPreset = getColorPreset(themeSettings.primaryColor)
-const colorCss = `:root { --primary: ${colorPreset.light.primary}; --primary-foreground: ${colorPreset.light.primaryForeground}; } .dark { --primary: ${colorPreset.dark.primary}; --primary-foreground: ${colorPreset.dark.primaryForeground}; }`
+const theme = getTheme(themeSettings.activeTheme);
+const themeCss = generateThemeCss(theme);
+
+const colorPreset = getColorPreset(themeSettings.primaryColor);
+const colorCss = `:root { --primary: ${colorPreset.light.primary}; --primary-foreground: ${colorPreset.light.primaryForeground}; } .dark { --primary: ${colorPreset.dark.primary}; --primary-foreground: ${colorPreset.dark.primaryForeground}; }`;
 
 export const Route = createRootRoute({
   validateSearch: (search: Record<string, unknown>) => {
@@ -33,9 +34,9 @@ export const Route = createRootRoute({
       search.demo === "true" ||
       search.demo === "" ||
       search.demo === 1 ||
-      search.demo === "1"
+      search.demo === "1";
 
-    return demo ? { demo: true as const } : {}
+    return demo ? { demo: true as const } : {};
   },
   head: () => ({
     meta: [
@@ -140,15 +141,15 @@ export const Route = createRootRoute({
   component: RootComponent,
   notFoundComponent: NotFoundComponent,
   errorComponent: ErrorComponent,
-})
+});
 
 function RootComponent() {
-  const { demo = false } = Route.useSearch()
+  const { demo = false } = Route.useSearch();
   return (
     <RootDocument isDemoMode={demo}>
       <Outlet />
     </RootDocument>
-  )
+  );
 }
 
 function RootDocument({
@@ -160,7 +161,7 @@ function RootDocument({
     flex: "1 1 0%",
     overflowY: isDemoMode ? "hidden" : "auto",
     scrollbarGutter: isDemoMode ? undefined : "stable",
-  } as const
+  } as const;
 
   return (
     <html
@@ -207,7 +208,7 @@ function RootDocument({
         <Scripts />
       </body>
     </html>
-  )
+  );
 }
 
 function NotFoundComponent() {
@@ -226,7 +227,7 @@ function NotFoundComponent() {
         </a>
       </div>
     </div>
-  )
+  );
 }
 
 function ErrorComponent({ error }: { error: Error }) {
@@ -250,5 +251,5 @@ function ErrorComponent({ error }: { error: Error }) {
         </a>
       </section>
     </RootDocument>
-  )
+  );
 }

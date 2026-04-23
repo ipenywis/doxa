@@ -1,292 +1,309 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react"
-import { useChatContext } from "@/src/components/chat/chat-context"
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/src/components/ui/dialog"
-import { ScrollArea } from "@/src/components/ui/scroll-area"
-import { highlightTerms } from "@/src/lib/search/highlight"
-import {
-  preloadSearchIndex,
-  searchDocs,
-  type SearchResult,
-} from "@/src/lib/search"
-import { loadRecent, saveRecent } from "@/src/lib/search/recent"
-import { cn } from "@/src/lib/utils"
-import { useNavigate } from "@tanstack/react-router"
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import * as DialogPrimitive from "@radix-ui/react-dialog";
+import { useNavigate } from "@tanstack/react-router";
 import {
   LuChevronRight,
   LuClock,
   LuFileText,
   LuSearch,
   LuSparkles,
-} from "react-icons/lu"
+} from "react-icons/lu";
 
-const MIN_QUERY_LENGTH = 2
+import {
+  preloadSearchIndex,
+  searchDocs,
+  type SearchResult,
+} from "@/src/lib/search";
+import { highlightTerms } from "@/src/lib/search/highlight";
+import { loadRecent, saveRecent } from "@/src/lib/search/recent";
+import { cn } from "@/src/lib/utils";
+import { ScrollArea } from "@/src/components/ui/scroll-area";
+import { useChatContext } from "@/src/components/chat/chat-context";
+
+const MIN_QUERY_LENGTH = 2;
 
 export default function Search() {
-  const [query, setQuery] = useState("")
-  const [isOpen, setIsOpen] = useState(false)
-  const [results, setResults] = useState<SearchResult[]>([])
-  const [selectedIndex, setSelectedIndex] = useState(0)
-  const [recent, setRecent] = useState<string[]>([])
-  const listRef = useRef<HTMLDivElement | null>(null)
-  const inputRef = useRef<HTMLInputElement | null>(null)
-  const navigate = useNavigate()
-  const { submitQuery } = useChatContext()
+  const [query, setQuery] = useState("");
+  const [isOpen, setIsOpen] = useState(false);
+  const [results, setResults] = useState<SearchResult[]>([]);
+  const [selectedIndex, setSelectedIndex] = useState(0);
+  const [recent, setRecent] = useState<string[]>([]);
+  const listRef = useRef<HTMLDivElement | null>(null);
+  const inputRef = useRef<HTMLInputElement | null>(null);
+  const navigate = useNavigate();
+  const { submitQuery } = useChatContext();
 
-  const trimmed = query.trim()
-  const hasQuery = trimmed.length >= MIN_QUERY_LENGTH
+  const trimmed = query.trim();
+  const hasQuery = trimmed.length >= MIN_QUERY_LENGTH;
 
   useEffect(() => {
-    if (typeof window === "undefined") return
+    if (typeof window === "undefined") return;
     const schedule =
       (window as Window & typeof globalThis).requestIdleCallback ??
-      ((cb: () => void) => window.setTimeout(cb, 200))
+      ((cb: () => void) => window.setTimeout(cb, 200));
     const cancel =
       (window as Window & typeof globalThis).cancelIdleCallback ??
-      ((id: number) => window.clearTimeout(id))
+      ((id: number) => window.clearTimeout(id));
     const handle = schedule(() => {
-      preloadSearchIndex()
-    })
-    return () => cancel(handle as number)
-  }, [])
+      preloadSearchIndex();
+    });
+    return () => cancel(handle as number);
+  }, []);
 
   useEffect(() => {
-    if (isOpen) setRecent(loadRecent())
-  }, [isOpen])
+    if (isOpen) setRecent(loadRecent());
+  }, [isOpen]);
 
   useEffect(() => {
     if (!hasQuery) {
-      setResults([])
-      setSelectedIndex(0)
-      return
+      setResults([]);
+      setSelectedIndex(0);
+      return;
     }
-    let cancelled = false
+    let cancelled = false;
     searchDocs(trimmed).then((hits) => {
-      if (cancelled) return
-      setResults(hits)
-      setSelectedIndex(0)
-    })
+      if (cancelled) return;
+      setResults(hits);
+      setSelectedIndex(0);
+    });
     return () => {
-      cancelled = true
-    }
-  }, [trimmed, hasQuery])
+      cancelled = true;
+    };
+  }, [trimmed, hasQuery]);
 
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
       if ((event.metaKey || event.ctrlKey) && event.key === "k") {
-        event.preventDefault()
-        setIsOpen((prev) => !prev)
+        event.preventDefault();
+        setIsOpen((prev) => !prev);
       }
-    }
-    window.addEventListener("keydown", handleKeyDown)
-    return () => window.removeEventListener("keydown", handleKeyDown)
-  }, [])
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, []);
 
   const navigateToResult = useCallback(
     (result: SearchResult) => {
-      saveRecent(trimmed)
-      const href = `/docs${result.slug}${result.snippetAnchor ? `#${result.snippetAnchor}` : ""}`
-      navigate({ to: href })
-      setIsOpen(false)
+      saveRecent(trimmed);
+      const href = `/docs${result.slug}${result.snippetAnchor ? `#${result.snippetAnchor}` : ""}`;
+      navigate({ to: href });
+      setIsOpen(false);
     },
     [navigate, trimmed]
-  )
+  );
 
   const handleAskAi = useCallback(() => {
-    if (!hasQuery) return
-    saveRecent(trimmed)
-    submitQuery(`Tell me more about "${trimmed}"`)
-    setIsOpen(false)
-  }, [hasQuery, submitQuery, trimmed])
+    if (!hasQuery) return;
+    saveRecent(trimmed);
+    submitQuery(`Tell me more about "${trimmed}"`);
+    setIsOpen(false);
+  }, [hasQuery, submitQuery, trimmed]);
 
   const runRecent = useCallback((q: string) => {
-    setQuery(q)
-    setSelectedIndex(0)
-    inputRef.current?.focus()
-  }, [])
+    setQuery(q);
+    setSelectedIndex(0);
+    inputRef.current?.focus();
+  }, []);
 
   const activations = useMemo<(() => void)[]>(() => {
     if (hasQuery) {
       return [
         ...results.map((r) => () => navigateToResult(r)),
         () => handleAskAi(),
-      ]
+      ];
     }
-    return recent.map((q) => () => runRecent(q))
-  }, [hasQuery, results, recent, navigateToResult, handleAskAi, runRecent])
+    return recent.map((q) => () => runRecent(q));
+  }, [hasQuery, results, recent, navigateToResult, handleAskAi, runRecent]);
 
-  const selectedIndexRef = useRef(selectedIndex)
-  const activationsRef = useRef(activations)
-  selectedIndexRef.current = selectedIndex
-  activationsRef.current = activations
+  const selectedIndexRef = useRef(selectedIndex);
+  const activationsRef = useRef(activations);
+  selectedIndexRef.current = selectedIndex;
+  activationsRef.current = activations;
 
   const handleKey = useCallback((event: React.KeyboardEvent) => {
-    const items = activationsRef.current
-    if (items.length === 0) return
+    const items = activationsRef.current;
+    if (items.length === 0) return;
     if (event.key === "ArrowDown") {
-      event.preventDefault()
-      event.stopPropagation()
-      setSelectedIndex((i) => (i + 1) % items.length)
+      event.preventDefault();
+      event.stopPropagation();
+      setSelectedIndex((i) => (i + 1) % items.length);
     } else if (event.key === "ArrowUp") {
-      event.preventDefault()
-      event.stopPropagation()
-      setSelectedIndex((i) => (i - 1 + items.length) % items.length)
+      event.preventDefault();
+      event.stopPropagation();
+      setSelectedIndex((i) => (i - 1 + items.length) % items.length);
     } else if (event.key === "Home") {
-      event.preventDefault()
-      setSelectedIndex(0)
+      event.preventDefault();
+      setSelectedIndex(0);
     } else if (event.key === "End") {
-      event.preventDefault()
-      setSelectedIndex(items.length - 1)
+      event.preventDefault();
+      setSelectedIndex(items.length - 1);
     } else if (event.key === "Enter") {
-      event.preventDefault()
-      event.stopPropagation()
-      const idx = selectedIndexRef.current
-      const fn = items[idx]
-      if (fn) fn()
+      event.preventDefault();
+      event.stopPropagation();
+      const idx = selectedIndexRef.current;
+      const fn = items[idx];
+      if (fn) fn();
     }
-  }, [])
+  }, []);
 
   useEffect(() => {
-    if (!listRef.current) return
+    if (!listRef.current) return;
     const selected = listRef.current.querySelector<HTMLElement>(
       "[data-search-selected='true']"
-    )
-    selected?.scrollIntoView({ block: "nearest" })
-  }, [selectedIndex])
+    );
+    selected?.scrollIntoView({ block: "nearest" });
+  }, [selectedIndex]);
 
   return (
-    <Dialog
+    <DialogPrimitive.Root
       open={isOpen}
       onOpenChange={(open) => {
-        setIsOpen(open)
+        setIsOpen(open);
         if (!open) {
           setTimeout(() => {
-            setQuery("")
-            setResults([])
-            setSelectedIndex(0)
-          }, 150)
+            setQuery("");
+            setResults([]);
+            setSelectedIndex(0);
+          }, 120);
         }
       }}
     >
-      <DialogTrigger asChild>
-        <div className="relative max-w-md flex-1 cursor-pointer">
-          <LuSearch className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-          <div className="flex h-9 w-full items-center rounded-md border bg-background pr-2 pl-10 text-sm text-muted-foreground shadow-sm md:w-[200px] lg:w-[260px]">
-            <span className="flex-1">Search...</span>
-            <kbd className="pointer-events-none hidden h-5 items-center gap-1 rounded border bg-muted px-1.5 font-mono text-[10px] font-medium text-muted-foreground sm:flex">
-              <span className="text-xs">⌘</span>K
+      <DialogPrimitive.Trigger asChild>
+        <button
+          type="button"
+          aria-label="Open search"
+          className="relative flex h-9 w-full max-w-md cursor-pointer items-center rounded-md border bg-background pr-2 pl-10 text-left text-sm text-muted-foreground shadow-sm outline-none focus-visible:ring-2 focus-visible:ring-ring sm:w-[260px] md:w-[320px] lg:w-[420px]"
+        >
+          <LuSearch className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2" />
+          <span className="flex-1">Search documentation...</span>
+          <kbd className="pointer-events-none hidden h-5 items-center gap-1 rounded border bg-muted px-1.5 font-mono text-[10px] font-medium sm:flex">
+            <span className="text-xs">⌘</span>K
+          </kbd>
+        </button>
+      </DialogPrimitive.Trigger>
+      <DialogPrimitive.Portal>
+        <DialogPrimitive.Overlay className="fixed inset-0 z-50 bg-black/40 data-[state=closed]:animate-out data-[state=closed]:duration-75 data-[state=closed]:fade-out-0 data-[state=open]:animate-in data-[state=open]:duration-75 data-[state=open]:fade-in-0" />
+        <DialogPrimitive.Content
+          onKeyDown={handleKey}
+          onOpenAutoFocus={(event) => {
+            event.preventDefault();
+            inputRef.current?.focus();
+          }}
+          className="fixed top-[14px] left-1/2 z-50 w-[calc(100%-2rem)] max-w-xl -translate-x-1/2 overflow-hidden rounded-xl border bg-background shadow-lg outline-none data-[state=closed]:animate-out data-[state=closed]:duration-75 data-[state=closed]:fade-out-0 data-[state=open]:animate-in data-[state=open]:duration-75 data-[state=open]:fade-in-0"
+        >
+          <DialogPrimitive.Title className="sr-only">
+            Search documentation
+          </DialogPrimitive.Title>
+          <div className="relative flex items-center border-b">
+            <LuSearch className="absolute top-1/2 left-4 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+            <input
+              ref={inputRef}
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              placeholder="Search documentation..."
+              className="h-11 w-full bg-transparent pr-14 pl-11 text-[15px] outline-none"
+            />
+            <kbd className="pointer-events-none absolute top-1/2 right-3 hidden h-5 -translate-y-1/2 items-center gap-1 rounded border bg-muted px-1.5 font-mono text-[10px] font-medium text-muted-foreground sm:flex">
+              Esc
             </kbd>
           </div>
-        </div>
-      </DialogTrigger>
-      <DialogContent
-        className="top-[45%] max-w-xs p-0 sm:top-[38%] sm:max-w-lg"
-        onKeyDown={handleKey}
-        onOpenAutoFocus={(event) => {
-          event.preventDefault()
-          inputRef.current?.focus()
-        }}
-      >
-        <DialogTitle className="sr-only">Search documentation</DialogTitle>
-        <DialogHeader>
-          <input
-            ref={inputRef}
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            placeholder="Search documentation..."
-            className="h-14 border-b bg-transparent px-4 text-[15px] outline-none"
-          />
-        </DialogHeader>
 
-        {!hasQuery && query.length > 0 && (
-          <p className="mx-auto mt-3 pb-4 text-sm text-muted-foreground">
-            Keep typing… at least {MIN_QUERY_LENGTH} characters
-          </p>
-        )}
-
-        {!hasQuery && query.length === 0 && recent.length > 0 && (
-          <div
-            ref={listRef}
-            className="flex flex-col items-stretch gap-0.5 px-1 pt-1 pr-3 pb-2 sm:px-2 sm:pr-4"
-          >
-            <p className="px-3 pt-1 pb-1 text-[11px] font-medium tracking-wide text-muted-foreground uppercase">
-              Recent searches
+          {!hasQuery && query.length > 0 && (
+            <p className="px-4 py-6 text-center text-sm text-muted-foreground">
+              Keep typing… at least {MIN_QUERY_LENGTH} characters
             </p>
-            {recent.map((q, i) => (
-              <RecentRow
-                key={q}
-                query={q}
-                selected={i === selectedIndex}
-                onHover={() => setSelectedIndex(i)}
-                onClick={() => runRecent(q)}
-              />
-            ))}
-          </div>
-        )}
+          )}
 
-        {hasQuery && (
-          <ScrollArea className="max-h-[400px] w-full overflow-hidden">
+          {!hasQuery && query.length === 0 && recent.length > 0 && (
             <div
               ref={listRef}
-              className="flex w-full flex-col items-stretch gap-0.5 px-1 pt-1 pr-3 pb-2 sm:px-2 sm:pr-4"
+              className="flex flex-col items-stretch gap-0.5 px-2 pt-2 pr-3 pb-2 sm:pr-4"
             >
-              {results.length === 0 && (
-                <p className="px-3 py-4 text-sm text-muted-foreground">
-                  No results for{" "}
-                  <span className="text-primary">{`"${trimmed}"`}</span>
-                </p>
-              )}
-
-              {results.map((result, index) => (
-                <SearchResultRow
-                  key={result.id}
-                  result={result}
-                  selected={index === selectedIndex}
-                  onHover={() => setSelectedIndex(index)}
-                  onClick={() => navigateToResult(result)}
+              <p className="px-3 pt-1 pb-1 text-[11px] font-medium tracking-wide text-muted-foreground uppercase">
+                Recent
+              </p>
+              {recent.map((q, i) => (
+                <RecentRow
+                  key={q}
+                  query={q}
+                  selected={i === selectedIndex}
+                  onHover={() => setSelectedIndex(i)}
+                  onClick={() => runRecent(q)}
                 />
               ))}
-
-              <AskAiRow
-                query={trimmed}
-                selected={selectedIndex === results.length}
-                onHover={() => setSelectedIndex(results.length)}
-                onClick={handleAskAi}
-              />
             </div>
-          </ScrollArea>
-        )}
-      </DialogContent>
-    </Dialog>
-  )
+          )}
+
+          {!hasQuery && query.length === 0 && recent.length === 0 && (
+            <p className="px-4 py-6 text-center text-sm text-muted-foreground">
+              Start typing to search the docs
+            </p>
+          )}
+
+          {hasQuery && (
+            <ScrollArea className="max-h-[60vh] w-full">
+              <div
+                ref={listRef}
+                className="flex w-full flex-col items-stretch gap-0.5 px-2 pt-2 pr-3 pb-2 sm:pr-4"
+              >
+                {results.length === 0 && (
+                  <p className="px-3 py-4 text-sm text-muted-foreground">
+                    No results for{" "}
+                    <span className="text-primary">{`"${trimmed}"`}</span>
+                  </p>
+                )}
+
+                {results.map((result, index) => (
+                  <SearchResultRow
+                    key={result.id}
+                    result={result}
+                    selected={index === selectedIndex}
+                    onHover={() => setSelectedIndex(index)}
+                    onClick={() => navigateToResult(result)}
+                  />
+                ))}
+
+                <AskAiRow
+                  query={trimmed}
+                  selected={selectedIndex === results.length}
+                  onHover={() => setSelectedIndex(results.length)}
+                  onClick={handleAskAi}
+                />
+              </div>
+            </ScrollArea>
+          )}
+        </DialogPrimitive.Content>
+      </DialogPrimitive.Portal>
+    </DialogPrimitive.Root>
+  );
 }
 
 interface RowProps {
-  result: SearchResult
-  selected: boolean
-  onHover: () => void
-  onClick: () => void
+  result: SearchResult;
+  selected: boolean;
+  onHover: () => void;
+  onClick: () => void;
 }
 
 function SearchResultRow({ result, selected, onHover, onClick }: RowProps) {
-  const href = `/docs${result.slug}${result.snippetAnchor ? `#${result.snippetAnchor}` : ""}`
+  const href = `/docs${result.slug}${result.snippetAnchor ? `#${result.snippetAnchor}` : ""}`;
   const snippetHtml = useMemo(
     () => highlightTerms(result.snippetLine, result.terms),
     [result.snippetLine, result.terms]
-  )
+  );
 
   const handleClick = (event: React.MouseEvent<HTMLAnchorElement>) => {
-    if (event.metaKey || event.ctrlKey || event.shiftKey || event.button !== 0) {
-      return
+    if (
+      event.metaKey ||
+      event.ctrlKey ||
+      event.shiftKey ||
+      event.button !== 0
+    ) {
+      return;
     }
-    event.preventDefault()
-    onClick()
-  }
+    event.preventDefault();
+    onClick();
+  };
 
   return (
     <a
@@ -324,7 +341,7 @@ function SearchResultRow({ result, selected, onHover, onClick }: RowProps) {
         )}
       </div>
     </a>
-  )
+  );
 }
 
 function AskAiRow({
@@ -333,10 +350,10 @@ function AskAiRow({
   onHover,
   onClick,
 }: {
-  query: string
-  selected: boolean
-  onHover: () => void
-  onClick: () => void
+  query: string;
+  selected: boolean;
+  onHover: () => void;
+  onClick: () => void;
 }) {
   return (
     <button
@@ -359,7 +376,7 @@ function AskAiRow({
         </span>
       </span>
     </button>
-  )
+  );
 }
 
 function RecentRow({
@@ -368,10 +385,10 @@ function RecentRow({
   onHover,
   onClick,
 }: {
-  query: string
-  selected: boolean
-  onHover: () => void
-  onClick: () => void
+  query: string;
+  selected: boolean;
+  onHover: () => void;
+  onClick: () => void;
 }) {
   return (
     <button
@@ -389,5 +406,5 @@ function RecentRow({
       </span>
       <span className="truncate text-[14px] text-foreground">{query}</span>
     </button>
-  )
+  );
 }

@@ -1,9 +1,10 @@
-import Markdown from "react-markdown"
-import remarkGfm from "remark-gfm"
-import { ChatDrawer } from "@/src/components/chat/chat-drawer"
-import { LuSend } from "react-icons/lu"
+import { LuSend } from "react-icons/lu";
+import Markdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 
-const DEMO_USER_MESSAGE = "How do I get started with the documentation?"
+import { ChatDrawer } from "@/src/components/chat/chat-drawer";
+
+const DEMO_USER_MESSAGE = "How do I get started with the documentation?";
 
 const DEMO_AI_RESPONSE = `Great question! Here's how to get started:
 
@@ -13,7 +14,7 @@ const DEMO_AI_RESPONSE = `Great question! Here's how to get started:
 
 Each documentation page uses **MDX** format with YAML frontmatter for metadata. You can use built-in components like \`<Note>\`, \`<Card>\`, and \`<Step>\` to create rich, interactive documentation.
 
-Check out the [Getting Started](/docs/getting-started) guide for a full walkthrough.`
+Check out the [Getting Started](/docs/getting-started) guide for a full walkthrough.`;
 
 const markdownComponents = {
   a: ({
@@ -33,23 +34,23 @@ const markdownComponents = {
     children,
     className,
   }: {
-    children?: React.ReactNode
-    className?: string
+    children?: React.ReactNode;
+    className?: string;
   }) => {
     if (className?.startsWith("language-")) {
       return (
         <code className={`block text-xs leading-relaxed ${className}`}>
           {children}
         </code>
-      )
+      );
     }
     return (
       <code className="rounded-md bg-primary/10 px-1.5 py-0.5 text-[0.8125em] font-medium text-primary before:content-none after:content-none">
         {children}
       </code>
-    )
+    );
   },
-}
+};
 
 export function DemoChatWithDocs() {
   return (
@@ -66,7 +67,7 @@ export function DemoChatWithDocs() {
           {/* AI response */}
           <div className="flex justify-start">
             <div className="max-w-[85%] rounded-2xl rounded-bl-sm bg-muted px-4 py-2.5 text-sm">
-              <div className="chat-prose prose prose-sm dark:prose-invert prose-headings:text-foreground prose-headings:text-sm prose-headings:font-semibold prose-p:text-foreground/90 prose-p:leading-relaxed prose-p:my-1.5 prose-a:text-primary prose-strong:text-foreground prose-strong:font-semibold prose-code:text-primary prose-pre:bg-transparent prose-pre:p-0 prose-li:text-foreground/90 prose-li:my-0.5 prose-ul:my-1.5 prose-ol:my-1.5 max-w-none">
+              <div className="chat-prose prose prose-sm max-w-none dark:prose-invert prose-headings:text-sm prose-headings:font-semibold prose-headings:text-foreground prose-p:my-1.5 prose-p:leading-relaxed prose-p:text-foreground/90 prose-a:text-primary prose-strong:font-semibold prose-strong:text-foreground prose-code:text-primary prose-pre:bg-transparent prose-pre:p-0 prose-ol:my-1.5 prose-ul:my-1.5 prose-li:my-0.5 prose-li:text-foreground/90">
                 <Markdown
                   remarkPlugins={[remarkGfm]}
                   components={markdownComponents}
@@ -95,5 +96,5 @@ export function DemoChatWithDocs() {
         </button>
       </div>
     </ChatDrawer>
-  )
+  );
 }

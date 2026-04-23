@@ -1,69 +1,67 @@
-import { promises as fs } from "fs"
-import path from "path"
+import { promises as fs } from "fs";
+import path from "path";
 
-import { Paths } from "@/src/lib/pageroutes"
-import { buildBreadcrumbMap } from "@/src/lib/search/breadcrumb"
-import { buildIndex, serializeIndex } from "@/src/lib/search/mini-search"
-import type {
-  SearchIndexEntry,
-  SearchIndexLine,
-} from "@/src/lib/search/types"
-import Documents from "@/src/contents/settings/documents.json"
-import grayMatter from "gray-matter"
-import remarkMdx from "remark-mdx"
-import remarkParse from "remark-parse"
-import remarkStringify from "remark-stringify"
-import { unified } from "unified"
-import { Node, Parent } from "unist"
-import { visit } from "unist-util-visit"
+import Documents from "@/src/contents/settings/documents.json";
+import grayMatter from "gray-matter";
+import remarkMdx from "remark-mdx";
+import remarkParse from "remark-parse";
+import remarkStringify from "remark-stringify";
+import { unified } from "unified";
+import { Node, Parent } from "unist";
+import { visit } from "unist-util-visit";
 
-const docsDir = path.join(process.cwd(), "src/contents/docs")
-const outputDir = path.join(process.cwd(), "public", "search-data")
+import { Paths } from "@/src/lib/pageroutes";
+import { buildBreadcrumbMap } from "@/src/lib/search/breadcrumb";
+import { buildIndex, serializeIndex } from "@/src/lib/search/mini-search";
+import type { SearchIndexEntry, SearchIndexLine } from "@/src/lib/search/types";
+
+const docsDir = path.join(process.cwd(), "src/contents/docs");
+const outputDir = path.join(process.cwd(), "public", "search-data");
 
 interface MdxJsxFlowElement extends Node {
-  name: string
-  children?: Node[]
+  name: string;
+  children?: Node[];
 }
 
 function isMdxJsxFlowElement(node: Node): node is MdxJsxFlowElement {
-  return node.type === "mdxJsxFlowElement" && "name" in node
+  return node.type === "mdxJsxFlowElement" && "name" in node;
 }
 
 function isRoute(
   node: Paths
 ): node is Extract<Paths, { href: string; title: string }> {
-  return "href" in node && "title" in node
+  return "href" in node && "title" in node;
 }
 
 function createSlug(filePath: string): string {
-  const relativePath = path.relative(docsDir, filePath)
-  const parsed = path.parse(relativePath)
+  const relativePath = path.relative(docsDir, filePath);
+  const parsed = path.parse(relativePath);
 
-  const slugPath = parsed.dir ? `${parsed.dir}/${parsed.name}` : parsed.name
-  const normalizedSlug = slugPath.replace(/\\/g, "/")
+  const slugPath = parsed.dir ? `${parsed.dir}/${parsed.name}` : parsed.name;
+  const normalizedSlug = slugPath.replace(/\\/g, "/");
 
   if (parsed.name === "index") {
-    const dir = parsed.dir.replace(/\\/g, "/")
-    return dir ? `/${dir}` : "/"
+    const dir = parsed.dir.replace(/\\/g, "/");
+    return dir ? `/${dir}` : "/";
   }
 
-  return `/${normalizedSlug}`
+  return `/${normalizedSlug}`;
 }
 
 function findDocumentBySlug(slug: string): Paths | null {
   for (const doc of Documents as Paths[]) {
     if (isRoute(doc) && doc.href === slug) {
-      return doc
+      return doc;
     }
   }
-  return null
+  return null;
 }
 
 async function ensureDirectoryExists(dir: string) {
   try {
-    await fs.access(dir)
+    await fs.access(dir);
   } catch {
-    await fs.mkdir(dir, { recursive: true })
+    await fs.mkdir(dir, { recursive: true });
   }
 }
 
@@ -82,7 +80,7 @@ function removeCustomComponents() {
     "FileTree",
     "Folder",
     "File",
-  ]
+  ];
 
   return (tree: Node) => {
     visit(
@@ -95,11 +93,11 @@ function removeCustomComponents() {
           Array.isArray(parent.children) &&
           customComponentNames.includes(node.name)
         ) {
-          parent.children.splice(index!, 1)
+          parent.children.splice(index!, 1);
         }
       }
-    )
-  }
+    );
+  };
 }
 
 function stripMarkdown(text: string): string {
@@ -112,7 +110,7 @@ function stripMarkdown(text: string): string {
     .replace(/^\s*[-*+]\s+/gm, "")
     .replace(/^\s*\d+\.\s+/gm, "")
     .replace(/^\s*\[[x\s]\]\s+/gm, "")
-    .replace(/^\s*>\s+/gm, "")
+    .replace(/^\s*>\s+/gm, "");
 }
 
 function cleanContentForSearch(content: string): string {
@@ -125,11 +123,14 @@ function cleanContentForSearch(content: string): string {
         .map((cell) => cell.trim())
         .join(" ")
     )
-    .replace(/<(?:Note|Card|Step|FileTree|Folder|File|Mermaid)[^>]*>([\s\S]*?)<\/(?:Note|Card|Step|FileTree|Folder|File|Mermaid)>/g, "$1")
+    .replace(
+      /<(?:Note|Card|Step|FileTree|Folder|File|Mermaid)[^>]*>([\s\S]*?)<\/(?:Note|Card|Step|FileTree|Folder|File|Mermaid)>/g,
+      "$1"
+    )
     .replace(/[^\w\s-:]/g, " ")
     .replace(/\s+/g, " ")
     .toLowerCase()
-    .trim()
+    .trim();
 }
 
 function slugifyHeading(heading: string): string {
@@ -137,73 +138,73 @@ function slugifyHeading(heading: string): string {
     .toLowerCase()
     .trim()
     .replace(/[^\w\s-]/g, "")
-    .replace(/\s+/g, "-")
+    .replace(/\s+/g, "-");
 }
 
 function extractLines(content: string): SearchIndexLine[] {
-  const rawLines = content.split(/\r?\n/)
-  const out: SearchIndexLine[] = []
-  let currentAnchor: string | undefined
+  const rawLines = content.split(/\r?\n/);
+  const out: SearchIndexLine[] = [];
+  let currentAnchor: string | undefined;
 
   for (const raw of rawLines) {
-    const trimmed = raw.trim()
-    if (!trimmed) continue
+    const trimmed = raw.trim();
+    if (!trimmed) continue;
 
-    const headingMatch = trimmed.match(/^(#{1,6})\s+(.+)$/)
+    const headingMatch = trimmed.match(/^(#{1,6})\s+(.+)$/);
     if (headingMatch) {
-      const level = headingMatch[1].length
-      const headingText = headingMatch[2].trim()
-      if (level >= 2) currentAnchor = slugifyHeading(headingText)
-      out.push({ text: headingText, anchor: currentAnchor })
-      continue
+      const level = headingMatch[1].length;
+      const headingText = headingMatch[2].trim();
+      if (level >= 2) currentAnchor = slugifyHeading(headingText);
+      out.push({ text: headingText, anchor: currentAnchor });
+      continue;
     }
 
-    if (/^[-*+]\s/.test(trimmed) || /^\d+\.\s/.test(trimmed)) continue
-    if (trimmed.startsWith("```")) continue
-    if (trimmed.startsWith("|")) continue
-    if (trimmed.startsWith("<") && trimmed.endsWith(">")) continue
+    if (/^[-*+]\s/.test(trimmed) || /^\d+\.\s/.test(trimmed)) continue;
+    if (trimmed.startsWith("```")) continue;
+    if (trimmed.startsWith("|")) continue;
+    if (trimmed.startsWith("<") && trimmed.endsWith(">")) continue;
 
-    const stripped = stripMarkdown(trimmed).replace(/\s+/g, " ").trim()
-    if (stripped.length < 4) continue
+    const stripped = stripMarkdown(trimmed).replace(/\s+/g, " ").trim();
+    if (stripped.length < 4) continue;
 
-    out.push({ text: stripped, anchor: currentAnchor })
+    out.push({ text: stripped, anchor: currentAnchor });
   }
 
-  return out
+  return out;
 }
 
 interface LegacyDocument {
-  slug: string
-  title: string
-  description: string
-  content: string
+  slug: string;
+  title: string;
+  description: string;
+  content: string;
   _searchMeta: {
-    cleanContent: string
-    headings: string[]
-    keywords: string[]
-  }
+    cleanContent: string;
+    headings: string[];
+    keywords: string[];
+  };
 }
 
 async function processMdxFile(
   filePath: string,
   breadcrumbMap: Map<string, { trail: string[]; icon?: string }>
 ): Promise<{ entry: SearchIndexEntry; legacy: LegacyDocument }> {
-  const rawMdx = await fs.readFile(filePath, "utf-8")
-  const { content, data: frontmatter } = grayMatter(rawMdx)
+  const rawMdx = await fs.readFile(filePath, "utf-8");
+  const { content, data: frontmatter } = grayMatter(rawMdx);
 
   const processed = await unified()
     .use(remarkParse)
     .use(remarkMdx)
     .use(removeCustomComponents)
     .use(remarkStringify)
-    .process(content)
+    .process(content);
 
-  const documentContent = String(processed.value)
+  const documentContent = String(processed.value);
 
   const headings =
     documentContent
       .match(/^##\s+(.+)$/gm)
-      ?.map((h) => h.replace(/^##\s+/, "").trim()) || []
+      ?.map((h) => h.replace(/^##\s+/, "").trim()) || [];
 
   const extractedKeywords = new Set<string>([
     ...(frontmatter.keywords || []),
@@ -214,17 +215,17 @@ async function processMdxFile(
     ...(documentContent.match(/`([^`]+)`/g) || []).map((m) =>
       m.replace(/`/g, "").trim()
     ),
-  ])
+  ]);
 
-  const slug = createSlug(filePath)
-  const matchedDoc = findDocumentBySlug(slug)
+  const slug = createSlug(filePath);
+  const matchedDoc = findDocumentBySlug(slug);
   const title =
     frontmatter.title ||
-    (matchedDoc && isRoute(matchedDoc) ? matchedDoc.title : "Untitled")
+    (matchedDoc && isRoute(matchedDoc) ? matchedDoc.title : "Untitled");
 
-  const breadcrumbInfo = breadcrumbMap.get(slug) ?? { trail: [] }
-  const cleanContent = cleanContentForSearch(documentContent)
-  const keywordsArr = Array.from(extractedKeywords)
+  const breadcrumbInfo = breadcrumbMap.get(slug) ?? { trail: [] };
+  const cleanContent = cleanContentForSearch(documentContent);
+  const keywordsArr = Array.from(extractedKeywords);
 
   return {
     entry: {
@@ -250,55 +251,55 @@ async function processMdxFile(
         keywords: keywordsArr,
       },
     },
-  }
+  };
 }
 
 async function getMdxFiles(dir: string): Promise<string[]> {
-  let files: string[] = []
-  const items = await fs.readdir(dir, { withFileTypes: true })
+  let files: string[] = [];
+  const items = await fs.readdir(dir, { withFileTypes: true });
 
   for (const item of items) {
-    const fullPath = path.join(dir, item.name)
+    const fullPath = path.join(dir, item.name);
     if (item.isDirectory()) {
-      const subFiles = await getMdxFiles(fullPath)
-      files = files.concat(subFiles)
+      const subFiles = await getMdxFiles(fullPath);
+      files = files.concat(subFiles);
     } else if (item.name.endsWith(".mdx")) {
-      files.push(fullPath)
+      files.push(fullPath);
     }
   }
 
-  return files
+  return files;
 }
 
 async function convertMdxToJson() {
   try {
-    await ensureDirectoryExists(outputDir)
+    await ensureDirectoryExists(outputDir);
 
-    const breadcrumbMap = buildBreadcrumbMap(Documents as Paths[])
-    const mdxFiles = await getMdxFiles(docsDir)
+    const breadcrumbMap = buildBreadcrumbMap(Documents as Paths[]);
+    const mdxFiles = await getMdxFiles(docsDir);
 
-    const entries: SearchIndexEntry[] = []
-    const legacyDocs: LegacyDocument[] = []
+    const entries: SearchIndexEntry[] = [];
+    const legacyDocs: LegacyDocument[] = [];
     for (const file of mdxFiles) {
-      const { entry, legacy } = await processMdxFile(file, breadcrumbMap)
-      entries.push(entry)
-      legacyDocs.push(legacy)
+      const { entry, legacy } = await processMdxFile(file, breadcrumbMap);
+      entries.push(entry);
+      legacyDocs.push(legacy);
     }
 
-    const index = buildIndex(entries)
-    const indexPath = path.join(outputDir, "index.json")
-    await fs.writeFile(indexPath, serializeIndex(index))
+    const index = buildIndex(entries);
+    const indexPath = path.join(outputDir, "index.json");
+    await fs.writeFile(indexPath, serializeIndex(index));
 
-    const legacyPath = path.join(outputDir, "documents.json")
-    await fs.writeFile(legacyPath, JSON.stringify(legacyDocs, null, 2))
+    const legacyPath = path.join(outputDir, "documents.json");
+    await fs.writeFile(legacyPath, JSON.stringify(legacyDocs, null, 2));
 
     console.log(
       `[search] indexed ${entries.length} documents → ${path.relative(process.cwd(), indexPath)}`
-    )
+    );
   } catch (err) {
-    console.error("Error processing MDX files:", err)
-    process.exitCode = 1
+    console.error("Error processing MDX files:", err);
+    process.exitCode = 1;
   }
 }
 
-convertMdxToJson()
+convertMdxToJson();

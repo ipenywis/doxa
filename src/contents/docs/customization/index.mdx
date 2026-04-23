@@ -1,22 +1,23 @@
 ---
 title: Customization
 description: Customize Doxa branding, theme, colors, icons, MDX components, navigation, and metadata.
-keywords: ["customization", "theme", "branding", "icons", "mdx registry", "doxa"]
+keywords:
+  ["customization", "theme", "branding", "icons", "mdx registry", "doxa"]
 ---
 
 Doxa is designed to be edited directly. Most customization happens through settings files, registered components, and static assets rather than a plugin system.
 
 ## Customization Map
 
-| Area | File |
-| :-- | :-- |
-| Site name, URL, metadata, feature flags | `src/settings/main.ts` |
-| Navigation and GitHub link | `src/settings/navigation.ts` |
-| Theme choice and primary color | `src/contents/settings/theme.json` |
-| Logo assets | `public/doxa-logo-*.svg`, `public/logo.svg`, `public/favicon.svg` |
-| Icon aliases for MDX cards | `src/settings/icons.ts` |
-| MDX component registry | `src/lib/components.ts` |
-| Component usage guidance | `agent/component-playbook.md` |
+| Area                                    | File                                                              |
+| :-------------------------------------- | :---------------------------------------------------------------- |
+| Site name, URL, metadata, feature flags | `src/settings/main.ts`                                            |
+| Navigation and GitHub link              | `src/settings/navigation.ts`                                      |
+| Theme choice and primary color          | `src/contents/settings/theme.json`                                |
+| Logo assets                             | `public/doxa-logo-*.svg`, `public/logo.svg`, `public/favicon.svg` |
+| Icon aliases for MDX cards              | `src/settings/icons.ts`                                           |
+| MDX component registry                  | `src/lib/components.ts`                                           |
+| Component usage guidance                | `agent/component-playbook.md`                                     |
 
 ## Branding
 
@@ -31,7 +32,7 @@ export const Settings = {
     keywords: ["acme", "api", "developer docs"],
     icon: "/favicon.svg",
   },
-}
+};
 ```
 
 ## Theme And Color
@@ -58,7 +59,7 @@ Cards accept icon keys from `src/settings/icons.ts`.
 export const iconMap = {
   alignJustify: LuAlignJustify,
   arrowUpRight: LuArrowUpRight,
-}
+};
 ```
 
 Then use the key in MDX:
@@ -86,7 +87,7 @@ export const components = {
   Note,
   Step,
   StepItem,
-}
+};
 ```
 
 <Note title="Playbook required" type="warning">
@@ -102,15 +103,14 @@ export const components = {
     Edit the smallest file that owns the behavior.
   </StepItem>
 
-  <StepItem title="Update docs examples when needed">
-    If the public authoring surface changes, update the example pages and the component playbook.
-  </StepItem>
+<StepItem title="Update docs examples when needed">
+  If the public authoring surface changes, update the example pages and the
+  component playbook.
+</StepItem>
 
-  <StepItem title="Regenerate search data">
-    ```bash
-    pnpm generate-content-json
-    ```
-  </StepItem>
+<StepItem title="Regenerate search data">
+  ```bash pnpm generate-content-json ```
+</StepItem>
 
   <StepItem title="Build the site">
     ```bash

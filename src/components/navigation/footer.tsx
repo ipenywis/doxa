@@ -1,5 +1,5 @@
-import { Logo } from "@/src/components/navigation/logo"
-import { Settings } from "@/src/settings/main"
+import { Settings } from "@/src/settings/main";
+import { Logo } from "@/src/components/navigation/logo";
 
 export function Footer() {
   return (
@@ -24,5 +24,5 @@ export function Footer() {
         </div>
       )}
     </footer>
-  )
+  );
 }

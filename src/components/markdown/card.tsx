@@ -1,19 +1,20 @@
-import { PropsWithChildren } from "react"
-import { Link } from "@/src/lib/transition"
-import { iconMap } from "@/src/settings/icons"
-import { cn } from "@/src/lib/utils"
+import { PropsWithChildren } from "react";
+
+import { iconMap } from "@/src/settings/icons";
+import { Link } from "@/src/lib/transition";
+import { cn } from "@/src/lib/utils";
 
 type CardProps = PropsWithChildren & {
-  subtitle?: string
-  title: string
-  description?: string
-  href?: string
-  image?: string
-  className?: string
-  external?: boolean
-  icon?: keyof typeof iconMap
-  variant?: "normal" | "small" | "image"
-}
+  subtitle?: string;
+  title: string;
+  description?: string;
+  href?: string;
+  image?: string;
+  className?: string;
+  external?: boolean;
+  icon?: keyof typeof iconMap;
+  variant?: "normal" | "small" | "image";
+};
 
 export function Card({
   subtitle,
@@ -27,8 +28,8 @@ export function Card({
   variant = "normal",
   children,
 }: CardProps) {
-  const IconComponent = icon ? iconMap[icon] : null
-  const ExternalIcon = iconMap["arrowUpRight"]
+  const IconComponent = icon ? iconMap[icon] : null;
+  const ExternalIcon = iconMap["arrowUpRight"];
 
   const content = (
     <div
@@ -52,9 +53,7 @@ export function Card({
           <ExternalIcon className="h-4 w-4" />
         </div>
       )}
-      {IconComponent && (
-        <IconComponent className="text-muted-foreground" />
-      )}
+      {IconComponent && <IconComponent className="text-muted-foreground" />}
       <div>
         {subtitle && variant === "normal" && (
           <p className="my-1! text-xs font-semibold text-muted-foreground">
@@ -92,7 +91,7 @@ export function Card({
       </div>
       {children}
     </div>
-  )
+  );
 
   return href ? (
     <Link
@@ -105,7 +104,7 @@ export function Card({
     </Link>
   ) : (
     content
-  )
+  );
 }
 
 export function CardGrid({ children }: PropsWithChildren) {
@@ -113,5 +112,5 @@ export function CardGrid({ children }: PropsWithChildren) {
     <div className="grid grid-cols-1 gap-6 md:grid-cols-2 2xl:grid-cols-3">
       {children}
     </div>
-  )
+  );
 }

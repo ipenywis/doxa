@@ -6,11 +6,11 @@
  * markup so the agent sees the same content as the source file.
  */
 
-import { toolDefinition } from "@tanstack/ai"
+import { toolDefinition } from "@tanstack/ai";
 
-import { contentStore } from "@/src/lib/content/store"
+import { contentStore } from "@/src/lib/content/store";
 
-const MAX_OUTPUT_CHARS = 30_000
+const MAX_OUTPUT_CHARS = 30_000;
 
 const catToolDefinition = toolDefinition({
   name: "cat",
@@ -27,31 +27,31 @@ const catToolDefinition = toolDefinition({
     },
     required: ["file"] as const,
   },
-})
+});
 
 async function executeCat(args: { file: string }): Promise<string> {
-  const file = args?.file
+  const file = args?.file;
   if (typeof file !== "string" || !file.trim()) {
-    return "Error: missing file path"
+    return "Error: missing file path";
   }
 
   try {
-    const content = await contentStore.readRaw(file)
-    if (content === null) return `Error: file not found: ${file}`
+    const content = await contentStore.readRaw(file);
+    if (content === null) return `Error: file not found: ${file}`;
 
     if (content.length > MAX_OUTPUT_CHARS) {
       return (
         content.slice(0, MAX_OUTPUT_CHARS) +
         `\n\n... (truncated at ${MAX_OUTPUT_CHARS} characters)`
-      )
+      );
     }
-    return content
+    return content;
   } catch (err) {
-    const message = err instanceof Error ? err.message : String(err)
-    return `Error: ${message}`
+    const message = err instanceof Error ? err.message : String(err);
+    return `Error: ${message}`;
   }
 }
 
 export const catTool = catToolDefinition.server((args: unknown) =>
   executeCat(args as { file: string })
-)
+);

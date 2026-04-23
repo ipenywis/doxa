@@ -1,11 +1,12 @@
-import SubLink from "@/src/components/sidebar/sublink"
-import { isHeading, isRoute, Routes } from "@/src/lib/pageroutes"
-import { useLocation } from "@tanstack/react-router"
+import { useLocation } from "@tanstack/react-router";
+
+import { isHeading, isRoute, Routes } from "@/src/lib/pageroutes";
+import SubLink from "@/src/components/sidebar/sublink";
 
 export function PageMenu({ isSheet = false }) {
-  const location = useLocation()
-  const pathname = location.pathname
-  if (!pathname.startsWith("/docs")) return null
+  const location = useLocation();
+  const pathname = location.pathname;
+  if (!pathname.startsWith("/docs")) return null;
 
   return (
     <div className="flex flex-col gap-1 pb-6">
@@ -16,7 +17,7 @@ export function PageMenu({ isSheet = false }) {
               key={`spacer-${index}`}
               className={`${index === 0 ? "" : "mt-4 mb-2 border-t border-foreground/10 dark:border-foreground/[0.06]"}`}
             />
-          )
+          );
         }
         if (isHeading(item)) {
           return (
@@ -26,7 +27,7 @@ export function PageMenu({ isSheet = false }) {
             >
               {item.heading}
             </div>
-          )
+          );
         }
         if (isRoute(item)) {
           return (
@@ -38,10 +39,10 @@ export function PageMenu({ isSheet = false }) {
                 isSheet,
               }}
             />
-          )
+          );
         }
-        return null
+        return null;
       })}
     </div>
-  )
+  );
 }

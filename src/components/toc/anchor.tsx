@@ -1,23 +1,24 @@
-import { ScrollArea } from "@/src/components/ui/scroll-area"
-import { useScrollSpy, type TocItem } from "@/src/hooks/use-scroll-spy"
-import { hrefToId } from "@/src/lib/toc"
-import { cn } from "@/src/lib/utils"
-import { LuList } from "react-icons/lu"
+import { LuList } from "react-icons/lu";
+
+import { hrefToId } from "@/src/lib/toc";
+import { cn } from "@/src/lib/utils";
+import { useScrollSpy, type TocItem } from "@/src/hooks/use-scroll-spy";
+import { ScrollArea } from "@/src/components/ui/scroll-area";
 
 export interface TableAnchorProps {
-  tocs: TocItem[]
+  tocs: TocItem[];
 }
 
 const levelPadding: Record<number, string> = {
   2: "pl-3",
   3: "pl-6",
   4: "pl-9",
-}
+};
 
 export function TableAnchor({ tocs }: TableAnchorProps) {
-  const { activeId, handleSmoothScroll } = useScrollSpy(tocs)
+  const { activeId, handleSmoothScroll } = useScrollSpy(tocs);
 
-  if (!tocs.length) return null
+  if (!tocs.length) return null;
 
   return (
     <div className="flex w-full flex-col gap-3">
@@ -38,7 +39,7 @@ export function TableAnchor({ tocs }: TableAnchorProps) {
                 "border-l-2 py-1.5 text-sm hover:text-foreground",
                 levelPadding[level],
                 activeId === hrefToId(href)
-                  ? "border-primary text-primary hover:text-primary font-medium"
+                  ? "border-primary font-medium text-primary hover:text-primary"
                   : "border-transparent text-muted-foreground"
               )}
             >
@@ -48,5 +49,5 @@ export function TableAnchor({ tocs }: TableAnchorProps) {
         </div>
       </ScrollArea>
     </div>
-  )
+  );
 }

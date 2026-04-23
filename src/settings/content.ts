@@ -54,11 +54,11 @@
  * ────────────────────────────────────────────────────────────────────────
  */
 
-import type { ContentAdapter } from "@/src/lib/content/types"
-import { viteAdapter } from "@/src/lib/content/adapters/vite-adapter"
-import { createGitHubAdapter } from "@/src/lib/content/adapters/github-adapter"
+import { createGitHubAdapter } from "@/src/lib/content/adapters/github-adapter";
+import { viteAdapter } from "@/src/lib/content/adapters/vite-adapter";
+import type { ContentAdapter } from "@/src/lib/content/types";
 
-export type ContentSource = "vite" | "github"
+export type ContentSource = "vite" | "github";
 
 /** Fallback source when CONTENT_SOURCE env var is not set */
 const defaultSource: ContentSource = "vite";
@@ -68,11 +68,11 @@ const defaultSource: ContentSource = "vite";
  * Called once at module load by src/lib/content/store.ts.
  */
 export function resolveAdapter(): ContentAdapter {
-  const source = (process.env.CONTENT_SOURCE as ContentSource) || defaultSource
+  const source = (process.env.CONTENT_SOURCE as ContentSource) || defaultSource;
 
   switch (source) {
     case "vite":
-      return viteAdapter
+      return viteAdapter;
 
     case "github":
       return createGitHubAdapter({
@@ -84,21 +84,21 @@ export function resolveAdapter(): ContentAdapter {
         cacheTTLSeconds: process.env.DOXA_GITHUB_CACHE_TTL
           ? Number(process.env.DOXA_GITHUB_CACHE_TTL)
           : undefined,
-      })
+      });
 
     default:
       throw new Error(
         `Unknown CONTENT_SOURCE: "${source}". Expected "vite" or "github".`
-      )
+      );
   }
 }
 
 function requireEnv(name: string): string {
-  const value = process.env[name]
+  const value = process.env[name];
   if (!value) {
     throw new Error(
       `Missing required env var: ${name}. See src/settings/content.ts for setup.`
-    )
+    );
   }
-  return value
+  return value;
 }

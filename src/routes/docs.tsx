@@ -1,9 +1,10 @@
-import { Sidebar } from "@/src/components/sidebar"
-import { createFileRoute, Outlet } from "@tanstack/react-router"
+import { createFileRoute, Outlet } from "@tanstack/react-router";
+
+import { Sidebar } from "@/src/components/sidebar";
 
 export const Route = createFileRoute("/docs")({
   component: DocsLayout,
-})
+});
 
 function DocsLayout() {
   return (
@@ -13,5 +14,5 @@ function DocsLayout() {
         <Outlet />
       </div>
     </div>
-  )
+  );
 }

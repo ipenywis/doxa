@@ -1,19 +1,20 @@
-import Anchor from "@/src/components/anchor"
-import { ChatButton } from "@/src/components/chat/chat-button"
-import { Logo } from "@/src/components/navigation/logo"
-import Search from "@/src/components/navigation/search"
-import { SheetLeft } from "@/src/components/sidebar"
-import { ModeToggle } from "@/src/components/theme-toggle"
-import { buttonVariants } from "@/src/components/ui/button"
-import { SheetClose } from "@/src/components/ui/sheet"
-import { GitHubLink, Navigations } from "@/src/settings/navigation"
-import { Settings } from "@/src/settings/main"
-import { LuArrowUpRight, LuGithub } from "react-icons/lu"
+import { LuArrowUpRight, LuGithub } from "react-icons/lu";
+
+import { Settings } from "@/src/settings/main";
+import { GitHubLink, Navigations } from "@/src/settings/navigation";
+import { buttonVariants } from "@/src/components/ui/button";
+import { SheetClose } from "@/src/components/ui/sheet";
+import Anchor from "@/src/components/anchor";
+import { ChatButton } from "@/src/components/chat/chat-button";
+import { Logo } from "@/src/components/navigation/logo";
+import Search from "@/src/components/navigation/search";
+import { SheetLeft } from "@/src/components/sidebar";
+import { ModeToggle } from "@/src/components/theme-toggle";
 
 export function Navbar() {
   return (
-    <nav className="sticky top-0 z-50 mx-auto flex h-16 w-full items-center justify-between border-b bg-background/80 px-4 backdrop-blur-xl sm:px-6 md:px-8">
-      <div className="flex items-center gap-6">
+    <nav className="sticky top-0 z-50 mx-auto grid h-16 w-full grid-cols-[1fr_auto_1fr] items-center gap-3 border-b bg-background/80 px-4 backdrop-blur-xl sm:px-6 md:px-8">
+      <div className="flex min-w-0 items-center gap-6">
         <SheetLeft />
         <div className="hidden md:flex">
           <Logo />
@@ -23,27 +24,28 @@ export function Navbar() {
         </div>
       </div>
 
-      <div className="flex items-center gap-3">
+      <div className="flex justify-center">
         <Search />
-        <div className="flex items-center gap-1">
-          {GitHubLink.href && (
-            <a
-              href={GitHubLink.href}
-              className={buttonVariants({ variant: "ghost", size: "icon" })}
-              target="_blank"
-              rel="noopener noreferrer"
-              title="View the repository on GitHub"
-              aria-label="View the repository on GitHub"
-            >
-              <LuGithub className="h-[1.1rem] w-[1.1rem]" />
-            </a>
-          )}
-          {Settings.features.ai.chat && <ChatButton />}
-          <ModeToggle />
-        </div>
+      </div>
+
+      <div className="flex items-center justify-end gap-1">
+        {GitHubLink.href && (
+          <a
+            href={GitHubLink.href}
+            className={buttonVariants({ variant: "ghost", size: "icon" })}
+            target="_blank"
+            rel="noopener noreferrer"
+            title="View the repository on GitHub"
+            aria-label="View the repository on GitHub"
+          >
+            <LuGithub className="h-[1.1rem] w-[1.1rem]" />
+          </a>
+        )}
+        {Settings.features.ai.chat && <ChatButton />}
+        <ModeToggle />
       </div>
     </nav>
-  )
+  );
 }
 
 export function NavMenu({ isSheet = false }) {
@@ -65,15 +67,15 @@ export function NavMenu({ isSheet = false }) {
               <LuArrowUpRight className="h-3 w-3 align-super" strokeWidth={3} />
             )}
           </Anchor>
-        )
+        );
         return isSheet ? (
           <SheetClose key={item.title + item.href} asChild>
             {Comp}
           </SheetClose>
         ) : (
           Comp
-        )
+        );
       })}
     </>
-  )
+  );
 }

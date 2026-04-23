@@ -1,69 +1,69 @@
-import { LuChevronLeft, LuPlus, LuTrash2 } from "react-icons/lu"
-import { Button } from "@/src/components/ui/button"
-import type { Conversation } from "@/src/components/chat/use-conversation-history"
+import { LuChevronLeft, LuPlus, LuTrash2 } from "react-icons/lu";
+
+import { Button } from "@/src/components/ui/button";
+import type { Conversation } from "@/src/components/chat/use-conversation-history";
 
 interface HistoryPanelProps {
-  conversations: Conversation[]
-  activeConversationId: string | null
-  onLoadConversation: (id: string) => void
-  onNewConversation: () => void
-  onDeleteConversation: (id: string) => void
-  onClose: () => void
+  conversations: Conversation[];
+  activeConversationId: string | null;
+  onLoadConversation: (id: string) => void;
+  onNewConversation: () => void;
+  onDeleteConversation: (id: string) => void;
+  onClose: () => void;
 }
 
 function formatRelativeTime(timestamp: number): string {
-  const now = Date.now()
-  const diff = now - timestamp
-  const seconds = Math.floor(diff / 1000)
-  const minutes = Math.floor(seconds / 60)
-  const hours = Math.floor(minutes / 60)
+  const now = Date.now();
+  const diff = now - timestamp;
+  const seconds = Math.floor(diff / 1000);
+  const minutes = Math.floor(seconds / 60);
+  const hours = Math.floor(minutes / 60);
 
-  if (seconds < 60) return "Just now"
-  if (minutes < 60) return `${minutes}m ago`
-  if (hours < 24) return `${hours}h ago`
+  if (seconds < 60) return "Just now";
+  if (minutes < 60) return `${minutes}m ago`;
+  if (hours < 24) return `${hours}h ago`;
 
-  const date = new Date(timestamp)
-  const today = new Date()
-  const yesterday = new Date(today)
-  yesterday.setDate(yesterday.getDate() - 1)
+  const date = new Date(timestamp);
+  const today = new Date();
+  const yesterday = new Date(today);
+  yesterday.setDate(yesterday.getDate() - 1);
 
-  if (date.toDateString() === yesterday.toDateString()) return "Yesterday"
+  if (date.toDateString() === yesterday.toDateString()) return "Yesterday";
 
   return date.toLocaleDateString("en-US", {
     month: "short",
     day: "numeric",
-    year:
-      date.getFullYear() !== today.getFullYear() ? "numeric" : undefined,
-  })
+    year: date.getFullYear() !== today.getFullYear() ? "numeric" : undefined,
+  });
 }
 
 function groupByDate(
   conversations: Conversation[]
 ): { label: string; items: Conversation[] }[] {
-  const today = new Date()
-  const yesterday = new Date(today)
-  yesterday.setDate(yesterday.getDate() - 1)
+  const today = new Date();
+  const yesterday = new Date(today);
+  yesterday.setDate(yesterday.getDate() - 1);
 
-  const groups: Record<string, Conversation[]> = {}
+  const groups: Record<string, Conversation[]> = {};
 
   for (const conv of conversations) {
-    const date = new Date(conv.updatedAt)
-    let label: string
+    const date = new Date(conv.updatedAt);
+    let label: string;
     if (date.toDateString() === today.toDateString()) {
-      label = "Today"
+      label = "Today";
     } else if (date.toDateString() === yesterday.toDateString()) {
-      label = "Yesterday"
+      label = "Yesterday";
     } else {
-      label = "Earlier"
+      label = "Earlier";
     }
-    if (!groups[label]) groups[label] = []
-    groups[label].push(conv)
+    if (!groups[label]) groups[label] = [];
+    groups[label].push(conv);
   }
 
-  const order = ["Today", "Yesterday", "Earlier"]
+  const order = ["Today", "Yesterday", "Earlier"];
   return order
     .filter((label) => groups[label])
-    .map((label) => ({ label, items: groups[label] }))
+    .map((label) => ({ label, items: groups[label] }));
 }
 
 export function HistoryPanel({
@@ -74,7 +74,7 @@ export function HistoryPanel({
   onDeleteConversation,
   onClose,
 }: HistoryPanelProps) {
-  const grouped = groupByDate(conversations)
+  const grouped = groupByDate(conversations);
 
   return (
     <div className="absolute inset-0 z-10 flex flex-col bg-background">
@@ -96,8 +96,8 @@ export function HistoryPanel({
           variant="outline"
           className="w-full cursor-pointer justify-start gap-2"
           onClick={() => {
-            onNewConversation()
-            onClose()
+            onNewConversation();
+            onClose();
           }}
         >
           <LuPlus className="h-4 w-4" />
@@ -131,8 +131,8 @@ export function HistoryPanel({
                         : ""
                     }`}
                     onClick={() => {
-                      onLoadConversation(conv.id)
-                      onClose()
+                      onLoadConversation(conv.id);
+                      onClose();
                     }}
                   >
                     <div className="min-w-0 flex-1">
@@ -147,8 +147,8 @@ export function HistoryPanel({
                       size="icon"
                       className="h-7 w-7 shrink-0 cursor-pointer opacity-0 group-hover:opacity-100"
                       onClick={(e) => {
-                        e.stopPropagation()
-                        onDeleteConversation(conv.id)
+                        e.stopPropagation();
+                        onDeleteConversation(conv.id);
                       }}
                       aria-label="Delete conversation"
                     >
@@ -162,5 +162,5 @@ export function HistoryPanel({
         )}
       </div>
     </div>
-  )
+  );
 }

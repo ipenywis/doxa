@@ -1,14 +1,15 @@
-import { Button } from "@/src/components/ui/button"
-import { useChatContext } from "@/src/components/chat/chat-context"
-import type { ChatPageContext } from "@/src/lib/chat-page-context"
-import { useEffect, useRef, useState } from "react"
-import { LuFileText, LuSend, LuX } from "react-icons/lu"
+import { useEffect, useRef, useState } from "react";
+import { LuFileText, LuSend, LuX } from "react-icons/lu";
+
+import type { ChatPageContext } from "@/src/lib/chat-page-context";
+import { Button } from "@/src/components/ui/button";
+import { useChatContext } from "@/src/components/chat/chat-context";
 
 interface ChatInputProps {
-  onSend: (message: string) => void
-  isLoading: boolean
-  pageContext: ChatPageContext | null
-  onRemovePageContext: () => void
+  onSend: (message: string) => void;
+  isLoading: boolean;
+  pageContext: ChatPageContext | null;
+  onRemovePageContext: () => void;
 }
 
 export function ChatInput({
@@ -17,26 +18,26 @@ export function ChatInput({
   pageContext,
   onRemovePageContext,
 }: ChatInputProps) {
-  const { focusRequestId, isOpen } = useChatContext()
-  const [value, setValue] = useState("")
-  const inputRef = useRef<HTMLInputElement>(null)
+  const { focusRequestId, isOpen } = useChatContext();
+  const [value, setValue] = useState("");
+  const inputRef = useRef<HTMLInputElement>(null);
 
   const handleSubmit = () => {
-    const trimmed = value.trim()
-    if (!trimmed || isLoading) return
-    onSend(trimmed)
-    setValue("")
-  }
+    const trimmed = value.trim();
+    if (!trimmed || isLoading) return;
+    onSend(trimmed);
+    setValue("");
+  };
 
   useEffect(() => {
-    if (!isOpen || isLoading) return
+    if (!isOpen || isLoading) return;
 
     const frame = requestAnimationFrame(() => {
-      inputRef.current?.focus()
-    })
+      inputRef.current?.focus();
+    });
 
-    return () => cancelAnimationFrame(frame)
-  }, [focusRequestId, isLoading, isOpen])
+    return () => cancelAnimationFrame(frame);
+  }, [focusRequestId, isLoading, isOpen]);
 
   return (
     <div className="flex items-end gap-2 border-t p-4">
@@ -65,8 +66,8 @@ export function ChatInput({
           onChange={(e) => setValue(e.target.value)}
           onKeyDown={(e) => {
             if (e.key === "Enter" && !e.shiftKey) {
-              e.preventDefault()
-              handleSubmit()
+              e.preventDefault();
+              handleSubmit();
             }
           }}
           placeholder="Ask about the docs..."
@@ -84,5 +85,5 @@ export function ChatInput({
         <LuSend className="h-4 w-4" />
       </Button>
     </div>
-  )
+  );
 }

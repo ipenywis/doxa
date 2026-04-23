@@ -1,16 +1,23 @@
 ---
 title: Content Sources
 description: Choose between bundled Vite documentation and runtime GitHub documentation with Doxa's content adapter layer.
-keywords: ["content sources", "content adapter", "github docs", "vite docs", "contentStore"]
+keywords:
+  [
+    "content sources",
+    "content adapter",
+    "github docs",
+    "vite docs",
+    "contentStore",
+  ]
 ---
 
 Doxa reads documentation through a single `contentStore` API. The active adapter decides where MDX comes from, while route rendering, AI tools, search-adjacent metadata, and AI-native routes keep the same interface.
 
 ## Adapter Options
 
-| Source | Where content lives | Best for |
-| :-- | :-- | :-- |
-| `vite` | `src/contents/docs` in the app repo | Fast bundled docs shipped with the site. |
+| Source   | Where content lives                    | Best for                                            |
+| :------- | :------------------------------------- | :-------------------------------------------------- |
+| `vite`   | `src/contents/docs` in the app repo    | Fast bundled docs shipped with the site.            |
 | `github` | A GitHub repository fetched at runtime | Content teams editing docs separately from the app. |
 
 ## Vite Source
@@ -56,11 +63,11 @@ DOXA_GITHUB_CACHE_TTL=300
 
 The adapters implement the same operations:
 
-| Method | Returns |
-| :-- | :-- |
-| `listFiles()` | All MDX paths relative to the docs root. |
+| Method               | Returns                                     |
+| :------------------- | :------------------------------------------ |
+| `listFiles()`        | All MDX paths relative to the docs root.    |
 | `readFile(filePath)` | Raw MDX for a file, or `null` when missing. |
-| `name` | Adapter name for logs and debugging. |
+| `name`               | Adapter name for logs and debugging.        |
 
 ## Choosing A Source
 
@@ -76,6 +83,7 @@ The adapters implement the same operations:
     CONTENT_SOURCE=vite
     pnpm build
     ```
+
   </TabsContent>
   <TabsContent value="github">
     Choose GitHub when writers need to update docs without redeploying the app.
@@ -85,6 +93,7 @@ The adapters implement the same operations:
     DOXA_GITHUB_OWNER=your-org
     DOXA_GITHUB_REPO=your-docs-repo
     ```
+
   </TabsContent>
 </Tabs>
 

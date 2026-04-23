@@ -1,17 +1,25 @@
 ---
 title: Agent Tools
 description: Learn how Doxa's documentation assistant searches and reads MDX through contentStore-backed tools.
-keywords: ["agent tools", "grep", "cat", "contentStore", "ai assistant", "system prompt"]
+keywords:
+  [
+    "agent tools",
+    "grep",
+    "cat",
+    "contentStore",
+    "ai assistant",
+    "system prompt",
+  ]
 ---
 
 The Doxa assistant is intentionally narrow. It receives a system prompt with the docs file tree, then uses two tools to find and read documentation content.
 
 ## Tool Surface
 
-| Tool | Purpose |
-| :-- | :-- |
+| Tool   | Purpose                                                                             |
+| :----- | :---------------------------------------------------------------------------------- |
 | `grep` | Search documentation content for a pattern and return file paths with line numbers. |
-| `cat` | Read the full raw MDX content for a documentation file. |
+| `cat`  | Read the full raw MDX content for a documentation file.                             |
 
 Both tools read through `contentStore`, so they work with the bundled Vite source and the runtime GitHub adapter.
 
@@ -28,6 +36,7 @@ Both tools read through `contentStore`, so they work with the bundled Vite sourc
     ```json
     { "pattern": "content source" }
     ```
+
   </StepItem>
 
   <StepItem title="Read the relevant source">
@@ -36,6 +45,7 @@ Both tools read through `contentStore`, so they work with the bundled Vite sourc
     ```json
     { "file": "content-sources/index.mdx" }
     ```
+
   </StepItem>
 
   <StepItem title="Answer with links">

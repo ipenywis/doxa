@@ -5,34 +5,35 @@ import React, {
   useRef,
   useState,
   type CSSProperties,
-} from "react"
-import { cn } from "@/src/lib/utils"
-import mermaid from "mermaid"
+} from "react";
+import mermaid from "mermaid";
+
+import { cn } from "@/src/lib/utils";
 
 interface MermaidProps {
-  chart: string
-  className?: string
+  chart: string;
+  className?: string;
 }
 
 mermaid.initialize({
   startOnLoad: false,
   theme: "neutral",
-})
+});
 
-let renderQueue: Promise<unknown> = Promise.resolve()
+let renderQueue: Promise<unknown> = Promise.resolve();
 
 function queueMermaidRender<T>(task: () => Promise<T>): Promise<T> {
-  const next = renderQueue.then(task, task)
-  renderQueue = next.catch(() => undefined)
-  return next
+  const next = renderQueue.then(task, task);
+  renderQueue = next.catch(() => undefined);
+  return next;
 }
 
 function normalizeId(id: string) {
-  return id.replace(/[^a-zA-Z0-9_-]/g, "")
+  return id.replace(/[^a-zA-Z0-9_-]/g, "");
 }
 
 function clamp(value: number, min: number, max: number) {
-  return Math.min(Math.max(value, min), max)
+  return Math.min(Math.max(value, min), max);
 }
 
 function estimateDiagramHeight(chart: string) {
@@ -40,41 +41,41 @@ function estimateDiagramHeight(chart: string) {
     .trim()
     .split("\n")
     .map((line) => line.trim())
-    .filter(Boolean)
-  const normalized = chart.trim().toLowerCase()
+    .filter(Boolean);
+  const normalized = chart.trim().toLowerCase();
 
   if (normalized.startsWith("sequencediagram")) {
     const messages = lines.filter((line) =>
       /-{1,2}>>|-->>|->>|->|-->|-\)|-x/.test(line)
-    ).length
+    ).length;
     const participants = lines.filter((line) =>
       /^(actor|participant)\s+/i.test(line)
-    ).length
+    ).length;
 
-    return clamp(155 + messages * 20 + participants * 6, 305, 720)
+    return clamp(155 + messages * 20 + participants * 6, 305, 720);
   }
 
   if (normalized.startsWith("erdiagram")) {
     const entityBlocks = (chart.match(/^\s*[A-Za-z_][\w-]*\s*\{/gm) ?? [])
-      .length
-    const relationships = lines.filter((line) => line.includes("--")).length
+      .length;
+    const relationships = lines.filter((line) => line.includes("--")).length;
     const fields = lines.filter((line) =>
       /^(string|int|float|date|boolean|number)\s+/i.test(line)
-    ).length
+    ).length;
 
     return clamp(
       240 + entityBlocks * 110 + relationships * 28 + fields * 8,
       320,
       820
-    )
+    );
   }
 
   if (normalized.startsWith("graph") || normalized.startsWith("flowchart")) {
-    const edges = lines.filter((line) => /-->|---|==>/.test(line)).length
-    return clamp(180 + edges * 18, 240, 620)
+    const edges = lines.filter((line) => /-->|---|==>/.test(line)).length;
+    return clamp(180 + edges * 18, 240, 620);
   }
 
-  return clamp(220 + lines.length * 14, 260, 720)
+  return clamp(220 + lines.length * 14, 260, 720);
 }
 
 function MermaidSkeleton() {
@@ -97,19 +98,19 @@ function MermaidSkeleton() {
         </div>
       </div>
     </div>
-  )
+  );
 }
 
 const Mermaid = ({ chart, className }: MermaidProps) => {
-  const ref = useRef<HTMLDivElement | null>(null)
-  const reactId = useId()
-  const [isRendered, setIsRendered] = useState(false)
-  const estimatedHeight = useMemo(() => estimateDiagramHeight(chart), [chart])
+  const ref = useRef<HTMLDivElement | null>(null);
+  const reactId = useId();
+  const [isRendered, setIsRendered] = useState(false);
+  const estimatedHeight = useMemo(() => estimateDiagramHeight(chart), [chart]);
 
   const memoizedClassName = useMemo(
     () => cn("doxa-mermaid not-prose relative my-6 overflow-x-auto", className),
     [className]
-  )
+  );
 
   const style = useMemo(
     () =>
@@ -117,33 +118,33 @@ const Mermaid = ({ chart, className }: MermaidProps) => {
         "--mermaid-min-height": `${estimatedHeight}px`,
       }) as CSSProperties,
     [estimatedHeight]
-  )
+  );
 
   useEffect(() => {
-    const node = ref.current
-    if (!node) return
+    const node = ref.current;
+    if (!node) return;
 
-    let cancelled = false
-    const renderId = `doxa-mermaid-${normalizeId(reactId)}`
+    let cancelled = false;
+    const renderId = `doxa-mermaid-${normalizeId(reactId)}`;
 
-    setIsRendered(false)
-    node.innerHTML = ""
+    setIsRendered(false);
+    node.innerHTML = "";
 
     queueMermaidRender(() => mermaid.render(renderId, chart))
       .then(({ svg, bindFunctions }) => {
-        if (cancelled || !ref.current) return
-        ref.current.innerHTML = svg
-        bindFunctions?.(ref.current)
-        setIsRendered(true)
+        if (cancelled || !ref.current) return;
+        ref.current.innerHTML = svg;
+        bindFunctions?.(ref.current);
+        setIsRendered(true);
       })
       .catch((error) => {
-        console.error("Mermaid diagram render error:", error)
-      })
+        console.error("Mermaid diagram render error:", error);
+      });
 
     return () => {
-      cancelled = true
-    }
-  }, [chart, reactId])
+      cancelled = true;
+    };
+  }, [chart, reactId]);
 
   return (
     <div
@@ -164,8 +165,8 @@ const Mermaid = ({ chart, className }: MermaidProps) => {
         {isRendered ? "Diagram rendered" : "Rendering diagram"}
       </span>
     </div>
-  )
-}
+  );
+};
 
-const MermaidMemo = React.memo(Mermaid)
-export default MermaidMemo
+const MermaidMemo = React.memo(Mermaid);
+export default MermaidMemo;

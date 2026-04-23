@@ -1,9 +1,25 @@
-import eslint from "@eslint/js"
-import tsParser from "@typescript-eslint/parser"
-import { defineConfig } from "eslint/config"
-import tseslint from "typescript-eslint"
+import eslint from "@eslint/js";
+import { defineConfig } from "eslint/config";
+import tseslint from "typescript-eslint";
 
 const eslintConfig = defineConfig([
+  {
+    ignores: [
+      "build/",
+      "coverage/",
+      "dist/",
+      ".next/",
+      ".output/",
+      ".tanstack/",
+      ".vercel/",
+      ".vinxi/",
+      ".vite/",
+      ".wrangler/",
+      "public/search-data/",
+      "src/routeTree.gen.ts",
+      "*.tsbuildinfo",
+    ],
+  },
   eslint.configs.recommended,
   tseslint.configs.recommended,
   tseslint.configs.stylistic,
@@ -11,13 +27,10 @@ const eslintConfig = defineConfig([
     files: ["**/*.{ts,tsx,js,jsx}"],
     languageOptions: {
       ecmaVersion: "latest",
-      parser: tsParser,
       parserOptions: {
         ecmaFeatures: {
-          ecmaVersion: "latest",
           jsx: true,
         },
-        projectService: true,
       },
       sourceType: "module",
     },
@@ -25,9 +38,6 @@ const eslintConfig = defineConfig([
       "@typescript-eslint": tseslint.plugin,
     },
   },
-  {
-    ignores: ["dist/", ".vite/", ".vinxi/", ".output/", ".next/"],
-  },
-])
+]);
 
-export default eslintConfig
+export default eslintConfig;

@@ -5,17 +5,17 @@
  * exist without needing an initial discovery step.
  */
 
-import { contentStore } from "@/src/lib/content/store"
-import { Settings } from "@/src/settings/main"
-import { aiConfig } from "@/src/settings/ai"
-import type { ChatPageContext } from "@/src/lib/chat-page-context"
+import { aiConfig } from "@/src/settings/ai";
+import { Settings } from "@/src/settings/main";
+import type { ChatPageContext } from "@/src/lib/chat-page-context";
+import { contentStore } from "@/src/lib/content/store";
 
 async function getDocsFileTree(): Promise<string> {
   try {
-    const paths = await contentStore.getAllPaths()
-    return paths.slice().sort().join("\n")
+    const paths = await contentStore.getAllPaths();
+    return paths.slice().sort().join("\n");
   } catch {
-    return "(unable to list docs files)"
+    return "(unable to list docs files)";
   }
 }
 
@@ -23,7 +23,7 @@ function formatCurrentPageContext(
   currentPageContext: ChatPageContext | null
 ): string {
   if (!currentPageContext) {
-    return "No page is attached to the latest user message."
+    return "No page is attached to the latest user message.";
   }
 
   const lines = [
@@ -31,20 +31,20 @@ function formatCurrentPageContext(
     `- Title: ${currentPageContext.title}`,
     `- URL: ${currentPageContext.href}`,
     `- Source file: ${currentPageContext.sourcePath}`,
-  ]
+  ];
 
   if (currentPageContext.description) {
-    lines.push(`- Description: ${currentPageContext.description}`)
+    lines.push(`- Description: ${currentPageContext.description}`);
   }
 
-  return lines.join("\n")
+  return lines.join("\n");
 }
 
 export async function buildAgentSystemPrompt(
   currentPageContext: ChatPageContext | null = null
 ): Promise<string> {
-  const fileTree = await getDocsFileTree()
-  const currentPageSection = formatCurrentPageContext(currentPageContext)
+  const fileTree = await getDocsFileTree();
+  const currentPageSection = formatCurrentPageContext(currentPageContext);
 
   return `You are a documentation assistant for ${Settings.site.name}.
 Your job is to answer user questions accurately using ONLY the documentation content available to you.
@@ -89,5 +89,5 @@ You are capped at 5 agent iterations total. Plan for that budget.
 - If the question is outside the scope of the documentation, say so and suggest checking the docs directly.
 - Be concise but thorough. Use markdown formatting.
 - Read the frontmatter (between \`---\` markers at the top of files) to get page titles and metadata.
-- MDX files contain JSX-like component markup (\`<Step>\`, \`<Note>\`, \`<Card>\`, etc.). Focus on the prose content inside these components, not the markup itself.`
+- MDX files contain JSX-like component markup (\`<Step>\`, \`<Note>\`, \`<Card>\`, etc.). Focus on the prose content inside these components, not the markup itself.`;
 }

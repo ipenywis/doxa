@@ -1,50 +1,51 @@
-import { useEffect, type ReactNode } from "react"
+import { useEffect, type ReactNode } from "react";
+import { useLocation } from "@tanstack/react-router";
 import {
   LuHistory,
   LuMaximize2,
   LuMinimize2,
   LuPlus,
   LuX,
-} from "react-icons/lu"
-import { useLocation } from "@tanstack/react-router"
-import { useChatContext } from "@/src/components/chat/chat-context"
+} from "react-icons/lu";
 
-const PANEL_WIDTH = "clamp(380px, 24vw, 720px)"
-const PANEL_WIDTH_EXPANDED = "clamp(520px, 34vw, 1040px)"
+import { useChatContext } from "@/src/components/chat/chat-context";
+
+const PANEL_WIDTH = "clamp(380px, 24vw, 720px)";
+const PANEL_WIDTH_EXPANDED = "clamp(520px, 34vw, 1040px)";
 
 interface ChatDrawerProps {
-  onHistoryClick: () => void
-  onNewChat: () => void
-  children: ReactNode
+  onHistoryClick: () => void;
+  onNewChat: () => void;
+  children: ReactNode;
 }
 
 const btnClass =
-  "cursor-pointer rounded-xs p-1 opacity-70 hover:opacity-100 focus:outline-none"
+  "cursor-pointer rounded-xs p-1 opacity-70 hover:opacity-100 focus:outline-none";
 
 export function ChatDrawer({
   onHistoryClick,
   onNewChat,
   children,
 }: ChatDrawerProps) {
-  const { isOpen, isExpanded, setOpen, toggleExpanded } = useChatContext()
-  const location = useLocation()
-  const onDocsPage = location.pathname.startsWith("/docs")
+  const { isOpen, isExpanded, setOpen, toggleExpanded } = useChatContext();
+  const location = useLocation();
+  const onDocsPage = location.pathname.startsWith("/docs");
 
-  const panelWidth = isExpanded ? PANEL_WIDTH_EXPANDED : PANEL_WIDTH
+  const panelWidth = isExpanded ? PANEL_WIDTH_EXPANDED : PANEL_WIDTH;
 
   // Auto-close when navigating away from /docs
   useEffect(() => {
-    if (!onDocsPage && isOpen) setOpen(false)
-  }, [onDocsPage, isOpen, setOpen])
+    if (!onDocsPage && isOpen) setOpen(false);
+  }, [onDocsPage, isOpen, setOpen]);
 
   // Escape key to close
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "Escape" && isOpen) setOpen(false)
-    }
-    document.addEventListener("keydown", handleKeyDown)
-    return () => document.removeEventListener("keydown", handleKeyDown)
-  }, [isOpen, setOpen])
+      if (e.key === "Escape" && isOpen) setOpen(false);
+    };
+    document.addEventListener("keydown", handleKeyDown);
+    return () => document.removeEventListener("keydown", handleKeyDown);
+  }, [isOpen, setOpen]);
 
   return (
     <aside
@@ -105,5 +106,5 @@ export function ChatDrawer({
         </div>
       </div>
     </aside>
-  )
+  );
 }
