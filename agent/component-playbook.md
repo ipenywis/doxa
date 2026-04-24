@@ -58,7 +58,7 @@ Use cards for navigation, related pages, feature groups, and external resources.
   />
   <Card
     title="Repository"
-    href="https://github.com/ipenywis/doxa-docs-template"
+    href="https://github.com/ipenywis/doxa"
     external={true}
   />
 </CardGrid>

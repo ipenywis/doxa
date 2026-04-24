@@ -2,18 +2,9 @@
 
 A beautiful, fast documentation template built with **TanStack Start**, **AI Agents**, **React 19**, **Tailwind CSS v4**, **TypeScript**, and **MDX**. Designed for developers, product teams, and technical writers who care about the reading experience as much as the writing.
 
-> **Demo**: [https://docs.doxa.so](https://docs.doxa.so)
-
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
-<!-- [![Top Language](https://img.shields.io/github/languages/top/ipenywis/doxa-docs-template)](https://github.com/ipenywis/doxa-docs-template)
-![GitHub commit activity](https://img.shields.io/github/commit-activity/m/ipenywis/doxa-docs-template)
-[![Last Commit](https://img.shields.io/github/last-commit/ipenywis/doxa-docs-template)](https://github.com/ipenywis/doxa-docs-template/commits)
-[![GitHub issues](https://img.shields.io/github/issues/ipenywis/doxa-docs-template)](https://github.com/ipenywis/doxa-docs-template/issues)
-[![GitHub pull requests](https://img.shields.io/github/issues-pr/ipenywis/doxa-docs-template)](https://github.com/ipenywis/doxa-docs-template/pulls)
-[![GitHub stars](https://img.shields.io/github/stars/ipenywis/doxa-docs-template)](https://github.com/ipenywis/doxa-docs-template/stargazers)
-[![GitHub forks](https://img.shields.io/github/forks/ipenywis/doxa-docs-template)](https://github.com/ipenywis/doxa-docs-template/network) -->
 
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Fipenywis%2Fdoxa&project-name=doxa-docs-template&repository-name=doxa-docs-template)
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Fipenywis%2Fdoxa&project-name=doxa&repository-name=doxa)
 
 ---
 
@@ -77,8 +68,8 @@ Built on **TanStack Start** for full-stack React with SSR, deployed to **Cloudfl
 ### Installation
 
 ```bash
-git clone https://github.com/ipenywis/doxa-docs-template.git
-cd doxa-docs-template
+git clone https://github.com/ipenywis/doxa.git
+cd doxa
 pnpm install
 pnpm dev
 ```
@@ -255,14 +246,6 @@ Contributions welcome.
 3. Commit your changes
 4. Open a pull request
 
----
-
-## Credits
-
-Doxa started as a fork of [Rubix Documents](https://github.com/rubixvi/rubix-documents) by [Vincent Vu](https://x.com/rubixvi) / [Rubix Studios](https://rubixstudios.com.au). The original project provided the foundation — we then migrated it to **TanStack Start**, rebuilt the rendering pipeline for edge deployment, added AI-powered chat, introduced new MDX components, and made extensive improvements to performance, lazy loading, and the overall developer experience. All the thanks goes to the Rubix team for their Documents project.
-
----
-
 ## License
 
 This project is licensed under the MIT License. See the [LICENSE](./LICENSE) file for details.
@@ -273,4 +256,4 @@ This project is licensed under the MIT License. See the [LICENSE](./LICENSE) fil
 
 Islem Maboud — [@Ipenywis](https://x.com/Ipenywis)
 
-**Project:** [https://github.com/ipenywis/doxa-docs-template](https://github.com/ipenywis/doxa-docs-template)
+**Project:** [https://github.com/ipenywis/doxa](https://github.com/ipenywis/doxa)
