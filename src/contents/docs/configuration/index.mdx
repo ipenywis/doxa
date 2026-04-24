@@ -121,6 +121,21 @@ The docs chat uses TanStack AI. Configure the provider and model in `src/setting
 | `DOXA_GITHUB_REPO`  |    GitHub source     | Repository name for runtime docs loading.                      |
 | `DOXA_GITHUB_TOKEN` | Private GitHub docs  | Read-only token for private docs repositories.                 |
 
+## Sitemap Generation
+
+Production builds generate `/sitemap.xml` through TanStack Start. Doxa seeds
+the sitemap from `src/contents/settings/documents.json`; the default Cloudflare
+build also prerenders each docs page and keeps link crawling enabled for
+internally linked pages.
+
+<Note title="Host inference" type="info">
+  `VITE_SITE_URL` is the preferred sitemap host. If it is not set, the build
+  checks `DOXA_SITE_URL`, `SITE_URL`, `PUBLIC_SITE_URL`, `PUBLIC_URL`,
+  `VERCEL_PROJECT_PRODUCTION_URL`, `VERCEL_URL`, `VERCEL_BRANCH_URL`,
+  `CF_PAGES_URL`, `URL`, `DEPLOY_URL`, and `DEPLOY_PRIME_URL` before falling
+  back to `https://docs.doxa.so`.
+</Note>
+
 ## Feature Toggle Guidance
 
 - Keep `ai.chat` enabled for demos that showcase the AI assistant.
@@ -144,22 +159,22 @@ The docs chat uses TanStack AI. Configure the provider and model in `src/setting
   ```bash pnpm generate-content-json ```
 </StepItem>
 
-  <StepItem title="Build the target you plan to deploy">
-    <Tabs defaultValue="cloudflare" className="pt-5 pb-1">
-      <TabsList>
-        <TabsTrigger value="cloudflare">Cloudflare</TabsTrigger>
-        <TabsTrigger value="vercel">Vercel</TabsTrigger>
-      </TabsList>
-      <TabsContent value="cloudflare">
-        ```bash
-        pnpm build:cloudflare
-        ```
-      </TabsContent>
-      <TabsContent value="vercel">
-        ```bash
-        pnpm build:vercel
-        ```
-      </TabsContent>
-    </Tabs>
+<StepItem title="Build the target you plan to deploy">
+  <Tabs defaultValue="cloudflare" className="pt-5 pb-1">
+    <TabsList>
+      <TabsTrigger value="cloudflare">Cloudflare</TabsTrigger>
+      <TabsTrigger value="vercel">Vercel</TabsTrigger>
+    </TabsList>
+    <TabsContent value="cloudflare">
+      ```bash pnpm build:cloudflare ```
+    </TabsContent>
+    <TabsContent value="vercel">```bash pnpm build:vercel ```</TabsContent>
+  </Tabs>
+</StepItem>
+
+  <StepItem title="Check generated sitemap output">
+    ```bash
+    test -f dist/client/sitemap.xml
+    ```
   </StepItem>
 </Step>

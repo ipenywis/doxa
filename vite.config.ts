@@ -1,3 +1,4 @@
+import { execFileSync } from "node:child_process";
 import { readFile } from "node:fs/promises";
 
 import { cloudflare } from "@cloudflare/vite-plugin";
@@ -13,10 +14,12 @@ import rehypePrism from "rehype-prism-plus";
 import rehypeSlug from "rehype-slug";
 import remarkFrontmatter from "remark-frontmatter";
 import remarkGfm from "remark-gfm";
-import { defineConfig, type PluginOption } from "vite";
+import { defineConfig, loadEnv, type PluginOption } from "vite";
 import tsConfigPaths from "vite-tsconfig-paths";
 
+import Documents from "./src/contents/settings/documents.json";
 import { rehypePreCopy, remarkStripFrontmatter } from "./src/lib/mdx-plugins";
+import { resolveSiteUrl } from "./src/lib/site-url";
 
 /**
  * mdxSourceCapturePlugin
@@ -64,11 +67,26 @@ function mdxSourceCapturePlugin(): PluginOption {
 
 type DeploymentTarget = "cloudflare" | "vercel";
 
+interface DocumentRoute {
+  title?: string;
+  href?: string;
+  noLink?: true;
+  items?: DocumentRoute[];
+}
+
+interface SitemapPage {
+  path: string;
+  sitemap?: {
+    lastmod?: string;
+  };
+}
+const HOME_ROUTE_FILE_PATH = "src/routes/index.tsx";
+
 const prerenderConfig = {
   enabled: true,
   crawlLinks: true,
   autoSubfolderIndex: true,
-  autoStaticPathsDiscovery: true,
+  autoStaticPathsDiscovery: false,
   concurrency: 14,
   retryCount: 2,
   retryDelay: 1000,
@@ -78,6 +96,78 @@ const prerenderConfig = {
     console.log("Prerendered path:", page.path);
   },
 };
+const gitLastModifiedCache = new Map<string, string | undefined>();
+
+function getGitLastModifiedDate(filePath: string): string | undefined {
+  const cached = gitLastModifiedCache.get(filePath);
+  if (cached !== undefined) {
+    return cached;
+  }
+
+  try {
+    const lastModified = execFileSync(
+      "git",
+      ["log", "-1", "--format=%cI", "--follow", "--", filePath],
+      {
+        cwd: process.cwd(),
+        encoding: "utf-8",
+        stdio: ["ignore", "pipe", "ignore"],
+      }
+    ).trim();
+
+    const resolved = lastModified || undefined;
+    gitLastModifiedCache.set(filePath, resolved);
+    return resolved;
+  } catch {
+    gitLastModifiedCache.set(filePath, undefined);
+    return undefined;
+  }
+}
+
+function getDocsPages(routes: DocumentRoute[], parentHref = ""): SitemapPage[] {
+  const pages: SitemapPage[] = [];
+
+  for (const route of routes) {
+    if (route.title && route.href) {
+      const href = `${parentHref}${route.href}`;
+      const filePath = `src/contents/docs${href}/index.mdx`;
+      const lastModified = getGitLastModifiedDate(filePath);
+
+      if (!route.noLink) {
+        pages.push({
+          path: `/docs${href}`,
+          sitemap: lastModified
+            ? {
+                lastmod: lastModified,
+              }
+            : undefined,
+        });
+      }
+
+      if (route.items) {
+        pages.push(...getDocsPages(route.items, href));
+      }
+    }
+  }
+
+  return pages;
+}
+
+function getSitemapPages() {
+  const homeLastModified = getGitLastModifiedDate(HOME_ROUTE_FILE_PATH);
+
+  return [
+    {
+      path: "/",
+      sitemap: homeLastModified
+        ? {
+            lastmod: homeLastModified,
+          }
+        : undefined,
+    } satisfies SitemapPage,
+    ...getDocsPages(Documents as DocumentRoute[]),
+  ];
+}
 
 function getDeploymentTarget(): DeploymentTarget {
   return process.env.DOXA_DEPLOY_TARGET === "vercel" ? "vercel" : "cloudflare";
@@ -91,8 +181,13 @@ function getHostingPlugins(target: DeploymentTarget): PluginOption[] {
   return [cloudflare({ viteEnvironment: { name: "ssr" } })];
 }
 
-export default defineConfig(() => {
+export default defineConfig(({ mode }) => {
+  const env = loadEnv(mode, process.cwd(), "");
   const deploymentTarget = getDeploymentTarget();
+  const sitemapHost = resolveSiteUrl({
+    ...process.env,
+    ...env,
+  });
   const buildConfig =
     deploymentTarget === "cloudflare"
       ? {
@@ -113,11 +208,21 @@ export default defineConfig(() => {
           server: {
             entry: "./src/server.ts",
           },
+          pages: getSitemapPages(),
           prerender: prerenderConfig,
+          sitemap: {
+            enabled: true,
+            host: sitemapHost,
+          },
         }
       : {
           server: {
             entry: "./src/server.ts",
+          },
+          pages: getSitemapPages(),
+          sitemap: {
+            enabled: true,
+            host: sitemapHost,
           },
         };
 

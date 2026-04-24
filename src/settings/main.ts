@@ -1,4 +1,5 @@
 import type { OpenGraph, TwitterCard } from "@/src/types/opengraph";
+import { resolveSiteUrl } from "@/src/lib/site-url";
 
 interface AiFeatureSettings {
   chat: boolean;
@@ -46,7 +47,9 @@ interface AppSettings {
   twitter: TwitterCard;
 }
 
-const siteUrl = import.meta.env.VITE_SITE_URL ?? "https://docs.doxa.so";
+const siteUrl = resolveSiteUrl(
+  import.meta.env as Record<string, string | undefined>
+);
 const companyLink = import.meta.env.VITE_COMPANY_LINK ?? siteUrl;
 
 export const Settings: AppSettings = {

@@ -30,12 +30,18 @@ Doxa includes scripts for Cloudflare Workers and Vercel. Cloudflare is the defau
 
 ## Required Production Settings
 
-| Setting             | Why it matters                                                                 |
-| :------------------ | :----------------------------------------------------------------------------- |
-| `VITE_SITE_URL`     | Canonical tags, sitemap, robots, Open Graph URLs, and `llms.txt` source links. |
-| `AI_API_KEY`        | Required when Chat with Docs is enabled.                                       |
-| `CONTENT_SOURCE`    | Selects bundled or runtime docs content.                                       |
-| GitHub adapter vars | Required only when `CONTENT_SOURCE=github`.                                    |
+| Setting             | Why it matters                                                                                            |
+| :------------------ | :-------------------------------------------------------------------------------------------------------- |
+| `VITE_SITE_URL`     | Preferred host for canonical tags, sitemap entries, robots, Open Graph URLs, and `llms.txt` source links. |
+| `AI_API_KEY`        | Required when Chat with Docs is enabled.                                                                  |
+| `CONTENT_SOURCE`    | Selects bundled or runtime docs content.                                                                  |
+| GitHub adapter vars | Required only when `CONTENT_SOURCE=github`.                                                               |
+
+<Note title="Sitemap host fallback" type="info">
+  If `VITE_SITE_URL` is not set, the build infers the sitemap host from common
+  deployment variables such as `VERCEL_PROJECT_PRODUCTION_URL`, `VERCEL_URL`,
+  `CF_PAGES_URL`, `URL`, `DEPLOY_URL`, or `DEPLOY_PRIME_URL`.
+</Note>
 
 ## Cloudflare Workers
 
@@ -86,6 +92,7 @@ Doxa includes scripts for Cloudflare Workers and Vercel. Cloudflare is the defau
 - [x] `src/contents/settings/documents.json` has no stale demo routes.
 - [x] `VITE_SITE_URL` points at the production docs URL.
 - [x] `AI_API_KEY` is set when chat is enabled.
+- [x] `/sitemap.xml` is generated and uses the production docs host.
 - [x] `/llms.txt` and `/llms-full.txt` return the expected content.
 - [x] Search opens with `Command+K` or `Ctrl+K`.
 

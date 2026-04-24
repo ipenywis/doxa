@@ -56,7 +56,7 @@ Built on **TanStack Start** for full-stack React with SSR, deployed to **Cloudfl
 - **TypeScript** strict mode throughout
 - **Radix UI** primitives for accessible components
 - Light/dark mode with system auto-detection
-- SEO-ready with dynamic meta tags, Open Graph, and Twitter Cards
+- SEO-ready with dynamic meta tags, Open Graph, Twitter Cards, and generated sitemaps
 - Google Tag Manager integration
 
 ### Deployment
@@ -112,6 +112,31 @@ pnpm deploy:vercel
 ```
 
 `VITE_SITE_URL` should match your public docs URL so canonical tags, sitemap, robots, and social metadata use the correct host.
+
+---
+
+## Sitemap Generation
+
+Production builds generate `/sitemap.xml` with TanStack Start. The build seeds sitemap pages from `src/contents/settings/documents.json`; the default Cloudflare build also prerenders those pages and crawls internal links so docs pages stay discoverable.
+
+The sitemap host is inferred from environment variables in this order:
+
+```text
+VITE_SITE_URL
+DOXA_SITE_URL
+SITE_URL
+PUBLIC_SITE_URL
+PUBLIC_URL
+VERCEL_PROJECT_PRODUCTION_URL
+VERCEL_URL
+VERCEL_BRANCH_URL
+CF_PAGES_URL
+URL
+DEPLOY_URL
+DEPLOY_PRIME_URL
+```
+
+Set `VITE_SITE_URL=https://docs.example.com` explicitly in production when you want canonical URLs, social metadata, AI-native route URLs, and sitemap entries to share the same public host.
 
 ---
 

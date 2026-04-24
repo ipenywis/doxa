@@ -1,15 +1,16 @@
 import { createFileRoute } from "@tanstack/react-router";
 
-import { Settings } from "@/src/settings/main";
+import { resolveSiteUrl } from "@/src/lib/site-url";
 
-export const Route = createFileRoute("/robots/txt")({
+export const Route = createFileRoute("/robots.txt")({
   server: {
     handlers: {
       GET: async () => {
+        const siteUrl = resolveSiteUrl(process.env);
         const robots = `User-agent: *
 Allow: /
 
-Sitemap: ${Settings.site.url}/sitemap.xml`;
+Sitemap: ${siteUrl}/sitemap.xml`;
 
         return new Response(robots, {
           headers: {
