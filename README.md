@@ -5,15 +5,15 @@ A beautiful, fast documentation template built with **TanStack Start**, **AI Age
 > **Demo**: [https://docs.doxa.so](https://docs.doxa.so)
 
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
-[![Top Language](https://img.shields.io/github/languages/top/ipenywis/doxa-docs-template)](https://github.com/ipenywis/doxa-docs-template)
+<!-- [![Top Language](https://img.shields.io/github/languages/top/ipenywis/doxa-docs-template)](https://github.com/ipenywis/doxa-docs-template)
 ![GitHub commit activity](https://img.shields.io/github/commit-activity/m/ipenywis/doxa-docs-template)
 [![Last Commit](https://img.shields.io/github/last-commit/ipenywis/doxa-docs-template)](https://github.com/ipenywis/doxa-docs-template/commits)
 [![GitHub issues](https://img.shields.io/github/issues/ipenywis/doxa-docs-template)](https://github.com/ipenywis/doxa-docs-template/issues)
 [![GitHub pull requests](https://img.shields.io/github/issues-pr/ipenywis/doxa-docs-template)](https://github.com/ipenywis/doxa-docs-template/pulls)
 [![GitHub stars](https://img.shields.io/github/stars/ipenywis/doxa-docs-template)](https://github.com/ipenywis/doxa-docs-template/stargazers)
-[![GitHub forks](https://img.shields.io/github/forks/ipenywis/doxa-docs-template)](https://github.com/ipenywis/doxa-docs-template/network)
+[![GitHub forks](https://img.shields.io/github/forks/ipenywis/doxa-docs-template)](https://github.com/ipenywis/doxa-docs-template/network) -->
 
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Fipenywis%2Fdoxa-docs-template&project-name=doxa-docs-template&repository-name=doxa-docs-template)
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Fipenywis%2Fdoxa&project-name=doxa-docs-template&repository-name=doxa-docs-template)
 
 ---
 
