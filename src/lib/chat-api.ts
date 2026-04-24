@@ -13,6 +13,7 @@ import { z } from "zod";
 
 import { aiConfig } from "@/src/settings/ai";
 import { Settings } from "@/src/settings/main";
+import { createDocsAnswerGuard } from "@/src/lib/agent/answer-guard";
 import { buildAgentSystemPrompt } from "@/src/lib/agent/system-prompt";
 import { agentTools } from "@/src/lib/agent/tools";
 import type {
@@ -182,6 +183,7 @@ export const chatWithDocsStream = createServerFn({ method: "POST" })
       const systemPrompt = await buildAgentSystemPrompt(currentPageContext);
       const adapter = getAdapter(apiKey);
       const abortController = new AbortController();
+      const answerGuard = createDocsAnswerGuard();
 
       const modelMessages: ModelMessage[] = messages.map((m, index) => ({
         role: m.role === "assistant" ? "assistant" : "user",
@@ -209,13 +211,17 @@ export const chatWithDocsStream = createServerFn({ method: "POST" })
         systemPrompts: [systemPrompt],
         messages: modelMessages,
         tools: agentTools,
+        middleware: [answerGuard.middleware],
         maxTokens: aiConfig.maxResponseTokens,
         stream: true as const,
-        agentLoopStrategy: ({ iterationCount }) => iterationCount < 5,
+        agentLoopStrategy: ({ iterationCount }) =>
+          answerGuard.shouldContinue(iterationCount),
         ...(modelOptions ? { modelOptions } : {}),
       } as Parameters<typeof chat>[0]);
 
-      return toServerSentEventsResponse(stream, { abortController });
+      return toServerSentEventsResponse(answerGuard.wrapStream(stream), {
+        abortController,
+      });
     } catch (err: unknown) {
       console.error("Chat API stream error:", err);
       const message =

@@ -11,7 +11,7 @@ keywords:
   ]
 ---
 
-Chat with Docs gives readers a side panel where they can ask questions about the documentation they are reading. The assistant is constrained to the docs corpus and uses tools to search and read MDX before answering.
+Chat with Docs gives readers a side panel where they can ask questions about the documentation they are reading. The assistant is constrained to the docs corpus, uses tools to search and read MDX before answering, and passes every final response through server-side scope validation.
 
 ## Reader Experience
 
@@ -25,8 +25,9 @@ The chat button appears in the navigation on `/docs` routes when `Settings.featu
 - Expanded and compact drawer widths.
 
 <Note title="Docs-only answers">
-  The system prompt tells the assistant to answer only from available
-  documentation files. If a question is outside the docs, it should say so.
+  The server only streams final answers that pass the documentation evidence
+  gate. If a question is outside the docs, the assistant returns a fixed
+  unsupported response instead of falling back to general model knowledge.
 </Note>
 
 ## Request Flow
@@ -39,10 +40,12 @@ The chat button appears in the navigation on `/docs` routes when `Settings.featu
     Prompt --> Model[TanStack AI model];
     Model --> Grep[grep tool];
     Model --> Cat[cat tool];
+    Model --> Submit[submit_answer tool];
     Grep --> Store[contentStore];
     Cat --> Store;
     Store --> Model;
-    Model --> Drawer;
+    Submit --> Guard[Scope guard];
+    Guard --> Drawer;
     Drawer --> Reader;`}
 />
 
@@ -109,6 +112,7 @@ The chat button appears in the navigation on `/docs` routes when `Settings.featu
 | Answers miss new pages            | Search data is stale or docs were not deployed | Regenerate search data and redeploy.          |
 | The assistant cannot cite a topic | The topic is not documented                    | Add or expand the relevant MDX page.          |
 | Tool calls show no matches        | Query terms do not appear in docs              | Improve headings, descriptions, and keywords. |
+| General questions are refused     | The topic is outside the docs corpus           | Add the supported details to the docs.        |
 
 <Note title="Production guidance" type="warning">
   Keep provider keys on the server. Do not expose `AI_API_KEY` as a Vite public
