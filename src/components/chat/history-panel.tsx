@@ -83,7 +83,7 @@ export function HistoryPanel({
           variant="ghost"
           size="icon"
           onClick={onClose}
-          className="h-8 w-8 shrink-0 cursor-pointer"
+          className="h-10 w-10 shrink-0 cursor-pointer sm:h-8 sm:w-8"
           aria-label="Back"
         >
           <LuChevronLeft className="h-4 w-4" />

@@ -48,7 +48,7 @@ export function ToolCallDisplay({ step }: ToolCallDisplayProps) {
   const displayCommand = step.args ? parseArgs(step.args) : "...";
 
   return (
-    <div className="my-1.5 max-w-[90%] overflow-hidden rounded-lg border border-border/50 bg-muted/30 text-xs">
+    <div className="my-1.5 max-w-full overflow-hidden rounded-lg border border-border/50 bg-muted/30 text-xs">
       {/* Header */}
       <button
         onClick={toggle}
@@ -88,7 +88,7 @@ export function ToolCallDisplay({ step }: ToolCallDisplayProps) {
 
         <LuTerminal className="size-3 shrink-0 text-muted-foreground" />
 
-        <code className="flex-1 truncate font-mono text-[11px] text-foreground/80">
+        <code className="min-w-0 flex-1 truncate font-mono text-xs text-foreground/80 sm:text-[11px]">
           <span className="font-semibold text-foreground">{step.name}</span>{" "}
           {displayCommand}
         </code>

@@ -144,8 +144,8 @@ function DocsContent() {
 
   if (!pageDocument) {
     return (
-      <div key={slug} className="flex items-start gap-10">
-        <article className="prose-code:font-code prose max-w-3xl flex-1 prose-zinc dark:prose-invert prose-headings:scroll-m-20 prose-code:before:content-none prose-code:after:content-none prose-pre:border prose-pre:bg-muted/25 prose-img:rounded-md">
+      <div key={slug} className="flex items-start gap-6 lg:gap-10">
+        <article className="prose-code:font-code @container/article prose w-full max-w-3xl min-w-0 flex-1 prose-zinc dark:prose-invert prose-headings:scroll-m-20 prose-code:before:content-none prose-code:after:content-none prose-pre:border prose-pre:bg-muted/25 prose-img:rounded-md">
           <ArticleBreadcrumb paths={paths} />
           <h1 className="text-3xl font-bold tracking-tight lg:text-4xl">
             Document Not Found
@@ -166,18 +166,18 @@ function DocsContent() {
   }
 
   return (
-    <div key={slug} className="flex items-start gap-10">
-      <article className="prose-code:font-code prose max-w-3xl flex-1 prose-zinc dark:prose-invert prose-headings:scroll-m-20 prose-code:before:content-none prose-code:after:content-none prose-pre:border prose-pre:bg-muted/25 prose-img:rounded-md">
+    <div key={slug} className="flex items-start gap-6 lg:gap-10">
+      <article className="prose-code:font-code @container/article prose w-full max-w-3xl min-w-0 flex-1 prose-zinc dark:prose-invert prose-headings:scroll-m-20 prose-code:before:content-none prose-code:after:content-none prose-pre:border prose-pre:bg-muted/25 prose-img:rounded-md">
         {sectionHeading && (
           <p className="not-prose mb-2 text-sm font-medium text-primary">
             {sectionHeading}
           </p>
         )}
-        <div className="not-prose flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+        <div className="not-prose flex flex-col gap-3 @2xl/article:flex-row @2xl/article:items-start @2xl/article:justify-between">
           <h1 className="min-w-0 text-3xl font-bold tracking-tight lg:text-4xl">
             {title}
           </h1>
-          <div className="flex shrink-0 flex-wrap items-center gap-2">
+          <div className="flex shrink-0 flex-wrap items-center gap-2 @2xl/article:order-last">
             {Settings.features.ai.chat &&
               Settings.features.ai.chatWithPage &&
               pageContext && <ChatWithPage pageContext={pageContext} />}

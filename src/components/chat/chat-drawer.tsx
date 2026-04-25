@@ -7,11 +7,13 @@ import {
   LuPlus,
   LuX,
 } from "react-icons/lu";
+import { useEventListener } from "usehooks-ts";
 
 import { useChatContext } from "@/src/components/chat/chat-context";
 
-const PANEL_WIDTH = "clamp(380px, 24vw, 720px)";
+const PANEL_WIDTH = "clamp(360px, 24vw, 720px)";
 const PANEL_WIDTH_EXPANDED = "clamp(520px, 34vw, 1040px)";
+const PANEL_MAX_WIDTH = "calc(100vw - 240px)";
 
 interface ChatDrawerProps {
   onHistoryClick: () => void;
@@ -27,7 +29,8 @@ export function ChatDrawer({
   onNewChat,
   children,
 }: ChatDrawerProps) {
-  const { isOpen, isExpanded, setOpen, toggleExpanded } = useChatContext();
+  const { isOpen, isExpanded, isMobile, setOpen, toggleExpanded } =
+    useChatContext();
   const location = useLocation();
   const onDocsPage = location.pathname.startsWith("/docs");
 
@@ -38,14 +41,65 @@ export function ChatDrawer({
     if (!onDocsPage && isOpen) setOpen(false);
   }, [onDocsPage, isOpen, setOpen]);
 
-  // Escape key to close
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "Escape" && isOpen) setOpen(false);
-    };
-    document.addEventListener("keydown", handleKeyDown);
-    return () => document.removeEventListener("keydown", handleKeyDown);
-  }, [isOpen, setOpen]);
+  useEventListener("keydown", (e) => {
+    if (e.key === "Escape" && isOpen) setOpen(false);
+  });
+
+  if (isMobile) {
+    return (
+      <>
+        {isOpen && (
+          <div
+            className="fixed inset-0 z-40 bg-black/40 backdrop-blur-sm"
+            onClick={() => setOpen(false)}
+            aria-hidden="true"
+          />
+        )}
+        <aside
+          role="dialog"
+          aria-modal="true"
+          aria-label="Chat with Docs"
+          className="fixed inset-0 z-50 flex flex-col bg-background transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)]"
+          style={{
+            transform: isOpen ? "translateY(0)" : "translateY(100%)",
+            pointerEvents: isOpen ? "auto" : "none",
+          }}
+        >
+          <div className="flex items-center justify-between border-b p-4">
+            <span className="font-semibold text-foreground">
+              Chat with Docs
+            </span>
+            <div className="flex items-center gap-1">
+              <button
+                onClick={onNewChat}
+                className={btnClass}
+                aria-label="New chat"
+              >
+                <LuPlus className="size-5" />
+              </button>
+              <button
+                onClick={onHistoryClick}
+                className={btnClass}
+                aria-label="Chat history"
+              >
+                <LuHistory className="size-5" />
+              </button>
+              <button
+                onClick={() => setOpen(false)}
+                className={btnClass}
+                aria-label="Close chat"
+              >
+                <LuX className="size-6" />
+              </button>
+            </div>
+          </div>
+          <div className="chat-drawer-scroll relative flex flex-1 flex-col overflow-hidden">
+            {children}
+          </div>
+        </aside>
+      </>
+    );
+  }
 
   return (
     <aside
@@ -55,12 +109,12 @@ export function ChatDrawer({
       style={{
         width: isOpen ? panelWidth : "0px",
         borderColor: isOpen ? "var(--border)" : "transparent",
-        maxWidth: "calc(100vw - 320px)",
+        maxWidth: PANEL_MAX_WIDTH,
       }}
     >
       <div
         className="flex h-full flex-col"
-        style={{ width: panelWidth, maxWidth: "calc(100vw - 320px)" }}
+        style={{ width: panelWidth, maxWidth: PANEL_MAX_WIDTH }}
       >
         {/* Header */}
         <div className="flex items-center justify-between border-b p-4">

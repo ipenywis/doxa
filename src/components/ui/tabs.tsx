@@ -21,14 +21,16 @@ function TabsList({
   ...props
 }: React.ComponentProps<typeof TabsPrimitive.List>) {
   return (
-    <TabsPrimitive.List
-      data-slot="tabs-list"
-      className={cn(
-        "inline-flex h-9 w-fit items-center justify-center rounded-lg bg-muted p-[3px] text-muted-foreground",
-        className
-      )}
-      {...props}
-    />
+    <div className="-mx-1 max-w-full overflow-x-auto px-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+      <TabsPrimitive.List
+        data-slot="tabs-list"
+        className={cn(
+          "inline-flex h-9 w-max min-w-full items-center justify-start rounded-lg bg-muted p-[3px] text-muted-foreground sm:w-fit sm:justify-center",
+          className
+        )}
+        {...props}
+      />
+    </div>
   );
 }
 

@@ -7,14 +7,17 @@ import {
   type ReactNode,
 } from "react";
 import { useLocation } from "@tanstack/react-router";
+import { useMediaQuery } from "usehooks-ts";
 
 import type { ChatPageContext } from "@/src/lib/chat-page-context";
 
 const EXPANDED_BREAKPOINT_PX = 1280;
+const MOBILE_BREAKPOINT_PX = 1024;
 
 interface ChatContextValue {
   isOpen: boolean;
   isExpanded: boolean;
+  isMobile: boolean;
   currentPageContext: ChatPageContext | null;
   attachedPageContext: ChatPageContext | null;
   pendingPageConversationContext: ChatPageContext | null;
@@ -40,6 +43,13 @@ export function ChatProvider({ children }: { children: ReactNode }) {
   const location = useLocation();
   const [isOpen, setOpen] = useState(false);
   const [isExpanded, setExpanded] = useState(false);
+  const isMobile = useMediaQuery(`(max-width: ${MOBILE_BREAKPOINT_PX - 1}px)`, {
+    initializeWithValue: false,
+  });
+  const isLargeScreen = useMediaQuery(
+    `(min-width: ${EXPANDED_BREAKPOINT_PX}px)`,
+    { initializeWithValue: false }
+  );
   const [currentPageContext, setCurrentPageContextState] =
     useState<ChatPageContext | null>(null);
   const [attachedPageContext, setAttachedPageContextState] =
@@ -50,9 +60,18 @@ export function ChatProvider({ children }: { children: ReactNode }) {
   const [pendingQuery, setPendingQuery] = useState<string | null>(null);
 
   useEffect(() => {
-    if (typeof window === "undefined") return;
-    if (window.innerWidth >= EXPANDED_BREAKPOINT_PX) setExpanded(true);
+    if (isLargeScreen) setExpanded(true);
   }, []);
+
+  useEffect(() => {
+    if (typeof document === "undefined") return;
+    if (!isMobile || !isOpen) return;
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = prev;
+    };
+  }, [isMobile, isOpen]);
 
   useEffect(() => {
     if (location.pathname.startsWith("/docs")) return;
@@ -132,6 +151,7 @@ export function ChatProvider({ children }: { children: ReactNode }) {
       value={{
         isOpen,
         isExpanded,
+        isMobile,
         currentPageContext,
         attachedPageContext,
         pendingPageConversationContext,

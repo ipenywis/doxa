@@ -39,7 +39,7 @@ export function Card({
           ? "items-center space-x-2 p-3"
           : variant === "image"
             ? "h-full flex-col justify-between p-0"
-            : "h-full flex-col justify-between p-4",
+            : "h-full flex-col justify-between p-3 sm:p-4",
         className
       )}
     >
@@ -109,7 +109,7 @@ export function Card({
 
 export function CardGrid({ children }: PropsWithChildren) {
   return (
-    <div className="grid grid-cols-1 gap-6 md:grid-cols-2 2xl:grid-cols-3">
+    <div className="grid grid-cols-1 gap-4 sm:gap-6 md:grid-cols-2 2xl:grid-cols-3">
       {children}
     </div>
   );

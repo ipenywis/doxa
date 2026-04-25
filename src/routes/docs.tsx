@@ -8,7 +8,7 @@ export const Route = createFileRoute("/docs")({
 
 function DocsLayout() {
   return (
-    <div className="flex items-start gap-8 lg:gap-12">
+    <div className="flex items-start gap-4 md:gap-8 lg:gap-12">
       <Sidebar />
       <div className="min-w-0 flex-1 pt-6">
         <Outlet />

@@ -64,7 +64,7 @@ function DocLink({
 
 function LoadingDots() {
   return (
-    <div className="flex max-w-[85%] items-center gap-1 rounded-2xl rounded-bl-sm bg-muted px-4 py-3">
+    <div className="flex max-w-[92%] items-center gap-1 rounded-2xl rounded-bl-sm bg-muted px-4 py-3 sm:max-w-[85%]">
       <span className="inline-block h-2 w-2 animate-bounce rounded-full bg-muted-foreground/50 [animation-delay:0ms]" />
       <span className="inline-block h-2 w-2 animate-bounce rounded-full bg-muted-foreground/50 [animation-delay:150ms]" />
       <span className="inline-block h-2 w-2 animate-bounce rounded-full bg-muted-foreground/50 [animation-delay:300ms]" />
@@ -121,7 +121,7 @@ interface TextBubbleProps {
 function TextBubble({ content, isStreaming }: TextBubbleProps) {
   return (
     <div className="flex justify-start">
-      <div className="max-w-[85%] rounded-2xl rounded-bl-sm bg-muted px-4 py-2.5 text-sm">
+      <div className="max-w-[92%] rounded-2xl rounded-bl-sm bg-muted px-4 py-2.5 text-sm sm:max-w-[85%]">
         <div className="chat-prose prose prose-sm max-w-none dark:prose-invert prose-headings:text-sm prose-headings:font-semibold prose-headings:text-foreground prose-p:my-1.5 prose-p:leading-relaxed prose-p:text-foreground/90 prose-a:text-primary prose-blockquote:border-primary/40 prose-blockquote:text-foreground/70 prose-strong:font-semibold prose-strong:text-foreground prose-em:text-foreground/80 prose-code:text-primary prose-pre:bg-transparent prose-pre:p-0 prose-ol:my-1.5 prose-ul:my-1.5 prose-li:my-0.5 prose-li:text-foreground/90 prose-th:text-foreground prose-td:text-foreground/80 prose-hr:my-2">
           <Markdown
             remarkPlugins={[remarkGfm]}
@@ -299,7 +299,7 @@ export function MessageList({
               >
                 {msg.pageContext && (
                   <div
-                    className="flex max-w-[85%] items-center gap-1.5 rounded-md border border-primary/20 bg-primary/5 px-2 py-1 text-xs text-primary"
+                    className="flex max-w-[92%] items-center gap-1.5 rounded-md border border-primary/20 bg-primary/5 px-2 py-1 text-xs text-primary sm:max-w-[85%]"
                     title={`Attached page: ${msg.pageContext.title}`}
                   >
                     <LuFileText className="size-3.5 shrink-0" />
@@ -308,7 +308,7 @@ export function MessageList({
                     </span>
                   </div>
                 )}
-                <div className="max-w-[85%] rounded-2xl rounded-br-sm bg-primary px-4 py-2 text-sm text-primary-foreground">
+                <div className="max-w-[92%] rounded-2xl rounded-br-sm bg-primary px-4 py-2 text-sm text-primary-foreground sm:max-w-[85%]">
                   {msg.content}
                 </div>
               </div>
@@ -366,7 +366,7 @@ export function MessageList({
         )}
         {/* Bottom padding — breathing room below the last message */}
         <div
-          className="pointer-events-none min-h-[20vh] shrink-0 select-none sm:min-h-[15vh]"
+          className="pointer-events-none min-h-[12vh] shrink-0 select-none sm:min-h-[15vh]"
           aria-hidden="true"
         />
         {/* Scroll anchor */}

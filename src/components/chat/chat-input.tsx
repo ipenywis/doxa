@@ -40,7 +40,7 @@ export function ChatInput({
   }, [focusRequestId, isLoading, isOpen]);
 
   return (
-    <div className="flex items-end gap-2 border-t p-4">
+    <div className="sticky bottom-0 z-10 flex items-end gap-2 border-t bg-background p-4">
       <div className="flex min-w-0 flex-1 flex-col gap-2">
         {pageContext && (
           <div

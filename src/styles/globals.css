@@ -134,12 +134,47 @@
 
 .typography {
   @apply prose prose-zinc prose-headings:scroll-m-20 prose-code:rounded-md prose-code:p-1 prose-code:leading-6 prose-code:before:content-none prose-code:after:content-none prose-pre:border prose-pre:bg-neutral-100 prose-img:rounded-md prose-img:border;
-  @apply w-[85vw] min-w-full! pt-2 text-sm sm:mx-auto sm:w-full prose-code:text-xs;
+  @apply w-full max-w-full pt-2 text-sm sm:mx-auto prose-code:text-xs;
   @apply dark:prose-invert prose-code:text-neutral-800 dark:prose-code:bg-neutral-900 dark:prose-code:text-white dark:prose-pre:bg-neutral-900;
 }
 
 .prose {
   margin: 0 !important;
+  max-width: 100% !important;
+}
+
+.prose :where(h1):not(:where([class~="not-prose"], [class~="not-prose"] *)) {
+  font-size: 1.875rem;
+  line-height: 2.25rem;
+}
+
+@media (min-width: 640px) {
+  .prose :where(h1):not(:where([class~="not-prose"], [class~="not-prose"] *)) {
+    font-size: 2.25rem;
+    line-height: 2.5rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .prose :where(h1):not(:where([class~="not-prose"], [class~="not-prose"] *)) {
+    font-size: 2.5rem;
+    line-height: 1.15;
+  }
+}
+
+.prose :where(img):not(:where([class~="not-prose"], [class~="not-prose"] *)) {
+  width: 100%;
+  height: auto;
+}
+
+.prose :where(pre):not(:where([class~="not-prose"], [class~="not-prose"] *)) {
+  font-size: 0.8125rem;
+}
+
+@media (min-width: 640px) {
+  .prose :where(pre):not(:where([class~="not-prose"], [class~="not-prose"] *)) {
+    font-size: 0.875rem;
+  }
 }
 
 .prose ul > li::marker {
