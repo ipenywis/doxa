@@ -1,0 +1,162 @@
+---
+title: Architecture
+description: A guided tour of the Doxa Docs template — routes, content layer, sidebar, search, AI surfaces, and how MDX components are registered.
+keywords: ["architecture", "routes", "content store", "tanstack", "mdx", "vite"]
+icon: layers
+---
+
+The template is a TanStack Start app on Vite, with MDX content compiled at build time and a pluggable content adapter for runtime reads.
+
+## High-level shape
+
+```text
+Browser ──► TanStack Router ──► /docs/$.tsx (catch-all)
+                                  │
+                                  ├─ MDX module from import.meta.glob
+                                  ├─ Sidebar    (per-section routes)
+                                  ├─ Breadcrumb (per-section trail)
+                                  └─ Pagination (prev/next within section)
+```
+
+Server-only routes (`/llms.txt`, `/llms-full.txt`, the AI chat agent) read content through the same `contentStore` that the build-time search indexer uses. The renderer never touches `fs` directly.
+
+## Where to find things
+
+<FileTree>
+  <Folder name="src">
+    <Folder name="contents">
+      <Folder name="docs" defaultOpen>
+        <File name="overview/index.mdx" />
+        <File name="…" />
+        <Folder name="development">
+          <File name="index.mdx" />
+          <File name="…/index.mdx" />
+        </Folder>
+      </Folder>
+      <Folder name="settings">
+        <File name="documents.json" />
+        <File name="documents.development.json" />
+        <File name="theme.json" />
+      </Folder>
+    </Folder>
+    <Folder name="components">
+      <Folder name="markdown">
+        <File name="card.tsx" />
+        <File name="note.tsx" />
+        <File name="…" />
+      </Folder>
+      <Folder name="navigation">
+        <File name="navbar.tsx" />
+        <File name="search.tsx" />
+        <File name="section-tabs.tsx" />
+      </Folder>
+      <Folder name="sidebar">
+        <File name="index.tsx" />
+        <File name="pagemenu.tsx" />
+        <File name="sublink.tsx" />
+      </Folder>
+    </Folder>
+    <Folder name="lib">
+      <Folder name="content">
+        <File name="store.ts" />
+      </Folder>
+      <Folder name="agent">
+        <File name="system-prompt.ts" />
+      </Folder>
+      <Folder name="search" />
+      <File name="components.ts" />
+      <File name="pageroutes.ts" />
+    </Folder>
+    <Folder name="routes">
+      <File name="docs.tsx" />
+      <File name="docs/$.tsx" />
+      <File name="llms[.]txt.ts" />
+      <File name="llms-full[.]txt.ts" />
+    </Folder>
+    <Folder name="settings">
+      <File name="main.ts" />
+      <File name="sections.ts" />
+      <File name="icons.ts" />
+      <File name="content.ts" />
+    </Folder>
+    <Folder name="scripts">
+      <File name="content.ts" />
+    </Folder>
+  </Folder>
+  <Folder name="scripts">
+    <Folder name="docs-generator">
+      <File name="generator.ts" />
+    </Folder>
+  </Folder>
+</FileTree>
+
+## Subsystems
+
+### Sections
+
+Configured in `src/settings/sections.ts`. Exactly one section is `default: true` and lives at `/docs/<page>`; non-default sections own a folder named after their slug and live at `/docs/<slug>/<page>`. The `<SectionTabs />` component reads this list and hides itself entirely when only the default section exists.
+
+### Content store
+
+`src/lib/content/store.ts` exposes an async, edge-safe API (`getAllPaths`, `getEntry`, `readRaw`, `searchContent`). The adapter is selected from `src/settings/content.ts` via `CONTENT_SOURCE` (`vite` or `github`). The agent tools (`grep`, `cat`), `/llms.txt`, `/llms-full.txt`, and the search indexer all consume `contentStore` — they never call `fs` directly. This is what makes the template runnable on Cloudflare Workers and Vercel Edge.
+
+### Page routes
+
+`src/lib/pageroutes.ts` flattens each section's nav file (`documents.json`, `documents.<slug>.json`) into a per-section route map. Helpers: `getRoutesForSection(slug)` returns the full nav (headings, spacers, items); `getPageRoutesForSection(slug)` returns just the linkable pages.
+
+### MDX rendering
+
+`src/routes/docs/$.tsx` resolves the splat to an MDX module via `import.meta.glob('/src/contents/docs/**/index.mdx', { eager: true, import: 'default' })`. The available components are registered in `src/lib/components.ts`.
+
+### Sidebar
+
+`src/components/sidebar/index.tsx` derives the current section from the pathname (`getSectionFromPath`) and feeds the section's routes into `<PageMenu />`. `<SubLink />` renders the optional `icon:` from frontmatter via `getIcon()` from `src/settings/icons.ts`.
+
+### Search
+
+Build-time indexer at `src/scripts/content.ts` walks every MDX file, strips custom JSX components, builds a MiniSearch index with per-entry `section` metadata, and writes `public/search-data/index.json`. The client (`src/components/navigation/search.tsx`) hydrates the index on idle and renders section filter chips when more than one section exists.
+
+### AI surfaces
+
+`/llms.txt` and `/llms-full.txt` group entries by section using the same `contentStore`. The chat agent's system prompt (`src/lib/agent/system-prompt.ts`) enumerates configured sections so the agent can scope its answers.
+
+## Adding new MDX components
+
+<Step>
+  <StepItem title="Create the component">
+    Add `src/components/markdown/<your-component>.tsx`. Keep props plain — MDX users will pass JSX-like attributes.
+  </StepItem>
+  <StepItem title="Register it">
+    Export from `src/lib/components.ts`. This is the single source of truth for what's available inside MDX files.
+  </StepItem>
+  <StepItem title="Document it in the playbook">
+    Update `agent/component-playbook.md` (the CLI agent reads this at runtime). Cover props, variants, and an example.
+  </StepItem>
+  <StepItem title="Strip it from search">
+    If the component wraps text content, add its name to `customComponentNames` in `src/scripts/content.ts` so the indexer focuses on the prose.
+  </StepItem>
+</Step>
+
+<Note title="Keep the playbook current" type="warning">
+  The playbook is consumed by the Doxa CLI agent for documentation generation.
+  Out-of-date docs there produce out-of-date generated content.
+</Note>
+
+## Next
+
+<CardGrid>
+  <Card
+    title="Coding Standards"
+    href="/docs/development/coding-standards"
+    icon="settings"
+    variant="small"
+    description="TypeScript, lint, formatting"
+  />
+  <Card
+    title="Quality And Testing"
+    href="/docs/development/quality-and-testing"
+    icon="shield"
+    variant="small"
+    description="Pre-PR gates and verification"
+  />
+</CardGrid>

@@ -64,6 +64,7 @@ export async function searchDocs(
       title: string;
       breadcrumb?: string[];
       icon?: string;
+      section?: string;
       lines?: SearchIndexEntry["lines"];
       score: number;
     };
@@ -74,6 +75,7 @@ export async function searchDocs(
       title: stored.title,
       breadcrumb: stored.breadcrumb ?? [],
       icon: stored.icon,
+      section: stored.section,
       snippetLine: snippet.text,
       snippetAnchor: snippet.anchor,
       score: stored.score,

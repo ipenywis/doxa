@@ -1,5 +1,6 @@
 import { useLocation } from "@tanstack/react-router";
 
+import { getIcon } from "@/src/settings/icons";
 import { isRoute, Paths } from "@/src/lib/pageroutes";
 import { cn } from "@/src/lib/utils";
 import { SheetClose } from "@/src/components/ui/sheet";
@@ -15,8 +16,9 @@ export default function SubLink(
     return null;
   }
 
-  const { title, href, noLink, isSheet } = props;
+  const { title, href, icon, noLink, isSheet } = props;
   const isActive = path === href;
+  const IconComp = getIcon(icon);
 
   const Comp = (
     <Anchor
@@ -24,12 +26,13 @@ export default function SubLink(
       href={href}
       preload="viewport"
       className={cn(
-        "flex w-full items-center rounded-md px-2 py-1.5 text-sm text-foreground/80 hover:bg-muted hover:text-foreground",
+        "flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-sm text-foreground/80 hover:bg-muted hover:text-foreground",
         isActive &&
           "bg-primary/10 font-medium text-primary hover:bg-primary/15 hover:text-primary"
       )}
     >
-      {title}
+      {IconComp && <IconComp className="h-4 w-4 shrink-0" aria-hidden="true" />}
+      <span className="truncate">{title}</span>
     </Anchor>
   );
 
@@ -40,8 +43,9 @@ export default function SubLink(
       Comp
     )
   ) : (
-    <h2 className="px-2 py-1.5 text-sm font-semibold text-foreground">
-      {title}
+    <h2 className="flex items-center gap-2 px-2 py-1.5 text-sm font-semibold text-foreground">
+      {IconComp && <IconComp className="h-4 w-4 shrink-0" aria-hidden="true" />}
+      <span>{title}</span>
     </h2>
   );
 

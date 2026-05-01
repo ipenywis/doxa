@@ -10,6 +10,11 @@ import { unified } from "unified";
 import { Node, Parent } from "unist";
 import { visit } from "unist-util-visit";
 
+import {
+  defaultSection,
+  isSectionSlug,
+  nonDefaultSections,
+} from "@/src/settings/sections";
 import { Paths } from "@/src/lib/pageroutes";
 import { buildBreadcrumbMap } from "@/src/lib/search/breadcrumb";
 import { buildIndex, serializeIndex } from "@/src/lib/search/mini-search";
@@ -48,8 +53,40 @@ function createSlug(filePath: string): string {
   return `/${normalizedSlug}`;
 }
 
-function findDocumentBySlug(slug: string): Paths | null {
-  for (const doc of Documents as Paths[]) {
+async function loadSectionDocs(): Promise<Map<string, Paths[]>> {
+  const map = new Map<string, Paths[]>();
+  map.set(defaultSection.slug, Documents as Paths[]);
+  for (const section of nonDefaultSections) {
+    const filePath = path.join(
+      process.cwd(),
+      "src",
+      "contents",
+      "settings",
+      `documents.${section.slug}.json`
+    );
+    try {
+      const raw = await fs.readFile(filePath, "utf-8");
+      map.set(section.slug, JSON.parse(raw) as Paths[]);
+    } catch {
+      map.set(section.slug, []);
+    }
+  }
+  return map;
+}
+
+function sectionForSlug(slug: string): string {
+  const segments = slug.split("/").filter(Boolean);
+  const first = segments[0];
+  if (first && isSectionSlug(first)) return first;
+  return defaultSection.slug;
+}
+
+function findDocumentBySlug(
+  slug: string,
+  docsBySection: Map<string, Paths[]>
+): Paths | null {
+  const docs = docsBySection.get(sectionForSlug(slug)) ?? [];
+  for (const doc of docs) {
     if (isRoute(doc) && doc.href === slug) {
       return doc;
     }
@@ -187,7 +224,8 @@ interface LegacyDocument {
 
 async function processMdxFile(
   filePath: string,
-  breadcrumbMap: Map<string, { trail: string[]; icon?: string }>
+  breadcrumbMap: Map<string, { trail: string[]; icon?: string }>,
+  docsBySection: Map<string, Paths[]>
 ): Promise<{ entry: SearchIndexEntry; legacy: LegacyDocument }> {
   const rawMdx = await fs.readFile(filePath, "utf-8");
   const { content, data: frontmatter } = grayMatter(rawMdx);
@@ -218,7 +256,7 @@ async function processMdxFile(
   ]);
 
   const slug = createSlug(filePath);
-  const matchedDoc = findDocumentBySlug(slug);
+  const matchedDoc = findDocumentBySlug(slug, docsBySection);
   const title =
     frontmatter.title ||
     (matchedDoc && isRoute(matchedDoc) ? matchedDoc.title : "Untitled");
@@ -226,6 +264,7 @@ async function processMdxFile(
   const breadcrumbInfo = breadcrumbMap.get(slug) ?? { trail: [] };
   const cleanContent = cleanContentForSearch(documentContent);
   const keywordsArr = Array.from(extractedKeywords);
+  const section = sectionForSlug(slug);
 
   return {
     entry: {
@@ -235,6 +274,7 @@ async function processMdxFile(
       description: frontmatter.description || "",
       breadcrumb: breadcrumbInfo.trail,
       icon: breadcrumbInfo.icon,
+      section,
       headings,
       keywords: keywordsArr,
       content: cleanContent,
@@ -275,13 +315,22 @@ async function convertMdxToJson() {
   try {
     await ensureDirectoryExists(outputDir);
 
-    const breadcrumbMap = buildBreadcrumbMap(Documents as Paths[]);
+    const docsBySection = await loadSectionDocs();
+    const breadcrumbMap = new Map<string, { trail: string[]; icon?: string }>();
+    for (const docs of docsBySection.values()) {
+      const partial = buildBreadcrumbMap(docs);
+      partial.forEach((value, key) => breadcrumbMap.set(key, value));
+    }
     const mdxFiles = await getMdxFiles(docsDir);
 
     const entries: SearchIndexEntry[] = [];
     const legacyDocs: LegacyDocument[] = [];
     for (const file of mdxFiles) {
-      const { entry, legacy } = await processMdxFile(file, breadcrumbMap);
+      const { entry, legacy } = await processMdxFile(
+        file,
+        breadcrumbMap,
+        docsBySection
+      );
       entries.push(entry);
       legacyDocs.push(legacy);
     }

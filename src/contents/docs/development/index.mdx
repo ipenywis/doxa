@@ -1,0 +1,88 @@
+---
+title: Development Overview
+description: How to clone the Doxa Docs template, run it locally, navigate the codebase, and contribute changes back.
+keywords: ["development", "contributing", "open source", "doxa", "template"]
+icon: wrench
+---
+
+This section is for engineers who want to **work on the template itself** — fix bugs, ship features, or extend the platform — rather than authors who only want to write docs. If you're here to write content, head to [Authoring → Markdown](/docs/authoring/markdown).
+
+<Note title="What you'll need" type="warning">
+  Node.js `^24.x` and pnpm `10.25.0` or newer. The repository is a single
+  pnpm workspace with no submodules.
+</Note>
+
+## What's in this section
+
+<CardGrid>
+  <Card
+    title="Local Setup"
+    href="/docs/development/setup"
+    icon="rocket"
+    variant="small"
+    description="Clone, install, run, and the scripts you'll use most"
+  />
+  <Card
+    title="Architecture"
+    href="/docs/development/architecture"
+    icon="layers"
+    variant="small"
+    description="Tour of the routes, content layer, and component registry"
+  />
+  <Card
+    title="Coding Standards"
+    href="/docs/development/coding-standards"
+    icon="settings"
+    variant="small"
+    description="TypeScript, lint, formatting, and import order"
+  />
+  <Card
+    title="Quality And Testing"
+    href="/docs/development/quality-and-testing"
+    icon="shield"
+    variant="small"
+    description="Typecheck, lint, build verification, and CI gates"
+  />
+  <Card
+    title="Contributing"
+    href="/docs/development/contributing"
+    icon="code"
+    variant="small"
+    description="Branching, commits, pull requests, and review flow"
+  />
+  <Card
+    title="Release Process"
+    href="/docs/development/release-process"
+    icon="package"
+    variant="small"
+    description="Versioning, changelog, and deploying the template"
+  />
+</CardGrid>
+
+## How sections work
+
+The page you're reading lives inside the **Development** section. Sections are configured in `src/settings/sections.ts` and rendered as the tab bar above the sidebar. The current setup:
+
+| Section         | Slug            | Folder                                 | URL prefix                  |
+| :-------------- | :-------------- | :------------------------------------- | :-------------------------- |
+| Documentation   | `documentation` | `src/contents/docs/` (rootless)        | `/docs/<page>`              |
+| Development     | `development`   | `src/contents/docs/development/`       | `/docs/development/<page>`  |
+
+Each non-default section gets its own nav file: `src/contents/settings/documents.development.json`. The default section keeps `documents.json` unchanged.
+
+## Quick contribution flow
+
+<Step>
+  <StepItem title="Fork and clone">
+    Fork on GitHub, then clone your fork. See [Local Setup](/docs/development/setup).
+  </StepItem>
+  <StepItem title="Branch off main">
+    `git checkout -b fix/short-description` — keep branches focused on one change.
+  </StepItem>
+  <StepItem title="Run the quality gate">
+    `pnpm quality` chains format, lint, and typecheck. See [Quality And Testing](/docs/development/quality-and-testing).
+  </StepItem>
+  <StepItem title="Open a pull request">
+    Reference the issue you're closing and describe the user-visible change. Review flow lives in [Contributing](/docs/development/contributing).
+  </StepItem>
+</Step>

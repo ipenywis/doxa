@@ -1,9 +1,14 @@
 /**
- * Docs Sync — Discovers new MDX pages and appends them to documents.json
+ * Docs Sync — Discovers new MDX pages and appends them to per-section nav files.
  *
- * documents.json is the single source of truth for navigation structure
- * (order, headings, spacers). This script only adds missing pages — it
- * never reorders, removes, or overwrites existing entries.
+ * Each section configured in `src/settings/sections.ts` gets its own nav file:
+ *   - default section → src/contents/settings/documents.json
+ *   - other sections  → src/contents/settings/documents.<slug>.json
+ *
+ * Behaviour:
+ *   - Append-only for entries (never reorders, removes, or rewrites the order).
+ *   - Updates the `icon` field on existing entries when MDX frontmatter
+ *     declares an icon — keeps sidebar icons in sync without disturbing order.
  *
  * Usage:
  *   pnpm generate:docs          # Sync once
@@ -15,36 +20,41 @@ import path from "path";
 
 import grayMatter from "gray-matter";
 
-// Paths
+import {
+  nonDefaultSections,
+  sections,
+  type SectionConfig,
+} from "@/src/settings/sections";
+
 const ROOT_DIR = process.cwd();
 const DOCS_DIR = path.join(ROOT_DIR, "src", "contents", "docs");
-const OUTPUT_PATH = path.join(
-  ROOT_DIR,
-  "src",
-  "contents",
-  "settings",
-  "documents.json"
-);
+const SETTINGS_DIR = path.join(ROOT_DIR, "src", "contents", "settings");
 
 interface MdxFrontmatter {
   title?: string;
   description?: string;
   keywords?: string[];
+  icon?: string;
   hidden?: boolean;
 }
 
 interface PathEntry {
   title?: string;
   href?: string;
+  icon?: string;
   heading?: string;
   spacer?: true;
   noLink?: true;
 }
 
-/**
- * Convert a slug to a title-case string
- * e.g., "basic-setup" -> "Basic Setup"
- */
+interface DiscoveredPage {
+  href: string;
+  title: string;
+  icon?: string;
+}
+
+const reservedSlugs = new Set(nonDefaultSections.map((s) => s.slug));
+
 function slugToTitle(slug: string): string {
   return slug
     .split("-")
@@ -52,9 +62,6 @@ function slugToTitle(slug: string): string {
     .join(" ");
 }
 
-/**
- * Parse frontmatter from an MDX file
- */
 async function parseFrontmatter(filePath: string): Promise<MdxFrontmatter> {
   try {
     const content = await fs.readFile(filePath, "utf-8");
@@ -66,140 +73,183 @@ async function parseFrontmatter(filePath: string): Promise<MdxFrontmatter> {
 }
 
 /**
- * Recursively find all MDX doc pages and return their hrefs + titles
+ * Recursively discover MDX pages under `dirPath`.
+ * `parentHref` is the href prefix (e.g. "" for default, "/api-reference" for a section).
+ * `topLevelSkip` is consulted only at the immediate children of the section root —
+ * used so the default section ignores folders owned by non-default sections.
  */
 async function discoverPages(
   dirPath: string,
-  parentHref = ""
-): Promise<{ href: string; title: string }[]> {
-  const pages: { href: string; title: string }[] = [];
+  parentHref: string,
+  topLevelSkip: Set<string> | null
+): Promise<DiscoveredPage[]> {
+  const pages: DiscoveredPage[] = [];
 
+  let entries: import("fs").Dirent[];
   try {
-    const entries = await fs.readdir(dirPath, { withFileTypes: true });
-    const directories = entries
-      .filter((entry) => entry.isDirectory())
-      .sort((a, b) => a.name.localeCompare(b.name));
-
-    for (const dir of directories) {
-      const fullPath = path.join(dirPath, dir.name);
-      const indexPath = path.join(fullPath, "index.mdx");
-      const href = `${parentHref}/${dir.name}`;
-
-      try {
-        await fs.access(indexPath);
-      } catch {
-        // No index.mdx — check children anyway
-        const childPages = await discoverPages(fullPath, href);
-        pages.push(...childPages);
-        continue;
-      }
-
-      const frontmatter = await parseFrontmatter(indexPath);
-
-      // Skip hidden pages
-      if (frontmatter.hidden) continue;
-
-      const title = frontmatter.title || slugToTitle(dir.name);
-      pages.push({ href, title });
-
-      // Recurse into children
-      const childPages = await discoverPages(fullPath, href);
-      pages.push(...childPages);
-    }
+    entries = await fs.readdir(dirPath, { withFileTypes: true });
   } catch (error) {
     console.error(`Error scanning directory ${dirPath}:`, error);
+    return pages;
+  }
+
+  const directories = entries
+    .filter((entry) => entry.isDirectory())
+    .sort((a, b) => a.name.localeCompare(b.name));
+
+  for (const dir of directories) {
+    if (topLevelSkip && topLevelSkip.has(dir.name)) continue;
+
+    const fullPath = path.join(dirPath, dir.name);
+    const indexPath = path.join(fullPath, "index.mdx");
+    const href = `${parentHref}/${dir.name}`;
+
+    let hasIndex = true;
+    try {
+      await fs.access(indexPath);
+    } catch {
+      hasIndex = false;
+    }
+
+    if (hasIndex) {
+      const frontmatter = await parseFrontmatter(indexPath);
+      if (!frontmatter.hidden) {
+        pages.push({
+          href,
+          title: frontmatter.title || slugToTitle(dir.name),
+          ...(frontmatter.icon ? { icon: frontmatter.icon } : {}),
+        });
+      }
+    }
+
+    pages.push(...(await discoverPages(fullPath, href, null)));
   }
 
   return pages;
 }
 
-/**
- * Load existing documents.json
- */
-async function loadExistingDocuments(): Promise<PathEntry[]> {
+function outputPathForSection(section: SectionConfig): string {
+  return section.default
+    ? path.join(SETTINGS_DIR, "documents.json")
+    : path.join(SETTINGS_DIR, `documents.${section.slug}.json`);
+}
+
+function rootDirForSection(section: SectionConfig): string {
+  return section.default ? DOCS_DIR : path.join(DOCS_DIR, section.slug);
+}
+
+async function loadExisting(filePath: string): Promise<PathEntry[]> {
   try {
-    const content = await fs.readFile(OUTPUT_PATH, "utf-8");
+    const content = await fs.readFile(filePath, "utf-8");
     return JSON.parse(content) as PathEntry[];
   } catch {
     return [];
   }
 }
 
-/**
- * Get all hrefs currently in documents.json
- */
-function getExistingHrefs(documents: PathEntry[]): Set<string> {
-  const hrefs = new Set<string>();
-  for (const entry of documents) {
-    if (entry.href) {
-      hrefs.add(entry.href);
+async function syncSection(section: SectionConfig): Promise<void> {
+  const sectionRoot = rootDirForSection(section);
+  const outputPath = outputPathForSection(section);
+  const hrefPrefix = section.default ? "" : `/${section.slug}`;
+
+  // Non-default section may not have a folder yet — skip silently.
+  if (!section.default) {
+    try {
+      await fs.access(sectionRoot);
+    } catch {
+      console.log(
+        `  · ${section.slug}: folder not found at src/contents/docs/${section.slug} — skipping`
+      );
+      return;
     }
   }
-  return hrefs;
-}
 
-/**
- * Main sync function — appends new pages to documents.json
- */
-export async function syncDocs(): Promise<void> {
-  console.log("Scanning for new docs...");
+  const topLevelSkip = section.default ? reservedSlugs : null;
+  const pages = await discoverPages(sectionRoot, hrefPrefix, topLevelSkip);
 
-  // Discover all MDX pages on disk
-  const allPages = await discoverPages(DOCS_DIR);
-
-  if (allPages.length === 0) {
-    console.warn("No documentation found in", DOCS_DIR);
-    return;
+  // For non-default sections, also emit the section root's own index.mdx
+  // (e.g. /development → src/contents/docs/development/index.mdx) so the
+  // section landing page appears at the top of its sidebar.
+  if (!section.default) {
+    const rootIndex = path.join(sectionRoot, "index.mdx");
+    try {
+      await fs.access(rootIndex);
+      const fm = await parseFrontmatter(rootIndex);
+      if (!fm.hidden) {
+        pages.unshift({
+          href: hrefPrefix,
+          title: fm.title || slugToTitle(section.slug),
+          ...(fm.icon ? { icon: fm.icon } : {}),
+        });
+      }
+    } catch {
+      // No section landing page — that's fine, just skip.
+    }
   }
 
-  console.log(`Found ${allPages.length} pages on disk`);
-
-  // Load existing documents.json
-  const documents = await loadExistingDocuments();
-  const existingHrefs = getExistingHrefs(documents);
-
-  // Find pages that aren't in documents.json yet
-  const newPages = allPages.filter((page) => !existingHrefs.has(page.href));
-
-  if (newPages.length === 0) {
-    console.log("All pages are already in documents.json — nothing to add");
-    return;
+  const existing = await loadExisting(outputPath);
+  const byHref = new Map<string, PathEntry>();
+  for (const entry of existing) {
+    if (entry.href) byHref.set(entry.href, entry);
   }
 
-  console.log(`Adding ${newPages.length} new page(s):`);
-  for (const page of newPages) {
-    console.log(`  + ${page.href} (${page.title})`);
-    documents.push({ title: page.title, href: page.href });
+  let added = 0;
+  let iconChanged = 0;
+
+  for (const page of pages) {
+    const found = byHref.get(page.href);
+    if (!found) {
+      const next: PathEntry = { title: page.title, href: page.href };
+      if (page.icon) next.icon = page.icon;
+      existing.push(next);
+      byHref.set(page.href, next);
+      added++;
+      console.log(
+        `    + ${page.href} (${page.title}${page.icon ? `, icon: ${page.icon}` : ""})`
+      );
+    } else {
+      // Keep title untouched (user may have customised it). Sync icon: add,
+      // change, or remove based on frontmatter.
+      if (page.icon !== found.icon) {
+        if (page.icon) found.icon = page.icon;
+        else delete found.icon;
+        iconChanged++;
+      }
+    }
   }
 
-  // Write back
+  if (added === 0 && iconChanged === 0 && existing.length > 0) {
+    return; // Nothing to write.
+  }
+
   await fs.writeFile(
-    OUTPUT_PATH,
-    JSON.stringify(documents, null, 2) + "\n",
+    outputPath,
+    JSON.stringify(existing, null, 2) + "\n",
     "utf-8"
   );
-
-  console.log(`Updated ${OUTPUT_PATH}`);
+  const rel = path.relative(ROOT_DIR, outputPath);
+  console.log(
+    `  · ${section.slug}: ${added} new, ${iconChanged} icon update${iconChanged === 1 ? "" : "s"} → ${rel}`
+  );
 }
 
-/**
- * Watch mode — sync on file changes
- */
+export async function syncDocs(): Promise<void> {
+  console.log(`Scanning docs across ${sections.length} section(s)…`);
+  for (const section of sections) {
+    await syncSection(section);
+  }
+}
+
 export async function watchDocs(): Promise<void> {
-  console.log("Starting docs sync in watch mode...");
+  console.log("Starting docs sync in watch mode…");
   console.log(`Watching: ${DOCS_DIR}`);
   console.log("");
 
-  // Initial sync
   await syncDocs();
 
   let debounceTimer: ReturnType<typeof setTimeout> | null = null;
-
   const onChange = (_eventType: string, filename: string | null) => {
-    if (debounceTimer) {
-      clearTimeout(debounceTimer);
-    }
-
+    if (debounceTimer) clearTimeout(debounceTimer);
     debounceTimer = setTimeout(async () => {
       console.log(`\nChange detected: ${filename || "unknown"}`);
       try {
@@ -211,11 +261,9 @@ export async function watchDocs(): Promise<void> {
   };
 
   fsWatch(DOCS_DIR, { recursive: true }, onChange);
-
-  console.log("Watching for changes... (press Ctrl+C to stop)");
+  console.log("Watching for changes… (press Ctrl+C to stop)");
 }
 
-// CLI entry point
 const args = process.argv.slice(2);
 const isWatch = args.includes("--watch") || args.includes("-w");
 

@@ -3,10 +3,18 @@ import { createFileRoute } from "@tanstack/react-router";
 import { z } from "zod";
 
 import { Settings } from "@/src/settings/main";
+import { getSectionFromPath } from "@/src/settings/sections";
 import type { ChatPageContext } from "@/src/lib/chat-page-context";
 import { components } from "@/src/lib/components";
 import { fetchDocumentFromServer, fetchRawDocument } from "@/src/lib/markdown";
-import { isHeading, isRoute, PageRoutes, Routes } from "@/src/lib/pageroutes";
+import {
+  getPageRoutesForSection,
+  getRoutesForSection,
+  isHeading,
+  isRoute,
+  PageRoutes,
+  type Paths,
+} from "@/src/lib/pageroutes";
 import { ArticleBreadcrumb } from "@/src/components/article/breadcrumb";
 import { ChatWithPage } from "@/src/components/article/chat-with-page";
 import { CopyPage } from "@/src/components/article/copy-page";
@@ -34,8 +42,10 @@ export const Route = createFileRoute("/docs/$")({
     }
     try {
       const document = await fetchDocumentFromServer({ data: slug });
+      const section = getSectionFromPath(`/docs/${slug}`);
+      const sectionPages = getPageRoutesForSection(section.slug);
       const routeTitle =
-        PageRoutes.find((r) => r.href === `/${slug}`)?.title ?? null;
+        sectionPages.find((r) => r.href === `/${slug}`)?.title ?? null;
       // Deferred: not awaited. Streams in after initial HTML so copy-page can
       // read from a resolved promise on first interaction without blocking SSR.
       const rawDoc = Settings.features.copyPage.markdown
@@ -98,8 +108,10 @@ function MdxContent({ slug }: { slug: string }) {
 
 function findSectionHeading(slug: string): string | undefined {
   const targetHref = `/${slug}`;
+  const section = getSectionFromPath(`/docs${targetHref}`);
+  const routes: Paths[] = getRoutesForSection(section.slug);
   let currentHeading: string | undefined;
-  for (const route of Routes) {
+  for (const route of routes) {
     if (isHeading(route)) {
       currentHeading = route.heading;
     } else if (isRoute(route) && route.href === targetHref) {
@@ -115,7 +127,9 @@ function DocsContent() {
   const paths = slug.split("/");
   const pathName = `docs/${slug}`;
 
-  const currentRoute = PageRoutes.find((r) => r.href === `/${slug}`);
+  const currentSection = getSectionFromPath(`/docs/${slug}`);
+  const currentSectionPages = getPageRoutesForSection(currentSection.slug);
+  const currentRoute = currentSectionPages.find((r) => r.href === `/${slug}`);
   const title =
     currentRoute?.title ||
     pageDocument?.frontmatter?.title ||

@@ -1,16 +1,23 @@
 import { useLocation } from "@tanstack/react-router";
 
-import { isHeading, isRoute, Routes } from "@/src/lib/pageroutes";
+import { isHeading, isRoute, Routes, type Paths } from "@/src/lib/pageroutes";
 import SubLink from "@/src/components/sidebar/sublink";
 
-export function PageMenu({ isSheet = false }) {
+interface PageMenuProps {
+  isSheet?: boolean;
+  routes?: Paths[];
+}
+
+export function PageMenu({ isSheet = false, routes }: PageMenuProps) {
   const location = useLocation();
   const pathname = location.pathname;
   if (!pathname.startsWith("/docs")) return null;
 
+  const list = routes ?? Routes;
+
   return (
     <div className="flex flex-col gap-1 pb-6">
-      {Routes.map((item, index) => {
+      {list.map((item, index) => {
         if ("spacer" in item) {
           return (
             <div

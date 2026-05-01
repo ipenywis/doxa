@@ -12,6 +12,7 @@ export type Paths =
   | {
       title: string;
       href: string;
+      icon?: string;
       noLink?: true;
       heading?: string;
       items?: Paths[];
@@ -30,6 +31,8 @@ export interface MdxFrontmatter {
   title?: string;
   description?: string;
   keywords?: string[];
+  /** Optional: icon name (key in src/settings/icons.ts iconMap) shown in the sidebar */
+  icon?: string;
   /** Optional: hide from menu */
   hidden?: boolean;
 }

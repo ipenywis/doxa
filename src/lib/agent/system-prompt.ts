@@ -7,6 +7,11 @@
 
 import { aiConfig } from "@/src/settings/ai";
 import { Settings } from "@/src/settings/main";
+import {
+  defaultSection,
+  nonDefaultSections,
+  sections,
+} from "@/src/settings/sections";
 import type { ChatPageContext } from "@/src/lib/chat-page-context";
 import { contentStore } from "@/src/lib/content/store";
 
@@ -40,14 +45,35 @@ function formatCurrentPageContext(
   return lines.join("\n");
 }
 
+function formatSectionsList(): string {
+  if (nonDefaultSections.length === 0) {
+    return `- ${defaultSection.slug}: ${defaultSection.label} (default — pages live at /docs/<slug>)`;
+  }
+  return sections
+    .map((s) => {
+      const tag = s.default
+        ? "(default — pages at /docs/<slug>)"
+        : `(pages at /docs/${s.slug}/<slug>; files under src/contents/docs/${s.slug}/)`;
+      return `- ${s.slug}: ${s.label} ${tag}`;
+    })
+    .join("\n");
+}
+
 export async function buildAgentSystemPrompt(
   currentPageContext: ChatPageContext | null = null
 ): Promise<string> {
   const fileTree = await getDocsFileTree();
   const currentPageSection = formatCurrentPageContext(currentPageContext);
+  const sectionList = formatSectionsList();
 
   return `You are a documentation assistant for ${Settings.site.name}.
 Your job is to answer user questions accurately using ONLY the documentation content available to you.
+
+## Documentation Sections
+
+The docs are organised into the following sections:
+
+${sectionList}
 
 ## Current Reader Page
 

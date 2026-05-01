@@ -10,6 +10,12 @@ import {
 } from "react-icons/lu";
 
 import {
+  defaultSection,
+  getSectionBySlug,
+  nonDefaultSections,
+  visibleSections,
+} from "@/src/settings/sections";
+import {
   preloadSearchIndex,
   searchDocs,
   type SearchResult,
@@ -22,12 +28,15 @@ import { useChatContext } from "@/src/components/chat/chat-context";
 
 const MIN_QUERY_LENGTH = 2;
 
+type SectionFilter = "all" | string;
+
 export default function Search() {
   const [query, setQuery] = useState("");
   const [isOpen, setIsOpen] = useState(false);
   const [results, setResults] = useState<SearchResult[]>([]);
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [recent, setRecent] = useState<string[]>([]);
+  const [sectionFilter, setSectionFilter] = useState<SectionFilter>("all");
   const listRef = useRef<HTMLDivElement | null>(null);
   const inputRef = useRef<HTMLInputElement | null>(null);
   const navigate = useNavigate();
@@ -35,6 +44,14 @@ export default function Search() {
 
   const trimmed = query.trim();
   const hasQuery = trimmed.length >= MIN_QUERY_LENGTH;
+  const showSectionChips = nonDefaultSections.length > 0;
+
+  const filteredResults = useMemo(() => {
+    if (sectionFilter === "all") return results;
+    return results.filter(
+      (r) => (r.section ?? defaultSection.slug) === sectionFilter
+    );
+  }, [results, sectionFilter]);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -70,6 +87,10 @@ export default function Search() {
       cancelled = true;
     };
   }, [trimmed, hasQuery]);
+
+  useEffect(() => {
+    setSelectedIndex(0);
+  }, [sectionFilter]);
 
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
@@ -108,12 +129,19 @@ export default function Search() {
   const activations = useMemo<(() => void)[]>(() => {
     if (hasQuery) {
       return [
-        ...results.map((r) => () => navigateToResult(r)),
+        ...filteredResults.map((r) => () => navigateToResult(r)),
         () => handleAskAi(),
       ];
     }
     return recent.map((q) => () => runRecent(q));
-  }, [hasQuery, results, recent, navigateToResult, handleAskAi, runRecent]);
+  }, [
+    hasQuery,
+    filteredResults,
+    recent,
+    navigateToResult,
+    handleAskAi,
+    runRecent,
+  ]);
 
   const selectedIndexRef = useRef(selectedIndex);
   const activationsRef = useRef(activations);
@@ -240,20 +268,38 @@ export default function Search() {
             </p>
           )}
 
+          {hasQuery && showSectionChips && (
+            <div className="flex flex-wrap items-center gap-1.5 border-b px-3 py-2">
+              <SectionChip
+                label="All"
+                active={sectionFilter === "all"}
+                onClick={() => setSectionFilter("all")}
+              />
+              {visibleSections.map((s) => (
+                <SectionChip
+                  key={s.slug}
+                  label={s.label}
+                  active={sectionFilter === s.slug}
+                  onClick={() => setSectionFilter(s.slug)}
+                />
+              ))}
+            </div>
+          )}
+
           {hasQuery && (
             <ScrollArea className="max-h-[60vh] w-full">
               <div
                 ref={listRef}
                 className="flex w-full flex-col items-stretch gap-0.5 px-2 pt-2 pr-3 pb-2 sm:pr-4"
               >
-                {results.length === 0 && (
+                {filteredResults.length === 0 && (
                   <p className="px-3 py-4 text-sm text-muted-foreground">
                     No results for{" "}
                     <span className="text-primary">{`"${trimmed}"`}</span>
                   </p>
                 )}
 
-                {results.map((result, index) => (
+                {filteredResults.map((result, index) => (
                   <SearchResultRow
                     key={result.id}
                     result={result}
@@ -265,8 +311,8 @@ export default function Search() {
 
                 <AskAiRow
                   query={trimmed}
-                  selected={selectedIndex === results.length}
-                  onHover={() => setSelectedIndex(results.length)}
+                  selected={selectedIndex === filteredResults.length}
+                  onHover={() => setSelectedIndex(filteredResults.length)}
                   onClick={handleAskAi}
                 />
               </div>
@@ -291,6 +337,11 @@ function SearchResultRow({ result, selected, onHover, onClick }: RowProps) {
     () => highlightTerms(result.snippetLine, result.terms),
     [result.snippetLine, result.terms]
   );
+  const sectionLabel = useMemo(() => {
+    if (nonDefaultSections.length === 0) return null;
+    const slug = result.section ?? defaultSection.slug;
+    return getSectionBySlug(slug)?.label ?? null;
+  }, [result.section]);
 
   const handleClick = (event: React.MouseEvent<HTMLAnchorElement>) => {
     if (
@@ -330,9 +381,16 @@ function SearchResultRow({ result, selected, onHover, onClick }: RowProps) {
             ))}
           </div>
         )}
-        <span className="truncate text-[15px] font-semibold text-primary">
-          {result.title}
-        </span>
+        <div className="flex min-w-0 items-center gap-2">
+          <span className="truncate text-[15px] font-semibold text-primary">
+            {result.title}
+          </span>
+          {sectionLabel && (
+            <span className="shrink-0 rounded border bg-muted px-1.5 py-0.5 text-[10px] font-medium text-muted-foreground">
+              {sectionLabel}
+            </span>
+          )}
+        </div>
         {result.snippetLine && (
           <p
             className="line-clamp-2 text-xs leading-snug text-muted-foreground"
@@ -375,6 +433,31 @@ function AskAiRow({
           Tell me more about <span className="italic">&quot;{query}&quot;</span>
         </span>
       </span>
+    </button>
+  );
+}
+
+function SectionChip({
+  label,
+  active,
+  onClick,
+}: {
+  label: string;
+  active: boolean;
+  onClick: () => void;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className={cn(
+        "rounded-full border px-2.5 py-0.5 text-xs font-medium transition-colors",
+        active
+          ? "border-primary bg-primary/10 text-primary"
+          : "border-border bg-background text-muted-foreground hover:bg-muted"
+      )}
+    >
+      {label}
     </button>
   );
 }

@@ -1,6 +1,73 @@
-import { LuAlignJustify, LuArrowUpRight } from "react-icons/lu";
+import type { IconType } from "react-icons";
+import {
+  LuAlignJustify,
+  LuArrowUpRight,
+  LuBeaker,
+  LuBook,
+  LuBookOpen,
+  LuBox,
+  LuCircleHelp,
+  LuCode,
+  LuCog,
+  LuCompass,
+  LuDatabase,
+  LuFile,
+  LuFlag,
+  LuFolder,
+  LuGlobe,
+  LuHouse,
+  LuKey,
+  LuLayers,
+  LuList,
+  LuPackage,
+  LuPlay,
+  LuPlug,
+  LuRocket,
+  LuSearch,
+  LuServer,
+  LuSettings,
+  LuShield,
+  LuTerminal,
+  LuWrench,
+  LuZap,
+} from "react-icons/lu";
 
 export const iconMap = {
   alignJustify: LuAlignJustify,
   arrowUpRight: LuArrowUpRight,
-};
+  beaker: LuBeaker,
+  book: LuBook,
+  bookOpen: LuBookOpen,
+  box: LuBox,
+  circleHelp: LuCircleHelp,
+  code: LuCode,
+  cog: LuCog,
+  compass: LuCompass,
+  database: LuDatabase,
+  file: LuFile,
+  flag: LuFlag,
+  folder: LuFolder,
+  globe: LuGlobe,
+  house: LuHouse,
+  key: LuKey,
+  layers: LuLayers,
+  list: LuList,
+  package: LuPackage,
+  play: LuPlay,
+  plug: LuPlug,
+  rocket: LuRocket,
+  search: LuSearch,
+  server: LuServer,
+  settings: LuSettings,
+  shield: LuShield,
+  terminal: LuTerminal,
+  wrench: LuWrench,
+  zap: LuZap,
+} satisfies Record<string, IconType>;
+
+export type IconName = keyof typeof iconMap;
+
+export function getIcon(name?: string | null): IconType | null {
+  if (!name) return null;
+  return (iconMap as Record<string, IconType>)[name] ?? null;
+}

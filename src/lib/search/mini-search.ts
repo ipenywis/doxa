@@ -13,7 +13,14 @@ const SEARCHABLE_FIELDS = [
   "keywordsText",
   "content",
 ] as const;
-const STORED_FIELDS = ["slug", "title", "breadcrumb", "icon", "lines"] as const;
+const STORED_FIELDS = [
+  "slug",
+  "title",
+  "breadcrumb",
+  "icon",
+  "section",
+  "lines",
+] as const;
 
 const FIELD_BOOSTS = {
   title: 5,

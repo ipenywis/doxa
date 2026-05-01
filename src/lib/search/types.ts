@@ -10,6 +10,8 @@ export interface SearchIndexEntry {
   description: string;
   breadcrumb: string[];
   icon?: string;
+  /** Section slug the page belongs to (matches sections.ts). */
+  section: string;
   headings: string[];
   keywords: string[];
   content: string;
@@ -22,6 +24,7 @@ export interface SearchResult {
   title: string;
   breadcrumb: string[];
   icon?: string;
+  section?: string;
   snippetLine: string;
   snippetAnchor?: string;
   score: number;

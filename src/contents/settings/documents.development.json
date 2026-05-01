@@ -1,0 +1,52 @@
+[
+  {
+    "heading": "Get Started"
+  },
+  {
+    "title": "Development Overview",
+    "href": "/development",
+    "icon": "wrench"
+  },
+  {
+    "title": "Local Setup",
+    "href": "/development/setup",
+    "icon": "rocket"
+  },
+  {
+    "spacer": true
+  },
+  {
+    "heading": "Codebase"
+  },
+  {
+    "title": "Architecture",
+    "href": "/development/architecture",
+    "icon": "layers"
+  },
+  {
+    "title": "Coding Standards",
+    "href": "/development/coding-standards",
+    "icon": "settings"
+  },
+  {
+    "title": "Quality And Testing",
+    "href": "/development/quality-and-testing",
+    "icon": "shield"
+  },
+  {
+    "spacer": true
+  },
+  {
+    "heading": "Ship It"
+  },
+  {
+    "title": "Contributing",
+    "href": "/development/contributing",
+    "icon": "code"
+  },
+  {
+    "title": "Release Process",
+    "href": "/development/release-process",
+    "icon": "package"
+  }
+]

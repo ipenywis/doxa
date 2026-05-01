@@ -1,0 +1,109 @@
+---
+title: Quality And Testing
+description: The verification gates a change must pass before review — typecheck, lint, format, build, and the manual smoke checks the template needs.
+keywords: ["quality", "testing", "typecheck", "build", "ci", "verification"]
+icon: shield
+---
+
+There's no unit-test suite for the template itself — verification is structural (typecheck, lint, build) plus manual smoke checks against the running app.
+
+## The pre-PR gate
+
+Run this before opening a pull request. It's the same gate CI runs.
+
+```bash
+pnpm quality
+```
+
+`pnpm quality` chains:
+
+| Step             | Command                       | What it catches                                       |
+| :--------------- | :---------------------------- | :---------------------------------------------------- |
+| Format check     | `pnpm format:check`           | Prettier drift, unsorted imports                      |
+| Lint             | `pnpm lint`                   | Unused symbols, banned APIs, accessibility lapses     |
+| Typecheck        | `pnpm typecheck`              | Cross-file type errors (`tsc --noEmit`)               |
+
+If `format:check` fails, run `pnpm clean` (autofix lint + format) and try again.
+
+## Build verification
+
+Always do at least one production build before merging anything that touches:
+
+- routes / loaders
+- the content store or its adapters
+- the docs generator
+- any `import.meta.glob` site
+
+```bash
+pnpm build
+```
+
+The build prerenders all static doc pages. Any glob mismatch, SSR-only `fs` usage, or broken adapter shows up here, not in `pnpm dev`.
+
+## Manual smoke checks
+
+For non-trivial UI changes, walk through the golden paths in the running app:
+
+<Step>
+  <StepItem title="Run the dev server">
+    ```bash
+    pnpm dev
+    ```
+  </StepItem>
+  <StepItem title="Navigate the docs">
+    Visit `/docs/overview`, click into a few sub-pages, use the sidebar, breadcrumbs, prev/next, and `Cmd+K` search. Verify nothing 404s.
+  </StepItem>
+  <StepItem title="Try multiple sections">
+    If you're touching section-aware code, add a temporary section to `src/settings/sections.ts`, drop a sample MDX page, run `pnpm generate:docs`, and confirm tabs + sidebar swap correctly.
+  </StepItem>
+  <StepItem title="Test both targets">
+    `pnpm build:cloudflare` and `pnpm build:vercel` should both succeed. Adapter-specific bugs surface in only one.
+  </StepItem>
+</Step>
+
+## Search and AI surfaces
+
+After meaningful content edits, regenerate the search index and visit the AI routes:
+
+```bash
+pnpm generate-content-json
+```
+
+Then check:
+
+- `/search` — visit and run a couple of queries.
+- `Cmd+K` palette — open from anywhere; section filter chips should appear when more than one section exists.
+- `/llms.txt` — entries grouped under each section's label.
+- `/llms-full.txt` — full corpus, sectioned the same way.
+
+## When to skip a check
+
+You don't need a full `pnpm build` for **content-only** changes (edits inside `src/contents/docs/**/*.mdx` with no new components). `pnpm generate-content-json` plus `pnpm typecheck` is enough.
+
+For **code changes**, run the full gate. Skipping the build is the most common reason a PR breaks deployment.
+
+## Performance budgets
+
+There's no automated budget yet, but be deliberate about:
+
+- Bundle size in the client — avoid pulling Node-only utilities into route components. The CI/build will fail fast if you do, but it's cheaper to notice yourself.
+- Eager `import.meta.glob` calls — they bundle every match into the entry chunk.
+
+## Next
+
+<CardGrid>
+  <Card
+    title="Contributing"
+    href="/docs/development/contributing"
+    icon="code"
+    variant="small"
+    description="The PR workflow"
+  />
+  <Card
+    title="Release Process"
+    href="/docs/development/release-process"
+    icon="package"
+    variant="small"
+    description="How changes ship"
+  />
+</CardGrid>

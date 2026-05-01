@@ -1,19 +1,22 @@
 import { LuChevronLeft, LuChevronRight } from "react-icons/lu";
 
-import { PageRoutes } from "@/src/lib/pageroutes";
+import { getSectionFromPath } from "@/src/settings/sections";
+import { getPageRoutesForSection } from "@/src/lib/pageroutes";
 import { Link } from "@/src/lib/transition";
 
 function getPreviousNext(path: string) {
-  const index = PageRoutes.findIndex(
-    (route) => route.href === `/${path.replace("docs/", "")}`
-  );
+  const cleanPath = path.replace(/^docs\//, "");
+  const targetHref = `/${cleanPath}`;
+  const section = getSectionFromPath(`/docs${targetHref}`);
+  const pages = getPageRoutesForSection(section.slug);
 
+  const index = pages.findIndex((route) => route.href === targetHref);
   if (index === -1) {
     return { prev: null, next: null };
   }
 
-  const prev = index > 0 ? PageRoutes[index - 1] : null;
-  const next = index < PageRoutes.length - 1 ? PageRoutes[index + 1] : null;
+  const prev = index > 0 ? pages[index - 1] : null;
+  const next = index < pages.length - 1 ? pages[index + 1] : null;
 
   return { prev, next };
 }

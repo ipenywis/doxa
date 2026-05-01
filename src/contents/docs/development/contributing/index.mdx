@@ -1,0 +1,142 @@
+---
+title: Contributing
+description: How to propose changes to the Doxa Docs template — issues, branches, commits, pull requests, and the review flow.
+keywords: ["contributing", "pull request", "branch", "commit", "review", "workflow"]
+icon: code
+---
+
+We welcome bug fixes, small features, and documentation improvements. Larger changes are easier to land if you open an issue first to align on direction.
+
+## Before you open a PR
+
+<Step>
+  <StepItem title="Search existing issues and PRs">
+    Someone may already be working on it. A linked issue keeps context together.
+  </StepItem>
+  <StepItem title="Open an issue for non-trivial changes">
+    Anything beyond a typo / one-file fix benefits from a quick design alignment. Include the problem, the proposed shape, and any alternatives you considered.
+  </StepItem>
+  <StepItem title="Run the quality gate locally">
+    `pnpm quality` — see [Quality And Testing](/docs/development/quality-and-testing).
+  </StepItem>
+</Step>
+
+## Branching
+
+Branch off `main`. Use a focused, descriptive name:
+
+```text
+fix/sidebar-active-style
+feat/api-reference-section
+docs/contributing-guide
+chore/bump-tanstack
+```
+
+Keep one logical change per branch. If you discover unrelated work along the way, open a follow-up branch instead of bundling it.
+
+## Commits
+
+The repo follows **Conventional Commits**. Recent history:
+
+```text
+fix: docs responsiveness
+chore: cleanup
+feat: improved tightened chat agent...
+```
+
+Commit types we use:
+
+| Type       | Use for                                                          |
+| :--------- | :--------------------------------------------------------------- |
+| `feat`     | A user-visible feature or capability                             |
+| `fix`      | A user-visible bug fix                                           |
+| `docs`     | Changes to the documentation content or generator               |
+| `chore`    | Tooling, deps, lockfile, config — no behaviour change            |
+| `refactor` | Internal restructure with no behaviour change                    |
+| `perf`     | A measurable performance improvement                             |
+| `style`    | Formatting / whitespace only                                     |
+
+The first line is the headline (under ~70 chars, present tense, no trailing period). Use the body for the **why**, not the **what** — the diff already shows what.
+
+```text
+feat: add multi-section docs (Documentation / Development)
+
+Render top-level section tabs above the sidebar so a single site can
+host Documentation alongside API Reference and Development guides.
+Single-section sites are unaffected — tabs auto-hide.
+```
+
+<Note title="Don't bypass hooks" type="warning">
+  Never run `git commit --no-verify`. If a pre-commit hook fails, fix the
+  underlying issue. The hook only runs lint/format on staged files — it's fast.
+</Note>
+
+## Opening a pull request
+
+A good PR description is short and answers four questions:
+
+1. **What changed?** One or two bullets.
+2. **Why?** The problem or motivation. Link the issue.
+3. **How to test?** A concrete checklist someone else can follow.
+4. **Anything risky?** Edge cases, follow-ups, intentional out-of-scope items.
+
+Suggested template:
+
+```markdown
+## Summary
+- Bullet describing the change
+- Bullet describing user-visible behaviour
+
+## Motivation
+<!-- Why is this change worth making? Link the issue. -->
+
+## Test plan
+- [ ] `pnpm quality` passes
+- [ ] `pnpm build` succeeds
+- [ ] Manually verified <specific path> in the dev server
+
+## Notes / follow-ups
+<!-- Optional: known limitations, deferred work -->
+```
+
+## Review flow
+
+- A maintainer reviews within a few business days for small changes; larger ones take longer.
+- Address feedback by **pushing additional commits** to the branch. Don't force-push during review unless you're rebasing on `main` or asked to squash.
+- Once approved, a maintainer merges. Squash-merge is the default — your headline becomes the merge commit.
+
+## Documentation changes
+
+If your change adds or modifies an MDX component, a frontmatter field, or a section, also update **`agent/component-playbook.md`** in the same PR. The CLI agent reads it at runtime — out-of-sync docs there cause bad generated content downstream.
+
+If your change adds or removes a script in `package.json`, update [Local Setup](/docs/development/setup) so the daily-commands table stays accurate.
+
+## Reporting bugs
+
+Bugs are tracked on GitHub. A useful report includes:
+
+- The version / commit hash you reproduced on
+- Exact steps to reproduce
+- What you expected vs. what happened
+- Browser + OS (for UI bugs); deploy target (for build / runtime bugs)
+
+A minimal repro (a fork with the failing case isolated) drastically shortens the fix loop.
+
+## Next
+
+<CardGrid>
+  <Card
+    title="Release Process"
+    href="/docs/development/release-process"
+    icon="package"
+    variant="small"
+    description="How accepted changes ship"
+  />
+  <Card
+    title="Architecture"
+    href="/docs/development/architecture"
+    icon="layers"
+    variant="small"
+    description="Tour of the codebase before your first PR"
+  />
+</CardGrid>

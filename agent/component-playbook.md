@@ -15,14 +15,26 @@ Every page must start with YAML frontmatter:
 title: Page Title
 description: A specific one-sentence page description.
 keywords: ["keyword", "another keyword"]
+icon: book
 ---
 ```
 
 - `title` is required and rendered as the page h1. Do not repeat it in the body.
 - `description` is required and feeds metadata, search, and page subtitles.
 - `keywords` should include user search terms and feature synonyms.
+- `icon` is optional. When set, it is rendered to the left of the page title in the sidebar **only** (not in the page header). The value must be a key in `iconMap` from `src/settings/icons.ts` (e.g. `book`, `code`, `wrench`, `terminal`, `rocket`, `settings`). Unknown values are ignored silently.
 - Use h2-h4 headings in body content.
 - Each page must be an `index.mdx` file inside a folder that becomes the route slug.
+
+## Sections
+
+The site is split into top-level **sections** rendered as tabs above the sidebar (e.g. Documentation, API Reference, Development). Sections are configured in `src/settings/sections.ts`.
+
+- Exactly one section must be `default: true`. Default-section pages are "rootless" — they live directly under `src/contents/docs/<page>/index.mdx` and their URLs are `/docs/<page>`.
+- Non-default sections own a top-level folder named after their slug: `src/contents/docs/<section-slug>/<page>/index.mdx`. Their URLs are `/docs/<section-slug>/<page>`.
+- A folder name that matches a non-default section slug is owned by that section — do not place default-section pages there.
+- When generating new docs, ask which section the content belongs to. If only one section exists, the section tab bar is hidden automatically.
+- After adding new pages, run `pnpm generate:docs` to append them to the matching `documents.json` / `documents.<slug>.json`. The generator is append-only for entries; it only re-syncs the `icon` field on existing entries.
 
 ## Current Example Docs Structure
 

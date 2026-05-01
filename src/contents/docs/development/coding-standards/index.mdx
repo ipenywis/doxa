@@ -1,0 +1,113 @@
+---
+title: Coding Standards
+description: The conventions every change to the Doxa template is reviewed against — TypeScript, ESLint, Prettier, and import ordering.
+keywords: ["coding standards", "typescript", "eslint", "prettier", "conventions"]
+icon: settings
+---
+
+These are the rules that pre-commit hooks and CI enforce. When in doubt, run `pnpm clean` and let the tooling decide.
+
+## TypeScript
+
+- **Strict mode is on.** `tsconfig.json` enables `strict`, `noUnusedLocals`, `noUnusedParameters`, and `noFallthroughCasesInSwitch`.
+- Prefer `interface` for public component props; use `type` for unions, intersections, and small ad-hoc shapes.
+- Avoid `any`. Use `unknown` when you genuinely don't know the shape, then narrow.
+- Re-export types from their nearest module — don't deep-import from a sibling's internals.
+
+```ts
+// Good
+import type { SearchResult } from "@/src/lib/search";
+
+// Avoid
+import type { SearchResult } from "@/src/lib/search/types";
+```
+
+## Path aliases
+
+| Alias  | Resolves to    | Use for                                            |
+| :----- | :------------- | :------------------------------------------------- |
+| `@/*`  | `./` (root)    | Anything outside `src/`, e.g. `@/utils/foo.ts`     |
+| `~/*`  | `./src/*`      | Optional shorthand for `src/` imports              |
+
+In practice the codebase uses `@/src/...` everywhere — it's the consistent style and works in both client and edge runtimes.
+
+## ESLint
+
+`pnpm lint` runs `eslint . --quiet`. The config uses `@eslint/js`, `typescript-eslint`, and a few project-specific rules. Highlights:
+
+- Unused locals / params are errors. Prefix intentionally unused params with `_` only when an interface forces them.
+- React 19 is the target — no need for `import React from "react"` in JSX files.
+- No console logs in shipped code paths. Build/script files (`scripts/**`, `src/scripts/**`) are exempt.
+
+Run autofix before staging:
+
+```bash
+pnpm lint:fix
+```
+
+## Prettier + import order
+
+Import sorting is handled by `@ianvs/prettier-plugin-sort-imports`. The plugin enforces grouped, alphabetised imports — don't fight it. Run:
+
+```bash
+pnpm format
+```
+
+Tailwind class ordering is also Prettier-managed via `prettier-plugin-tailwindcss`. Keep classes inline; don't sort them by hand.
+
+## Tailwind & UI conventions
+
+- Tailwind 4 is in use — config-less, driven by the `@tailwindcss/postcss` and `@tailwindcss/vite` plugins.
+- Reach for **Radix primitives** before building from scratch (`@radix-ui/react-dialog`, `react-tabs`, etc.).
+- Icons come from `react-icons/lu`. Reusable icons get registered in `src/settings/icons.ts` so they're available by name in frontmatter and in the `Card` component.
+- Classnames merging uses `cn()` from `@/src/lib/utils` — always prefer it over manual template strings when conditional.
+
+```tsx
+import { cn } from "@/src/lib/utils";
+
+<button className={cn("rounded px-3 py-1", isActive && "bg-primary text-white")} />
+```
+
+## Server-safe code
+
+Some routes run on the edge (Cloudflare Workers, Vercel Edge). Two rules:
+
+1. **Don't import `fs`, `path`, `child_process`, or other Node-only modules from app code.** Use `contentStore` from `src/lib/content/store.ts` instead.
+2. **Build-time scripts are exempt.** Anything under `scripts/**` or `src/scripts/**` runs in Node and can use the standard library freely.
+
+## Comments
+
+Default to writing none. Add a comment only when the **why** is non-obvious — a hidden constraint, a workaround for a known bug, or a decision a future reader would otherwise reverse. Don't narrate **what** the code does.
+
+```tsx
+// Good — captures a non-obvious constraint.
+// `import: "default"` skips the sibling `__rawSource` export injected by
+// mdxSourceCapturePlugin so raw MDX strings stay out of the client bundle.
+const mdxModules = import.meta.glob(/* … */);
+
+// Avoid — restates the code.
+// Loop through the routes and render each one.
+```
+
+## Pre-commit hook
+
+Husky runs `lint-staged` on every commit. It autofixes lint and formatting on the staged files. **Don't bypass it** with `--no-verify` — if the hook fails, fix the underlying issue and commit again.
+
+## Next
+
+<CardGrid>
+  <Card
+    title="Quality And Testing"
+    href="/docs/development/quality-and-testing"
+    icon="shield"
+    variant="small"
+    description="The gates your PR has to clear"
+  />
+  <Card
+    title="Contributing"
+    href="/docs/development/contributing"
+    icon="code"
+    variant="small"
+    description="Branching, commits, pull requests"
+  />
+</CardGrid>

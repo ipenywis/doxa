@@ -1,0 +1,129 @@
+---
+title: Local Setup
+description: Clone the Doxa Docs template, install dependencies, run the dev server, and learn the scripts you'll use day-to-day.
+keywords: ["setup", "install", "pnpm", "dev server", "scripts"]
+icon: rocket
+---
+
+A clean checkout to a running dev server takes about a minute on a warm pnpm cache.
+
+## Prerequisites
+
+- Node.js `^24.x` (the engines field enforces this)
+- pnpm `10.25.0` or newer (declared in `package.json#packageManager`)
+- Git
+
+<Note title="Use the declared package manager" type="warning">
+  Run `pnpm` directly. Don't substitute `npm` or `yarn` — the lockfile is
+  pnpm-shaped and CI tooling assumes pnpm.
+</Note>
+
+## Clone and install
+
+<Step>
+  <StepItem title="Fork and clone">
+    ```bash
+    git clone https://github.com/<your-username>/doxa.git
+    cd doxa/doxa-docs-template
+    ```
+
+    Working from a fork keeps your branches isolated and makes pull requests trivial later.
+
+  </StepItem>
+
+  <StepItem title="Install dependencies">
+    ```bash
+    pnpm install
+    ```
+
+    Husky runs on install via the `prepare` script and wires up pre-commit hooks (`lint-staged`).
+
+  </StepItem>
+
+  <StepItem title="Start the dev server">
+    ```bash
+    pnpm dev
+    ```
+
+    This is an alias for `pnpm dev:cloudflare`. The Vercel adapter is also available:
+
+    <Tabs defaultValue="cloudflare" className="pt-5 pb-1">
+      <TabsList>
+        <TabsTrigger value="cloudflare">Cloudflare</TabsTrigger>
+        <TabsTrigger value="vercel">Vercel</TabsTrigger>
+      </TabsList>
+      <TabsContent value="cloudflare">
+        ```bash
+        pnpm dev:cloudflare
+        ```
+      </TabsContent>
+      <TabsContent value="vercel">
+        ```bash
+        pnpm dev:vercel
+        ```
+      </TabsContent>
+    </Tabs>
+
+  </StepItem>
+
+  <StepItem title="Open the docs">
+    Visit the local URL Vite prints (typically `http://localhost:5173`). The docs landing page is `/docs/overview`.
+  </StepItem>
+</Step>
+
+## Daily commands
+
+| Command                        | What it does                                                        |
+| :----------------------------- | :------------------------------------------------------------------ |
+| `pnpm dev`                     | Run the dev server (Cloudflare target by default).                  |
+| `pnpm build`                   | Produce a production build for the active deploy target.            |
+| `pnpm start`                   | Preview the production build locally.                               |
+| `pnpm typecheck`               | Run `tsc --noEmit` across the workspace.                            |
+| `pnpm lint` / `pnpm lint:fix`  | ESLint (read-only / autofix).                                       |
+| `pnpm format` / `format:check` | Prettier (write / verify).                                          |
+| `pnpm quality`                 | Format check + lint + typecheck — the gate before opening a PR.     |
+| `pnpm clean`                   | Run `lint:fix`, `format`, then `format:check` to tidy your changes. |
+| `pnpm generate:docs`           | Append newly added MDX pages to the matching nav file.              |
+| `pnpm generate:docs:watch`     | Same, but rerun on file changes.                                    |
+| `pnpm generate-content-json`   | Rebuild the search index from current MDX content.                  |
+
+## Adding pages while you work
+
+Drop a new folder under `src/contents/docs/<page>/index.mdx` (or `src/contents/docs/<section-slug>/<page>/index.mdx` for a non-default section), then run:
+
+```bash
+pnpm generate:docs
+```
+
+The generator is **append-only** — it never reorders or deletes nav entries. It does, however, sync the optional `icon:` frontmatter field on existing entries so sidebar icons stay current.
+
+<Note title="Search index" type="success">
+  Run `pnpm generate-content-json` after meaningful content edits — search hits,
+  snippets, and breadcrumbs are derived from `public/search-data/index.json`.
+</Note>
+
+## Environment variables
+
+Most local development needs none. The two that affect behaviour:
+
+- `DOXA_DEPLOY_TARGET` — `cloudflare` (default) or `vercel`. Picked up by `pnpm dev:*` and `pnpm build:*`.
+- `CONTENT_SOURCE` — `vite` (default) or `github`. Selects the content adapter in `src/settings/content.ts`.
+
+## Next
+
+<CardGrid>
+  <Card
+    title="Architecture"
+    href="/docs/development/architecture"
+    icon="layers"
+    variant="small"
+    description="Tour the routes, content layer, and component registry"
+  />
+  <Card
+    title="Coding Standards"
+    href="/docs/development/coding-standards"
+    icon="settings"
+    variant="small"
+    description="The conventions every PR is reviewed against"
+  />
+</CardGrid>

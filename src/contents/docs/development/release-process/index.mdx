@@ -1,0 +1,122 @@
+---
+title: Release Process
+description: How merged changes become a published version of the Doxa Docs template — versioning, tagging, and deploying.
+keywords: ["release", "version", "deploy", "publish", "changelog"]
+icon: package
+---
+
+The template ships as a public repository — there's no npm package to publish. A release is a tagged commit on `main` plus a deploy of the showcase site.
+
+## Versioning
+
+We follow **Semantic Versioning** (`MAJOR.MINOR.PATCH`):
+
+| Bump  | When                                                                               |
+| :---- | :--------------------------------------------------------------------------------- |
+| MAJOR | Breaking changes to file structure, frontmatter shape, or required configuration   |
+| MINOR | New capability that's backwards-compatible (a new section, new MDX component, etc.) |
+| PATCH | Bug fixes, copy edits, dependency bumps with no behaviour change                   |
+
+The current version is in `package.json#version`. Bump it in the PR that lands the change, not in a separate "version bump" PR.
+
+## Cutting a release
+
+<Step>
+  <StepItem title="Land all changes on main">
+    All PRs going into the release should be merged. Run `pnpm quality` and `pnpm build` on a clean checkout of `main` to catch anything CI missed.
+  </StepItem>
+  <StepItem title="Update the version">
+    Edit `package.json` and (if applicable) the `CHANGELOG.md`. Commit:
+
+    ```bash
+    git commit -m "chore: release v1.2.0"
+    ```
+
+  </StepItem>
+  <StepItem title="Tag and push">
+    ```bash
+    git tag v1.2.0
+    git push origin main --tags
+    ```
+  </StepItem>
+  <StepItem title="Create a GitHub release">
+    Use the tag and paste the changelog entry as the release notes. Highlight breaking changes prominently.
+  </StepItem>
+</Step>
+
+## Deploying the showcase
+
+The showcase site (the public preview of the template) deploys automatically from `main` to Cloudflare. Manual deploys, if you need them:
+
+<Tabs defaultValue="cloudflare" className="pt-5 pb-1">
+  <TabsList>
+    <TabsTrigger value="cloudflare">Cloudflare</TabsTrigger>
+    <TabsTrigger value="vercel">Vercel</TabsTrigger>
+  </TabsList>
+  <TabsContent value="cloudflare">
+    ```bash
+    pnpm deploy:cloudflare
+    ```
+
+    Builds the Cloudflare target and pushes via Wrangler. Requires `wrangler login`.
+
+  </TabsContent>
+  <TabsContent value="vercel">
+    ```bash
+    pnpm deploy:vercel
+    ```
+
+    Builds the Vercel target and runs `vercel deploy --prod`. Requires `vercel login`.
+
+  </TabsContent>
+</Tabs>
+
+<Note title="Don't deploy from a feature branch" type="warning">
+  Production deploys come from `main`. Use preview environments (Cloudflare
+  Pages preview, Vercel preview deployments) for branch-scoped verification.
+</Note>
+
+## Changelog conventions
+
+Group entries under the version heading by type:
+
+```markdown
+## v1.2.0 — 2026-04-30
+
+### Added
+- Multi-section docs with top-level tab bar
+- Optional per-page `icon:` frontmatter field
+
+### Changed
+- Sidebar now renders only the routes for the active section
+
+### Fixed
+- Pagination prev/next now stays within the active section
+```
+
+Keep entries user-focused. Internal refactors only get a line if they affect users (build size, deploy targets, etc.).
+
+## Post-release
+
+- Watch the showcase deploy logs for prerender errors.
+- Open a fresh "next release" tracking issue if you have a backlog of follow-up work.
+- If you broke something, ship a patch release the same way — don't amend the tag.
+
+## Next
+
+<CardGrid>
+  <Card
+    title="Contributing"
+    href="/docs/development/contributing"
+    icon="code"
+    variant="small"
+    description="Get your changes into the next release"
+  />
+  <Card
+    title="Quality And Testing"
+    href="/docs/development/quality-and-testing"
+    icon="shield"
+    variant="small"
+    description="The gates a release must pass"
+  />
+</CardGrid>
