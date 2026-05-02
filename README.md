@@ -1,13 +1,13 @@
-# Doxa
+# Doxa — Self-Updating Docs for Modern Codebases
 
-A beautiful, fast documentation template built with **TanStack Start**, **AI Agents**, **React 19**, **Tailwind CSS v4**, **TypeScript**, and **MDX**. Designed for developers, product teams, and technical writers who care about the reading experience as much as the writing.
+A beautiful, fast documentation template that **writes and updates itself**. Powered by the **Doxa AI agent**, **TanStack Start**, **React 19**, **Tailwind CSS v4**, **TypeScript**, and **MDX** — your docs stay in sync with every PR, with zero human babysitting.
 
 
 ## Overview
 
-Doxa gives you a production-ready documentation site out of the box — with edge deployment, AI-powered chat, rich MDX components, and a polished reading experience in both light and dark mode.
+Doxa gives you a production-ready documentation site out of the box — with edge deployment, AI-powered chat, rich MDX components, and a polished reading experience.
 
-Built on **TanStack Start** for full-stack React with SSR, deployed to **Cloudflare Workers**, **Vercel** and many more.
+Built on **TanStack Start** for full-stack React with SSR, deployed to **Cloudflare Workers**, **Vercel** and many more providers coming soon.
 
 
 ## Features
