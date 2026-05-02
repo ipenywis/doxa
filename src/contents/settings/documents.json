@@ -4,19 +4,23 @@
   },
   {
     "title": "Overview",
-    "href": "/overview"
+    "href": "/overview",
+    "icon": "compass"
   },
   {
     "title": "Quickstart",
-    "href": "/quickstart"
+    "href": "/quickstart",
+    "icon": "rocket"
   },
   {
     "title": "Project Structure",
-    "href": "/project-structure"
+    "href": "/project-structure",
+    "icon": "folder"
   },
   {
     "title": "Configuration",
-    "href": "/configuration"
+    "href": "/configuration",
+    "icon": "cog"
   },
   {
     "spacer": true
@@ -26,19 +30,23 @@
   },
   {
     "title": "Markdown",
-    "href": "/authoring/markdown"
+    "href": "/authoring/markdown",
+    "icon": "file"
   },
   {
     "title": "MDX Components",
-    "href": "/authoring/mdx-components"
+    "href": "/authoring/mdx-components",
+    "icon": "box"
   },
   {
     "title": "Code Blocks",
-    "href": "/authoring/code-blocks"
+    "href": "/authoring/code-blocks",
+    "icon": "code"
   },
   {
     "title": "Diagrams And Math",
-    "href": "/authoring/diagrams-and-math"
+    "href": "/authoring/diagrams-and-math",
+    "icon": "beaker"
   },
   {
     "spacer": true
@@ -48,19 +56,23 @@
   },
   {
     "title": "Chat With Docs",
-    "href": "/ai/chat-with-docs"
+    "href": "/ai/chat-with-docs",
+    "icon": "zap"
   },
   {
     "title": "Agent Tools",
-    "href": "/ai/agent-tools"
+    "href": "/ai/agent-tools",
+    "icon": "terminal"
   },
   {
     "title": "llms.txt",
-    "href": "/ai/llms-txt"
+    "href": "/ai/llms-txt",
+    "icon": "globe"
   },
   {
     "title": "Search",
-    "href": "/search"
+    "href": "/search",
+    "icon": "search"
   },
   {
     "spacer": true
@@ -70,18 +82,22 @@
   },
   {
     "title": "Content Sources",
-    "href": "/content-sources"
+    "href": "/content-sources",
+    "icon": "database"
   },
   {
     "title": "Navigation",
-    "href": "/navigation"
+    "href": "/navigation",
+    "icon": "list"
   },
   {
     "title": "Customization",
-    "href": "/customization"
+    "href": "/customization",
+    "icon": "settings"
   },
   {
     "title": "Deployment",
-    "href": "/deployment"
+    "href": "/deployment",
+    "icon": "server"
   }
 ]
