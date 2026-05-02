@@ -2,7 +2,6 @@
 
 A beautiful, fast documentation template built with **TanStack Start**, **AI Agents**, **React 19**, **Tailwind CSS v4**, **TypeScript**, and **MDX**. Designed for developers, product teams, and technical writers who care about the reading experience as much as the writing.
 
----
 
 ## Overview
 
@@ -10,9 +9,21 @@ Doxa gives you a production-ready documentation site out of the box — with edg
 
 Built on **TanStack Start** for full-stack React with SSR, deployed to **Cloudflare Workers**, **Vercel** and many more.
 
----
 
 ## Features
+
+### Docs that auto-updates itself
+
+The **Doxa agent** is built specifically to generate and auto-update documentation for your projects with zero human intervention. Point it at a repo and it ships a complete, structured set of docs — then keeps them in sync as the code evolves.
+
+It integrates natively with this template: generated pages drop straight into `src/contents/docs/`, use the registered MDX components, and respect your section layout and frontmatter conventions out of the box.
+
+Two ways to run it, both keep your docs current on every PR: 
+
+- **Doxa GitHub App (Coming very soon)** — install once on your repo. Every new PR is reviewed by the agent, which opens a follow-up PR (or commit) updating the affected docs pages so `main` is never out of sync with shipped code.
+- **Open-source CLI (Coming very soon)** — run the same agent locally or in your own CI. Wire it into a GitHub Action, pre-merge hook, or scheduled job — same behavior, your infrastructure.
+
+The result: docs that stay accurate by default, without anyone remembering to update them.
 
 ### Rich Content Authoring
 
@@ -181,7 +192,7 @@ Doxa ships a **unified content access layer** with pluggable adapters. The AI ch
 
 Two adapters ship out of the box:
 
-|                     | `vite` (default)                  | `github`                                                           |
+|                     | `vite` (**default and recommended**)                  | `github`                                                           |
 | ------------------- | --------------------------------- | ------------------------------------------------------------------ |
 | Where content lives | `src/contents/docs/` in this repo | Separate GitHub repo                                               |
 | Update model        | Redeploy to ship changes          | Edits appear within cache TTL                                      |
@@ -252,4 +263,4 @@ This project is licensed under the MIT License. See the [LICENSE](./LICENSE) fil
 
 Islem Maboud — [@Ipenywis](https://x.com/Ipenywis)
 
-**Project:** [https://github.com/ipenywis/doxa](https://github.com/ipenywis/doxa)
+Affiliated with [CoderOne](https://youtube.com/@CoderOne)
