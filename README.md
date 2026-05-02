@@ -2,6 +2,7 @@
 
 A beautiful, fast documentation template that **writes and updates itself**. Powered by the **Doxa AI agent**, **TanStack Start**, **React 19**, **Tailwind CSS v4**, **TypeScript**, and **MDX** — your docs stay in sync with every PR, with zero human babysitting.
 
+[Read the docs](https://docs.doxa.so/docs)
 
 ## Overview
 
