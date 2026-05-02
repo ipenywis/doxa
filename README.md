@@ -2,10 +2,6 @@
 
 A beautiful, fast documentation template built with **TanStack Start**, **AI Agents**, **React 19**, **Tailwind CSS v4**, **TypeScript**, and **MDX**. Designed for developers, product teams, and technical writers who care about the reading experience as much as the writing.
 
-[![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
-
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Fipenywis%2Fdoxa&project-name=doxa&repository-name=doxa)
-
 ---
 
 ## Overview
