@@ -281,12 +281,13 @@ export function ChatWithDocs() {
               const payload = line.slice(6);
               if (payload === "[DONE]") continue;
 
+              let parsed: Record<string, unknown> | null = null;
               try {
-                const parsed = JSON.parse(payload);
-                handleSSEEvent(parsed);
+                parsed = JSON.parse(payload);
               } catch {
                 // Skip malformed JSON
               }
+              if (parsed) handleSSEEvent(parsed);
             }
           }
         }
@@ -346,10 +347,25 @@ export function ChatWithDocs() {
 
   /**
    * Handle a parsed SSE event from the TanStack AI stream.
-   * AG-UI protocol events: TEXT_MESSAGE_CONTENT, TOOL_CALL_START, TOOL_CALL_ARGS, TOOL_CALL_END
+   * AG-UI protocol events: TEXT_MESSAGE_CONTENT, TOOL_CALL_START, TOOL_CALL_ARGS, TOOL_CALL_END, RUN_ERROR
    */
   function handleSSEEvent(parsed: Record<string, unknown>) {
     switch (parsed.type) {
+      case "RUN_ERROR": {
+        const errInfo =
+          (parsed.error as { message?: string; code?: string } | undefined) ??
+          {};
+        if (typeof console !== "undefined") {
+          console.error(
+            "[chat-with-docs] AI stream returned RUN_ERROR — see server logs for details. Provider error:",
+            errInfo
+          );
+        }
+        throw new Error(
+          "The AI assistant ran into a problem. Please try again."
+        );
+      }
+
       case "TEXT_MESSAGE_CONTENT": {
         if (typeof parsed.delta === "string") {
           bufferRef.current += parsed.delta;

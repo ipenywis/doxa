@@ -1,3 +1,4 @@
+import { useDemoMode } from "@/src/contexts/demo-mode";
 import { LuArrowUpRight, LuGithub } from "react-icons/lu";
 
 import { Settings } from "@/src/settings/main";
@@ -12,6 +13,7 @@ import { SheetLeft } from "@/src/components/sidebar";
 import { ModeToggle } from "@/src/components/theme-toggle";
 
 export function Navbar() {
+  const isDemoMode = useDemoMode();
   return (
     <nav className="sticky top-0 z-50 mx-auto grid h-16 w-full grid-cols-[1fr_auto_1fr] items-center gap-3 border-b bg-background/80 px-4 backdrop-blur-xl sm:px-6 md:px-8">
       <div className="flex min-w-0 items-center gap-6">
@@ -24,9 +26,7 @@ export function Navbar() {
         </div>
       </div>
 
-      <div className="flex justify-center">
-        <Search />
-      </div>
+      <div className="flex justify-center">{!isDemoMode && <Search />}</div>
 
       <div className="flex items-center justify-end gap-1">
         {GitHubLink.href && (
