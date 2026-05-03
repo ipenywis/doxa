@@ -1,5 +1,9 @@
+import { FaGithub } from "react-icons/fa6";
+
 import { Settings } from "@/src/settings/main";
 import { Logo } from "@/src/components/navigation/logo";
+
+const openSourceRepoUrl = import.meta.env.VITE_OPENSOURCE_REPO_URL;
 
 export function Footer() {
   return (
@@ -18,6 +22,18 @@ export function Footer() {
         </a>
         .
       </p>
+      {openSourceRepoUrl && (
+        <a
+          href={openSourceRepoUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="inline-flex items-center gap-1.5 text-xs font-medium text-muted-foreground transition-colors hover:text-foreground"
+          aria-label="Free and Open Source on GitHub"
+        >
+          Free and OpenSource
+          <FaGithub className="h-4 w-4" aria-hidden="true" />
+        </a>
+      )}
       {Settings.features.branding !== false && (
         <div className="hidden items-center md:block">
           <Logo variant="full" size={16} />

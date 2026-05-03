@@ -12,6 +12,9 @@
     "binding": "ASSETS",
     "not_found_handling": "none"
   },
+  "vars": {
+    "VITE_OPENSOURCE_REPO_URL": "https://github.com/ipenywis/doxa"
+  },
   "observability": {
     "enabled": false,
     "head_sampling_rate": 1,
