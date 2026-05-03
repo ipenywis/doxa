@@ -74,7 +74,7 @@ async function resolvePageContext(
 
   return {
     slug: entryFromSlug.slug.replace(/^\//, ""),
-    href: `/docs${entryFromSlug.slug}`,
+    href: entryFromSlug.slug,
     sourcePath: entryFromSlug.filePath,
     title: title || context.title,
     ...(entryFromSlug.frontmatter.description

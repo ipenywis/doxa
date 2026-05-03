@@ -9,7 +9,7 @@ export interface NavItem {
 export const Navigations: NavItem[] = [
   {
     title: "Docs",
-    href: `/docs${PageRoutes[0]?.href ?? ""}`,
+    href: PageRoutes[0]?.href ?? "/",
   },
 ];
 

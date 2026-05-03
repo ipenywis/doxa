@@ -1,6 +1,5 @@
 import { RefObject, useRef, useState } from "react";
 import { useDemoMode } from "@/src/contexts/demo-mode";
-import { useLocation } from "@tanstack/react-router";
 import { LuArrowUp } from "react-icons/lu";
 import { useOnClickOutside } from "usehooks-ts";
 
@@ -9,7 +8,6 @@ import { useChatContext } from "@/src/components/chat/chat-context";
 export function FloatingChatBar() {
   const { isOpen, requestChatInputFocus, submitQuery, setOpen } =
     useChatContext();
-  const location = useLocation();
   const isDemoMode = useDemoMode();
   const [value, setValue] = useState("");
   const [expanded, setExpanded] = useState(false);
@@ -21,7 +19,6 @@ export function FloatingChatBar() {
   });
 
   if (isDemoMode) return null;
-  if (!location.pathname.startsWith("/docs")) return null;
   if (isOpen) return null;
 
   const handleSubmit = () => {

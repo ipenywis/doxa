@@ -80,7 +80,6 @@ interface SitemapPage {
     lastmod?: string;
   };
 }
-const HOME_ROUTE_FILE_PATH = "src/routes/index.tsx";
 
 const prerenderConfig = {
   enabled: true,
@@ -135,7 +134,7 @@ function getDocsPages(routes: DocumentRoute[], parentHref = ""): SitemapPage[] {
 
       if (!route.noLink) {
         pages.push({
-          path: `/docs${href}`,
+          path: href,
           sitemap: lastModified
             ? {
                 lastmod: lastModified,
@@ -154,18 +153,15 @@ function getDocsPages(routes: DocumentRoute[], parentHref = ""): SitemapPage[] {
 }
 
 function getSitemapPages() {
-  const homeLastModified = getGitLastModifiedDate(HOME_ROUTE_FILE_PATH);
+  const docPages = getDocsPages(Documents as DocumentRoute[]);
+  const firstDoc = docPages[0];
 
   return [
     {
       path: "/",
-      sitemap: homeLastModified
-        ? {
-            lastmod: homeLastModified,
-          }
-        : undefined,
+      sitemap: firstDoc?.sitemap,
     } satisfies SitemapPage,
-    ...getDocsPages(Documents as DocumentRoute[]),
+    ...docPages,
   ];
 }
 

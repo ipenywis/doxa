@@ -26,7 +26,7 @@ export function SectionTabs() {
       <div className="flex w-max items-center gap-4 px-4 sm:gap-6 sm:px-6 md:px-8">
         {visibleSections.map((section) => {
           const firstPage = getPageRoutesForSection(section.slug)[0];
-          const href = firstPage ? `/docs${firstPage.href}` : "/docs";
+          const href = firstPage?.href ?? "/";
           const active = current.slug === section.slug;
           return (
             <Link

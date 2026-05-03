@@ -1,4 +1,3 @@
-import { useLocation } from "@tanstack/react-router";
 import { LuMessagesSquare } from "react-icons/lu";
 
 import { Button } from "@/src/components/ui/button";
@@ -6,9 +5,6 @@ import { useChatContext } from "@/src/components/chat/chat-context";
 
 export function ChatButton() {
   const { isOpen, requestChatInputFocus, setOpen } = useChatContext();
-  const location = useLocation();
-
-  if (!location.pathname.startsWith("/docs")) return null;
 
   return (
     <Button

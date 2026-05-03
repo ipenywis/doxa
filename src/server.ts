@@ -5,17 +5,14 @@ import {
 
 const startHandler = createStartHandler(defaultStreamHandler);
 
-function getNormalizedDocsPath(pathname: string): string | null {
-  if (pathname === "/docs/docs") {
-    return "/docs";
-  }
-
-  if (pathname.startsWith("/docs/docs/")) {
-    return pathname.replace(/^\/docs\/docs/, "/docs");
-  }
-
+function getNormalizedPath(pathname: string): string | null {
   if (pathname.startsWith("/docs/assets/")) {
     return pathname.replace(/^\/docs\/assets/, "/assets");
+  }
+
+  if (pathname === "/docs") return "/";
+  if (pathname.startsWith("/docs/")) {
+    return pathname.slice("/docs".length) || "/";
   }
 
   return null;
@@ -30,7 +27,7 @@ function redirectToPath(url: string, pathname: string) {
 
 const server = {
   async fetch(request: Request) {
-    const normalizedPath = getNormalizedDocsPath(new URL(request.url).pathname);
+    const normalizedPath = getNormalizedPath(new URL(request.url).pathname);
 
     if (normalizedPath) {
       return redirectToPath(request.url, normalizedPath);

@@ -5,9 +5,8 @@ import { getPageRoutesForSection } from "@/src/lib/pageroutes";
 import { Link } from "@/src/lib/transition";
 
 function getPreviousNext(path: string) {
-  const cleanPath = path.replace(/^docs\//, "");
-  const targetHref = `/${cleanPath}`;
-  const section = getSectionFromPath(`/docs${targetHref}`);
+  const targetHref = `/${path.replace(/^\/+/, "")}`;
+  const section = getSectionFromPath(targetHref);
   const pages = getPageRoutesForSection(section.slug);
 
   const index = pages.findIndex((route) => route.href === targetHref);
@@ -29,7 +28,7 @@ export function Pagination({ pathname }: { pathname: string }) {
       {res.prev ? (
         <Link
           rel="prev"
-          href={`/docs${res.prev.href}`}
+          href={res.prev.href}
           preload="viewport"
           title={`Previous: ${res.prev.title}`}
           className="group flex flex-col items-start gap-1 no-underline!"
@@ -48,7 +47,7 @@ export function Pagination({ pathname }: { pathname: string }) {
       {res.next && (
         <Link
           rel="next"
-          href={`/docs${res.next.href}`}
+          href={res.next.href}
           preload="viewport"
           title={`Next: ${res.next.title}`}
           className="group ml-auto flex flex-col items-end gap-1 no-underline!"

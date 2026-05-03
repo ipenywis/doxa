@@ -2,10 +2,10 @@
  * Sections — Top-level docs surfaces (Documentation, API Reference, Development, …).
  *
  * Exactly one section must be marked `default: true`. The default section is
- * "rootless": its pages live at `/docs/<slug>` and its content sits at the
+ * "rootless": its pages live at `/<slug>` and its content sits at the
  * root of `src/contents/docs/`. Non-default sections own a top-level folder
  * named after their slug — `src/contents/docs/<slug>/...` — and their URLs
- * are `/docs/<slug>/...`.
+ * are `/<slug>/...`.
  *
  * Edit the `sections` array to add / rename / reorder sections.
  */
@@ -103,11 +103,11 @@ export function isSectionSlug(slug: string): boolean {
 
 /**
  * Resolve a section from a pathname.
- * `/docs/<x>/...` → if `<x>` is a non-default slug, returns that section.
+ * `/<x>/...` → if `<x>` is a non-default slug, returns that section.
  * Otherwise returns the default section.
  */
 export function getSectionFromPath(pathname: string): SectionConfig {
-  const match = pathname.match(/^\/docs\/?([^/]+)?/);
+  const match = pathname.match(/^\/?([^/]+)?/);
   const first = match?.[1];
   if (first && isSectionSlug(first)) {
     return getSectionBySlug(first) ?? defaultSection;

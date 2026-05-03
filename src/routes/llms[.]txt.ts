@@ -84,7 +84,7 @@ export const Route = createFileRoute("/llms.txt")({
 function formatEntry(entry: ContentEntry): string {
   const title = entry.frontmatter.title || filePathToSlug(entry.filePath);
   const description = entry.frontmatter.description;
-  const url = `${Settings.site.url}/docs${entry.slug}`;
+  const url = `${Settings.site.url}${entry.slug}`;
   const desc = description ? `: ${description}` : "";
   return `- [${title}](${url})${desc}`;
 }

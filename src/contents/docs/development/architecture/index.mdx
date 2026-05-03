@@ -94,7 +94,7 @@ Server-only routes (`/llms.txt`, `/llms-full.txt`, the AI chat agent) read conte
 
 ### Sections
 
-Configured in `src/settings/sections.ts`. Exactly one section is `default: true` and lives at `/docs/<page>`; non-default sections own a folder named after their slug and live at `/docs/<slug>/<page>`. The `<SectionTabs />` component reads this list and hides itself entirely when only the default section exists.
+Configured in `src/settings/sections.ts`. Exactly one section is `default: true` and lives at `/<page>`; non-default sections own a folder named after their slug and live at `/<slug>/<page>`. The `<SectionTabs />` component reads this list and hides itself entirely when only the default section exists.
 
 ### Content store
 
@@ -106,7 +106,7 @@ Configured in `src/settings/sections.ts`. Exactly one section is `default: true`
 
 ### MDX rendering
 
-`src/routes/docs/$.tsx` resolves the splat to an MDX module via `import.meta.glob('/src/contents/docs/**/index.mdx', { eager: true, import: 'default' })`. The available components are registered in `src/lib/components.ts`.
+`src/routes/$.tsx` resolves the splat to an MDX module via `import.meta.glob('/src/contents/docs/**/index.mdx', { eager: true, import: 'default' })`. The available components are registered in `src/lib/components.ts`.
 
 ### Sidebar
 
@@ -147,14 +147,14 @@ Build-time indexer at `src/scripts/content.ts` walks every MDX file, strips cust
 <CardGrid>
   <Card
     title="Coding Standards"
-    href="/docs/development/coding-standards"
+    href="/development/coding-standards"
     icon="settings"
     variant="small"
     description="TypeScript, lint, formatting"
   />
   <Card
     title="Quality And Testing"
-    href="/docs/development/quality-and-testing"
+    href="/development/quality-and-testing"
     icon="shield"
     variant="small"
     description="Pre-PR gates and verification"

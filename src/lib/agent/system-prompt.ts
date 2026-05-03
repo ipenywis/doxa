@@ -47,13 +47,13 @@ function formatCurrentPageContext(
 
 function formatSectionsList(): string {
   if (nonDefaultSections.length === 0) {
-    return `- ${defaultSection.slug}: ${defaultSection.label} (default — pages live at /docs/<slug>)`;
+    return `- ${defaultSection.slug}: ${defaultSection.label} (default — pages live at /<slug>)`;
   }
   return sections
     .map((s) => {
       const tag = s.default
-        ? "(default — pages at /docs/<slug>)"
-        : `(pages at /docs/${s.slug}/<slug>; files under src/contents/docs/${s.slug}/)`;
+        ? "(default — pages at /<slug>)"
+        : `(pages at /${s.slug}/<slug>; files under src/contents/docs/${s.slug}/)`;
       return `- ${s.slug}: ${s.label} ${tag}`;
     })
     .join("\n");
@@ -115,8 +115,8 @@ You are capped at 5 agent iterations total. Plan for that budget.
   - \`partial\`: the documentation supports part of the answer, but related details are not documented. Include at least one citation and explain the missing part in \`unsupportedReason\`.
   - \`unsupported\`: the documentation does not support the answer. Use this for requests for general programming help, OS/package-manager installation commands, third-party tool definitions, jokes, emotional support, or anything unrelated to the docs.
 - Do not answer from general model knowledge, even if the answer seems obvious or helpful.
-- When referencing a documentation section, provide a link in this format: [Section Title](/docs/path#section-anchor)
-  - The path is derived from the folder structure: \`ai/chat-with-docs/index.mdx\` → \`/docs/ai/chat-with-docs\`
+- When referencing a documentation section, provide a link in this format: [Section Title](/path#section-anchor)
+  - The path is derived from the folder structure: \`ai/chat-with-docs/index.mdx\` → \`/ai/chat-with-docs\`
   - Section anchors are lowercase, hyphenated heading text: "Quick Start" → \`#quick-start\`
 - ${aiConfig.codeSnippets ? "Include code snippets from the docs when helpful." : "Do not include code snippets."}
 - If the question is outside the scope of the documentation, call \`submit_answer\` with \`scope: "unsupported"\`.

@@ -28,14 +28,14 @@ Each route entry maps to a folder under `src/contents/docs`. The app prefixes th
 | `spacer`         | Adds visual separation between groups.                         |
 | `noLink`         | Keeps a page in the route data without rendering it as a link. |
 
-<Note title="Route prefix">
-  Use hrefs like `/overview` in `documents.json`. The sidebar, search results,
-  and links add `/docs` when needed.
+<Note title="Hrefs">
+  Use hrefs like `/overview` in `documents.json`. They render at the root —
+  no `/docs` prefix.
 </Note>
 
 ## Folder Structure
 
-The physical folder names become the URL path. A page at `src/contents/docs/ai/chat-with-docs/index.mdx` resolves to `/docs/ai/chat-with-docs`.
+The physical folder names become the URL path. A page at `src/contents/docs/ai/chat-with-docs/index.mdx` resolves to `/ai/chat-with-docs`.
 
 <FileTree>
   <Folder name="src" label="Project source" defaultOpen>

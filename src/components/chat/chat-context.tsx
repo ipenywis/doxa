@@ -6,7 +6,6 @@ import {
   useState,
   type ReactNode,
 } from "react";
-import { useLocation } from "@tanstack/react-router";
 import { useMediaQuery } from "usehooks-ts";
 
 import type { ChatPageContext } from "@/src/lib/chat-page-context";
@@ -40,7 +39,6 @@ interface ChatContextValue {
 const ChatContext = createContext<ChatContextValue | null>(null);
 
 export function ChatProvider({ children }: { children: ReactNode }) {
-  const location = useLocation();
   const [isOpen, setOpen] = useState(false);
   const [isExpanded, setExpanded] = useState(false);
   const isMobile = useMediaQuery(`(max-width: ${MOBILE_BREAKPOINT_PX - 1}px)`, {
@@ -72,13 +70,6 @@ export function ChatProvider({ children }: { children: ReactNode }) {
       document.body.style.overflow = prev;
     };
   }, [isMobile, isOpen]);
-
-  useEffect(() => {
-    if (location.pathname.startsWith("/docs")) return;
-    setCurrentPageContextState(null);
-    setAttachedPageContextState(null);
-    setPendingPageConversationContext(null);
-  }, [location.pathname]);
 
   const requestChatInputFocus = useCallback(() => {
     setFocusRequestId((id) => id + 1);

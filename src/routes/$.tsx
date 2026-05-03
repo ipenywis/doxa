@@ -20,6 +20,8 @@ import { ChatWithPage } from "@/src/components/article/chat-with-page";
 import { CopyPage } from "@/src/components/article/copy-page";
 import { Pagination } from "@/src/components/article/pagination";
 import { useChatContext } from "@/src/components/chat/chat-context";
+import { SectionTabs } from "@/src/components/navigation/section-tabs";
+import { Sidebar } from "@/src/components/sidebar";
 import { TableOfContents } from "@/src/components/toc";
 
 // `import: "default"` pulls only the compiled React component, skipping the
@@ -30,7 +32,7 @@ const mdxModules = import.meta.glob<
   ComponentType<{ components?: typeof components }>
 >("/src/contents/docs/**/index.mdx", { eager: true, import: "default" });
 
-export const Route = createFileRoute("/docs/$")({
+export const Route = createFileRoute("/$")({
   validateSearch: z.object({
     _splat: z.string().optional(),
   }),
@@ -42,7 +44,7 @@ export const Route = createFileRoute("/docs/$")({
     }
     try {
       const document = await fetchDocumentFromServer({ data: slug });
-      const section = getSectionFromPath(`/docs/${slug}`);
+      const section = getSectionFromPath(`/${slug}`);
       const sectionPages = getPageRoutesForSection(section.slug);
       const routeTitle =
         sectionPages.find((r) => r.href === `/${slug}`)?.title ?? null;
@@ -71,7 +73,7 @@ export const Route = createFileRoute("/docs/$")({
       ? `${title} – ${Settings.site.name}`
       : Settings.site.name;
     const pageDescription = description || Settings.site.description;
-    const pageUrl = `${Settings.site.url}/docs/${slug}`;
+    const pageUrl = `${Settings.site.url}/${slug}`;
 
     return {
       meta: [
@@ -108,7 +110,7 @@ function MdxContent({ slug }: { slug: string }) {
 
 function findSectionHeading(slug: string): string | undefined {
   const targetHref = `/${slug}`;
-  const section = getSectionFromPath(`/docs${targetHref}`);
+  const section = getSectionFromPath(targetHref);
   const routes: Paths[] = getRoutesForSection(section.slug);
   let currentHeading: string | undefined;
   for (const route of routes) {
@@ -125,9 +127,9 @@ function DocsContent() {
   const { isOpen: chatOpen, setCurrentPageContext } = useChatContext();
   const { slug, document: pageDocument, rawDoc } = Route.useLoaderData();
   const paths = slug.split("/");
-  const pathName = `docs/${slug}`;
+  const pathName = slug;
 
-  const currentSection = getSectionFromPath(`/docs/${slug}`);
+  const currentSection = getSectionFromPath(`/${slug}`);
   const currentSectionPages = getPageRoutesForSection(currentSection.slug);
   const currentRoute = currentSectionPages.find((r) => r.href === `/${slug}`);
   const title =
@@ -145,7 +147,7 @@ function DocsContent() {
 
     return {
       slug,
-      href: `/docs/${slug}`,
+      href: `/${slug}`,
       sourcePath: `${slug}/index.mdx`,
       title,
       ...(description ? { description } : {}),
@@ -156,30 +158,26 @@ function DocsContent() {
     setCurrentPageContext(pageContext);
   }, [pageContext, setCurrentPageContext]);
 
-  if (!pageDocument) {
-    return (
-      <div key={slug} className="flex items-start gap-6 lg:gap-10">
-        <article className="prose-code:font-code @container/article prose w-full max-w-3xl min-w-0 flex-1 prose-zinc dark:prose-invert prose-headings:scroll-m-20 prose-code:before:content-none prose-code:after:content-none prose-pre:border prose-pre:bg-muted/25 prose-img:rounded-md">
-          <ArticleBreadcrumb paths={paths} />
-          <h1 className="text-3xl font-bold tracking-tight lg:text-4xl">
-            Document Not Found
-          </h1>
-          <div className="prose-content">
-            <p className="text-muted-foreground">
-              The documentation page for <strong>{slug}</strong> could not be
-              found.
-            </p>
-            <p>
-              Expected file at: <code>src/contents/docs/{slug}/index.mdx</code>
-            </p>
-          </div>
-          <Pagination pathname={pathName} />
-        </article>
-      </div>
-    );
-  }
-
-  return (
+  const article = !pageDocument ? (
+    <div key={slug} className="flex items-start gap-6 lg:gap-10">
+      <article className="prose-code:font-code @container/article prose w-full max-w-3xl min-w-0 flex-1 prose-zinc dark:prose-invert prose-headings:scroll-m-20 prose-code:before:content-none prose-code:after:content-none prose-pre:border prose-pre:bg-muted/25 prose-img:rounded-md">
+        <ArticleBreadcrumb paths={paths} />
+        <h1 className="text-3xl font-bold tracking-tight lg:text-4xl">
+          Document Not Found
+        </h1>
+        <div className="prose-content">
+          <p className="text-muted-foreground">
+            The documentation page for <strong>{slug}</strong> could not be
+            found.
+          </p>
+          <p>
+            Expected file at: <code>src/contents/docs/{slug}/index.mdx</code>
+          </p>
+        </div>
+        <Pagination pathname={pathName} />
+      </article>
+    </div>
+  ) : (
     <div key={slug} className="flex items-start gap-6 lg:gap-10">
       <article className="prose-code:font-code @container/article prose w-full max-w-3xl min-w-0 flex-1 prose-zinc dark:prose-invert prose-headings:scroll-m-20 prose-code:before:content-none prose-code:after:content-none prose-pre:border prose-pre:bg-muted/25 prose-img:rounded-md">
         {sectionHeading && (
@@ -222,6 +220,16 @@ function DocsContent() {
           frontmatter={pageDocument.frontmatter}
         />
       )}
+    </div>
+  );
+
+  return (
+    <div className="flex flex-col">
+      <SectionTabs />
+      <div className="flex items-start gap-4 md:gap-8 lg:gap-12">
+        <Sidebar />
+        <div className="min-w-0 flex-1 pt-6">{article}</div>
+      </div>
     </div>
   );
 }

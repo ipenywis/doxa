@@ -106,7 +106,7 @@ export default function Search() {
   const navigateToResult = useCallback(
     (result: SearchResult) => {
       saveRecent(trimmed);
-      const href = `/docs${result.slug}${result.snippetAnchor ? `#${result.snippetAnchor}` : ""}`;
+      const href = `${result.slug}${result.snippetAnchor ? `#${result.snippetAnchor}` : ""}`;
       navigate({ to: href });
       setIsOpen(false);
     },
@@ -332,7 +332,7 @@ interface RowProps {
 }
 
 function SearchResultRow({ result, selected, onHover, onClick }: RowProps) {
-  const href = `/docs${result.slug}${result.snippetAnchor ? `#${result.snippetAnchor}` : ""}`;
+  const href = `${result.slug}${result.snippetAnchor ? `#${result.snippetAnchor}` : ""}`;
   const snippetHtml = useMemo(
     () => highlightTerms(result.snippetLine, result.terms),
     [result.snippetLine, result.terms]

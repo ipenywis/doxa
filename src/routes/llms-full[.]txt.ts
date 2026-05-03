@@ -65,7 +65,7 @@ export const Route = createFileRoute("/llms-full.txt")({
           for (const entry of list) {
             const title =
               entry.frontmatter.title || filePathToSlug(entry.filePath);
-            const url = `${Settings.site.url}/docs${entry.slug}`;
+            const url = `${Settings.site.url}${entry.slug}`;
             out.push("---");
             out.push("");
             out.push(`## ${title}`);

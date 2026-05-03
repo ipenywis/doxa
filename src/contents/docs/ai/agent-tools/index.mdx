@@ -50,7 +50,7 @@ Both tools read through `contentStore`, so they work with the bundled Vite sourc
   </StepItem>
 
   <StepItem title="Submit a scoped answer">
-    The assistant synthesizes the result and links to relevant sections, such as `[Content Sources](/docs/content-sources)`.
+    The assistant synthesizes the result and links to relevant sections, such as `[Content Sources](/content-sources)`.
     The server accepts the answer only when its citations map to docs pages that were found through `grep` or `cat`.
   </StepItem>
 </Step>
@@ -81,7 +81,7 @@ The system prompt defines strict behavior:
 - Use `grep` first when the right file is uncertain.
 - Use `cat` to read full context before answering.
 - Use `submit_answer` for every final response.
-- Include links in the `/docs/path#section-anchor` format.
+- Include links in the `/path#section-anchor` format.
 - Include code snippets when `aiConfig.codeSnippets` is enabled.
 - Classify responses as supported, partial, or unsupported.
 - Return a fixed unsupported response when a question is outside the documentation scope.

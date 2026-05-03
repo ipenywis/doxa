@@ -61,11 +61,11 @@ function extractGrepEvidencePaths(result: string): string[] {
   return Array.from(paths);
 }
 
-function stripDocsPrefix(href: string): string | null {
+function citationSlug(href: string): string | null {
   const [path] = href.split("#");
-  if (!path.startsWith("/docs/")) return null;
+  if (!path.startsWith("/")) return null;
   if (path.includes("?")) return null;
-  return path.slice("/docs".length);
+  return path;
 }
 
 function markdownLink(title: string, href: string): string {
@@ -156,11 +156,11 @@ export function createDocsAnswerGuard(): DocsAnswerGuard {
     const validated = new Map<string, ValidatedCitation>();
 
     for (const citation of citations) {
-      const slug = stripDocsPrefix(citation.href);
+      const slug = citationSlug(citation.href);
       if (!slug) {
         return {
           ok: false,
-          message: `Citation must use a /docs/... href: ${citation.href}`,
+          message: `Citation must use an absolute path href (e.g. /overview): ${citation.href}`,
         };
       }
 

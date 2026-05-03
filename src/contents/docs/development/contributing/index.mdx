@@ -17,7 +17,7 @@ We welcome bug fixes, small features, and documentation improvements. Larger cha
     Anything beyond a typo / one-file fix benefits from a quick design alignment. Include the problem, the proposed shape, and any alternatives you considered.
   </StepItem>
   <StepItem title="Run the quality gate locally">
-    `pnpm quality` — see [Quality And Testing](/docs/development/quality-and-testing).
+    `pnpm quality` — see [Quality And Testing](/development/quality-and-testing).
   </StepItem>
 </Step>
 
@@ -109,7 +109,7 @@ Suggested template:
 
 If your change adds or modifies an MDX component, a frontmatter field, or a section, also update **`agent/component-playbook.md`** in the same PR. The CLI agent reads it at runtime — out-of-sync docs there cause bad generated content downstream.
 
-If your change adds or removes a script in `package.json`, update [Local Setup](/docs/development/setup) so the daily-commands table stays accurate.
+If your change adds or removes a script in `package.json`, update [Local Setup](/development/setup) so the daily-commands table stays accurate.
 
 ## Reporting bugs
 
@@ -127,14 +127,14 @@ A minimal repro (a fork with the failing case isolated) drastically shortens the
 <CardGrid>
   <Card
     title="Release Process"
-    href="/docs/development/release-process"
+    href="/development/release-process"
     icon="package"
     variant="small"
     description="How accepted changes ship"
   />
   <Card
     title="Architecture"
-    href="/docs/development/architecture"
+    href="/development/architecture"
     icon="layers"
     variant="small"
     description="Tour of the codebase before your first PR"

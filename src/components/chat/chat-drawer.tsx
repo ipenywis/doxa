@@ -1,5 +1,4 @@
-import { useEffect, type ReactNode } from "react";
-import { useLocation } from "@tanstack/react-router";
+import { type ReactNode } from "react";
 import {
   LuHistory,
   LuMaximize2,
@@ -31,15 +30,8 @@ export function ChatDrawer({
 }: ChatDrawerProps) {
   const { isOpen, isExpanded, isMobile, setOpen, toggleExpanded } =
     useChatContext();
-  const location = useLocation();
-  const onDocsPage = location.pathname.startsWith("/docs");
 
   const panelWidth = isExpanded ? PANEL_WIDTH_EXPANDED : PANEL_WIDTH;
-
-  // Auto-close when navigating away from /docs
-  useEffect(() => {
-    if (!onDocsPage && isOpen) setOpen(false);
-  }, [onDocsPage, isOpen, setOpen]);
 
   useEventListener("keydown", (e) => {
     if (e.key === "Escape" && isOpen) setOpen(false);

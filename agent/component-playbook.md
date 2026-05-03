@@ -30,8 +30,8 @@ icon: book
 
 The site is split into top-level **sections** rendered as tabs above the sidebar (e.g. Documentation, API Reference, Development). Sections are configured in `src/settings/sections.ts`.
 
-- Exactly one section must be `default: true`. Default-section pages are "rootless" — they live directly under `src/contents/docs/<page>/index.mdx` and their URLs are `/docs/<page>`.
-- Non-default sections own a top-level folder named after their slug: `src/contents/docs/<section-slug>/<page>/index.mdx`. Their URLs are `/docs/<section-slug>/<page>`.
+- Exactly one section must be `default: true`. Default-section pages are "rootless" — they live directly under `src/contents/docs/<page>/index.mdx` and their URLs are `/<page>`.
+- Non-default sections own a top-level folder named after their slug: `src/contents/docs/<section-slug>/<page>/index.mdx`. Their URLs are `/<section-slug>/<page>`.
 - A folder name that matches a non-default section slug is owned by that section — do not place default-section pages there.
 - When generating new docs, ask which section the content belongs to. If only one section exists, the section tab bar is hidden automatically.
 - After adding new pages, run `pnpm generate:docs` to append them to the matching `documents.json` / `documents.<slug>.json`. The generator is append-only for entries; it only re-syncs the `icon` field on existing entries.
@@ -59,11 +59,11 @@ Use cards for navigation, related pages, feature groups, and external resources.
     subtitle="Start"
     title="Quickstart"
     description="Install dependencies and run the docs site locally."
-    href="/docs/quickstart"
+    href="/quickstart"
   />
   <Card
     title="Search"
-    href="/docs/search"
+    href="/search"
     icon="alignJustify"
     variant="small"
     description="Understand generated search data."

@@ -1,5 +1,3 @@
-import { useLocation } from "@tanstack/react-router";
-
 import { isHeading, isRoute, Routes, type Paths } from "@/src/lib/pageroutes";
 import SubLink from "@/src/components/sidebar/sublink";
 
@@ -9,10 +7,6 @@ interface PageMenuProps {
 }
 
 export function PageMenu({ isSheet = false, routes }: PageMenuProps) {
-  const location = useLocation();
-  const pathname = location.pathname;
-  if (!pathname.startsWith("/docs")) return null;
-
   const list = routes ?? Routes;
 
   return (
@@ -42,7 +36,7 @@ export function PageMenu({ isSheet = false, routes }: PageMenuProps) {
               key={item.href}
               {...{
                 ...item,
-                href: `/docs${item.href}`,
+                href: item.href,
                 isSheet,
               }}
             />

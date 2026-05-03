@@ -5,7 +5,7 @@ keywords: ["development", "contributing", "open source", "doxa", "template"]
 icon: wrench
 ---
 
-This section is for engineers who want to **work on the template itself** — fix bugs, ship features, or extend the platform — rather than authors who only want to write docs. If you're here to write content, head to [Authoring → Markdown](/docs/authoring/markdown).
+This section is for engineers who want to **work on the template itself** — fix bugs, ship features, or extend the platform — rather than authors who only want to write docs. If you're here to write content, head to [Authoring → Markdown](/authoring/markdown).
 
 <Note title="What you'll need" type="warning">
   Node.js `^24.x` and pnpm `10.25.0` or newer. The repository is a single
@@ -17,42 +17,42 @@ This section is for engineers who want to **work on the template itself** — fi
 <CardGrid>
   <Card
     title="Local Setup"
-    href="/docs/development/setup"
+    href="/development/setup"
     icon="rocket"
     variant="small"
     description="Clone, install, run, and the scripts you'll use most"
   />
   <Card
     title="Architecture"
-    href="/docs/development/architecture"
+    href="/development/architecture"
     icon="layers"
     variant="small"
     description="Tour of the routes, content layer, and component registry"
   />
   <Card
     title="Coding Standards"
-    href="/docs/development/coding-standards"
+    href="/development/coding-standards"
     icon="settings"
     variant="small"
     description="TypeScript, lint, formatting, and import order"
   />
   <Card
     title="Quality And Testing"
-    href="/docs/development/quality-and-testing"
+    href="/development/quality-and-testing"
     icon="shield"
     variant="small"
     description="Typecheck, lint, build verification, and CI gates"
   />
   <Card
     title="Contributing"
-    href="/docs/development/contributing"
+    href="/development/contributing"
     icon="code"
     variant="small"
     description="Branching, commits, pull requests, and review flow"
   />
   <Card
     title="Release Process"
-    href="/docs/development/release-process"
+    href="/development/release-process"
     icon="package"
     variant="small"
     description="Versioning, changelog, and deploying the template"
@@ -65,8 +65,8 @@ The page you're reading lives inside the **Development** section. Sections are c
 
 | Section         | Slug            | Folder                                 | URL prefix                  |
 | :-------------- | :-------------- | :------------------------------------- | :-------------------------- |
-| Documentation   | `documentation` | `src/contents/docs/` (rootless)        | `/docs/<page>`              |
-| Development     | `development`   | `src/contents/docs/development/`       | `/docs/development/<page>`  |
+| Documentation   | `documentation` | `src/contents/docs/` (rootless)        | `/<page>`              |
+| Development     | `development`   | `src/contents/docs/development/`       | `/development/<page>`  |
 
 Each non-default section gets its own nav file: `src/contents/settings/documents.development.json`. The default section keeps `documents.json` unchanged.
 
@@ -74,15 +74,15 @@ Each non-default section gets its own nav file: `src/contents/settings/documents
 
 <Step>
   <StepItem title="Fork and clone">
-    Fork on GitHub, then clone your fork. See [Local Setup](/docs/development/setup).
+    Fork on GitHub, then clone your fork. See [Local Setup](/development/setup).
   </StepItem>
   <StepItem title="Branch off main">
     `git checkout -b fix/short-description` — keep branches focused on one change.
   </StepItem>
   <StepItem title="Run the quality gate">
-    `pnpm quality` chains format, lint, and typecheck. See [Quality And Testing](/docs/development/quality-and-testing).
+    `pnpm quality` chains format, lint, and typecheck. See [Quality And Testing](/development/quality-and-testing).
   </StepItem>
   <StepItem title="Open a pull request">
-    Reference the issue you're closing and describe the user-visible change. Review flow lives in [Contributing](/docs/development/contributing).
+    Reference the issue you're closing and describe the user-visible change. Review flow lives in [Contributing](/development/contributing).
   </StepItem>
 </Step>
