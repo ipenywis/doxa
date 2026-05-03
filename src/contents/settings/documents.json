@@ -70,6 +70,11 @@
     "icon": "globe"
   },
   {
+    "title": "Raw Markdown",
+    "href": "/ai/raw-markdown",
+    "icon": "file"
+  },
+  {
     "title": "Search",
     "href": "/search",
     "icon": "search"

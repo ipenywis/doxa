@@ -202,7 +202,7 @@ export default defineConfig(({ mode }) => {
     deploymentTarget === "cloudflare"
       ? {
           server: {
-            entry: "./src/server.ts",
+            entry: "./server.ts",
           },
           pages: getSitemapPages(),
           prerender: prerenderConfig,
@@ -213,7 +213,7 @@ export default defineConfig(({ mode }) => {
         }
       : {
           server: {
-            entry: "./src/server.ts",
+            entry: "./server.ts",
           },
           pages: getSitemapPages(),
           sitemap: {

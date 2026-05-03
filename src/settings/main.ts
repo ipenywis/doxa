@@ -41,6 +41,7 @@ interface AppSettings {
     scrollToTop: boolean;
     ai: AiFeatureSettings;
     copyPage: CopyPageFeatureSettings;
+    rawMarkdown: boolean;
     loadFromGithub: boolean;
   };
   openGraph: OpenGraph;
@@ -89,6 +90,7 @@ export const Settings: AppSettings = {
       markdown: true,
       rawText: true,
     },
+    rawMarkdown: true,
     loadFromGithub: false,
   },
   openGraph: {

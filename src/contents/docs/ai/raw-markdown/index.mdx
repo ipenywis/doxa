@@ -1,0 +1,98 @@
+---
+title: Raw Markdown Routes
+description: Append `.md` to any docs URL to get the page's source MDX as plain text — for AI agents, scripting, and direct copy.
+keywords:
+  [
+    "raw markdown",
+    ".md route",
+    "ai native docs",
+    "agent fetch",
+    "per page markdown",
+  ]
+icon: file
+---
+
+Every docs page is also reachable as raw markdown by appending `.md` to its URL. This gives AI agents and scripts a one-shot way to pull the source for a single page without parsing HTML or fetching the whole `/llms-full.txt` corpus.
+
+## Routes
+
+| Page URL             | Markdown URL            |
+| :------------------- | :---------------------- |
+| `/quickstart`        | `/quickstart.md`        |
+| `/configuration`     | `/configuration.md`     |
+| `/ai/chat-with-docs` | `/ai/chat-with-docs.md` |
+| `/development/setup` | `/development/setup.md` |
+
+The response body is the exact MDX file from `src/contents/docs/<slug>/index.mdx`, frontmatter included, served as `text/markdown; charset=utf-8`. Unknown slugs return `404 text/plain`.
+
+## How It Works
+
+<Mermaid
+  chart={`graph TD;
+    Request["GET /quickstart.md"] --> Worker[worker.js];
+    Worker -->|".md suffix"| Skip[Skip ASSETS binding];
+    Worker -->|"otherwise"| Assets[env.ASSETS];
+    Skip --> Server[src/server.ts];
+    Server --> Handler[tryRawMarkdownResponse];
+    Handler --> Store[contentStore.readRaw];
+    Store --> Md[Raw MDX response];`}
+/>
+
+The Cloudflare worker entry skips the static-asset binding for `.md` paths so the request reaches `src/server.ts`, which calls `tryRawMarkdownResponse` from `src/lib/raw-markdown.ts`. Both vite (default) and github content adapters expose the raw source identically.
+
+## When To Use Each Endpoint
+
+| Need                                             | Use                       |
+| :----------------------------------------------- | :------------------------ |
+| Fetch the source for one specific page           | `/<slug>.md`              |
+| Discover every page (titles, URLs, descriptions) | `/llms.txt`               |
+| Pull the entire corpus in one request            | `/llms-full.txt`          |
+| Cite a page in a chat response                   | The page URL or `.md` URL |
+
+<Note title="Frontmatter included" type="info">
+  The response is the file as it exists on disk, so the YAML frontmatter block
+  is preserved. Agents that only want the body should parse the leading `---`
+  block themselves.
+</Note>
+
+## Disable The Feature
+
+The feature is on by default. To turn it off, set `features.rawMarkdown` to `false` in `src/settings/main.ts`:
+
+```ts {6} showLineNumbers
+export const Settings = {
+  features: {
+    copyPage: {
+      markdown: true,
+    },
+    rawMarkdown: false,
+  },
+};
+```
+
+When disabled, requests for `/<slug>.md` fall through to the normal page route and render the HTML shell with a "Document Not Found" message — the same behavior as any other unmatched path.
+
+## Verification
+
+<Step>
+  <StepItem title="Run the docs site">
+    ```bash
+    pnpm dev
+    ```
+  </StepItem>
+
+  <StepItem title="Fetch a page as markdown">
+    ```bash
+    curl -i http://localhost:3000/quickstart.md
+    ```
+
+    The response should be `200 text/markdown` with a body that starts with `---` and the page frontmatter.
+
+  </StepItem>
+
+  <StepItem title="Confirm a missing slug returns 404">
+    ```bash
+    curl -i http://localhost:3000/does/not/exist.md
+    ```
+  </StepItem>
+</Step>

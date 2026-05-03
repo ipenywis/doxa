@@ -3,6 +3,8 @@ import {
   defaultStreamHandler,
 } from "@tanstack/react-start/server";
 
+import { tryRawMarkdownResponse } from "@/src/lib/raw-markdown";
+
 const startHandler = createStartHandler(defaultStreamHandler);
 
 function getNormalizedPath(pathname: string): string | null {
@@ -27,11 +29,15 @@ function redirectToPath(url: string, pathname: string) {
 
 const server = {
   async fetch(request: Request) {
-    const normalizedPath = getNormalizedPath(new URL(request.url).pathname);
+    const { pathname } = new URL(request.url);
 
+    const normalizedPath = getNormalizedPath(pathname);
     if (normalizedPath) {
       return redirectToPath(request.url, normalizedPath);
     }
+
+    const rawMarkdown = await tryRawMarkdownResponse(pathname);
+    if (rawMarkdown) return rawMarkdown;
 
     return startHandler(request);
   },
