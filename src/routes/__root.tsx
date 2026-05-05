@@ -191,7 +191,7 @@ function RootDocument({
                   style={appScrollStyle}
                 >
                   <Navbar />
-                  <main className="mx-auto h-auto max-w-[1440px] px-4 sm:px-6 md:px-8">
+                  <main className="mx-auto h-auto min-h-[calc(100vh-12rem)] max-w-[1440px] px-4 sm:px-6 md:px-8">
                     {children}
                   </main>
                   {!isDemoMode && <Footer />}

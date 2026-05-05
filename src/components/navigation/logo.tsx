@@ -1,5 +1,6 @@
 import type { ElementType } from "react";
 
+import { PageRoutes } from "@/src/lib/pageroutes";
 import { Link } from "@/src/lib/transition";
 
 type LogoVariant = "full" | "icon";
@@ -12,6 +13,7 @@ interface LogoProps {
 }
 
 const LOGO_ASPECT = 193 / 160;
+const homeHref = PageRoutes[0]?.href ?? "/";
 
 export function LogoMark({ size = 28 }: { size?: number }) {
   const height = size * LOGO_ASPECT;
@@ -53,7 +55,7 @@ export function Logo({
 
   return (
     <Link
-      href="/"
+      href={homeHref}
       title="doxa home"
       aria-label="doxa home"
       className={`flex items-center gap-1.5 ${className ?? ""}`}
