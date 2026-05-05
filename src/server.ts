@@ -14,7 +14,7 @@ function getNormalizedPath(pathname: string): string | null {
     return pathname.replace(/^\/docs\/assets/, "/assets");
   }
 
-  if (pathname === "/docs") return "/";
+  if (pathname === "/docs") return homePath ?? "/";
   if (pathname.startsWith("/docs/")) {
     return pathname.slice("/docs".length) || "/";
   }

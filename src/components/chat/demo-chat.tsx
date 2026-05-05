@@ -2,6 +2,7 @@ import { LuSend } from "react-icons/lu";
 import Markdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 
+import { Link } from "@/src/lib/transition";
 import { ChatDrawer } from "@/src/components/chat/chat-drawer";
 
 const DEMO_USER_MESSAGE = "How do I get started with the documentation?";
@@ -14,22 +15,34 @@ const DEMO_AI_RESPONSE = `Great question! Here's how to get started:
 
 Each documentation page uses **MDX** format with YAML frontmatter for metadata. You can use built-in components like \`<Note>\`, \`<Card>\`, and \`<Step>\` to create rich, interactive documentation.
 
-Check out the [Getting Started](/docs/getting-started) guide for a full walkthrough.`;
+Check out the [Quickstart](/quickstart) guide for a full walkthrough.`;
+
+type MarkdownAnchorProps = React.AnchorHTMLAttributes<HTMLAnchorElement> & {
+  node?: unknown;
+};
 
 const markdownComponents = {
-  a: ({
-    href,
-    children,
-    ...props
-  }: React.AnchorHTMLAttributes<HTMLAnchorElement>) => (
-    <a
-      href={href}
-      className="text-primary underline underline-offset-2 hover:text-primary/80"
-      {...props}
-    >
-      {children}
-    </a>
-  ),
+  a: ({ href, children, node, ...props }: MarkdownAnchorProps) => {
+    void node;
+
+    return href?.startsWith("/") ? (
+      <Link
+        href={href}
+        className="text-primary underline underline-offset-2 hover:text-primary/80"
+        {...props}
+      >
+        {children}
+      </Link>
+    ) : (
+      <a
+        href={href}
+        className="text-primary underline underline-offset-2 hover:text-primary/80"
+        {...props}
+      >
+        {children}
+      </a>
+    );
+  },
   code: ({
     children,
     className,

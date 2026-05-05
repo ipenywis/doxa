@@ -32,16 +32,31 @@ const mdxModules = import.meta.glob<
   ComponentType<{ components?: typeof components }>
 >("/src/contents/docs/**/index.mdx", { eager: true, import: "default" });
 
+function isDemoSearch(search: Record<string, unknown>): boolean {
+  return (
+    search.demo === true ||
+    search.demo === "true" ||
+    search.demo === "" ||
+    search.demo === 1 ||
+    search.demo === "1"
+  );
+}
+
 export const Route = createFileRoute("/$")({
   validateSearch: z.object({
     _splat: z.string().optional(),
   }),
-  loader: async ({ params }) => {
+  loader: async ({ location, params }) => {
     const slug = params._splat ?? "";
     if (!slug) {
       const firstRoute = PageRoutes[0]?.href;
       if (firstRoute) {
-        throw redirect({ to: firstRoute });
+        throw redirect({
+          to: firstRoute,
+          ...(isDemoSearch(location.search)
+            ? { search: { demo: true as const } }
+            : {}),
+        });
       }
       return { slug: "", document: null, routeTitle: null, rawDoc: null };
     }
