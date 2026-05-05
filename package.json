@@ -28,7 +28,8 @@
     "prepare": "husky",
     "precommit": "pnpm exec lint-staged",
     "deploy": "pnpm run deploy:cloudflare",
-    "deploy:cloudflare": "pnpm run build:cloudflare && pnpx wrangler deploy -c dist/server/wrangler.json",
+    "deploy:cloudflare": "pnpm run build:cloudflare && pnpm run deploy:cloudflare:built",
+    "deploy:cloudflare:built": "pnpm exec wrangler deploy -c dist/server/wrangler.json",
     "deploy:vercel": "vercel deploy --prod"
   },
   "dependencies": {
@@ -111,7 +112,8 @@
     "typescript-eslint": "^8.50.0",
     "vercel": "^51.3.0",
     "vite": "^7.3.0",
-    "vite-tsconfig-paths": "^5.1.4"
+    "vite-tsconfig-paths": "^5.1.4",
+    "wrangler": "4.82.2"
   },
   "engines": {
     "node": "^24.x"
