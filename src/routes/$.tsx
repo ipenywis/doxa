@@ -1,5 +1,5 @@
 import { useEffect, useMemo, type ComponentType } from "react";
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, redirect } from "@tanstack/react-router";
 import { z } from "zod";
 
 import { Settings } from "@/src/settings/main";
@@ -37,9 +37,12 @@ export const Route = createFileRoute("/$")({
     _splat: z.string().optional(),
   }),
   loader: async ({ params }) => {
-    const firstRoute = PageRoutes[0]?.href?.replace(/^\//, "");
-    const slug = params._splat || firstRoute || "";
+    const slug = params._splat ?? "";
     if (!slug) {
+      const firstRoute = PageRoutes[0]?.href;
+      if (firstRoute) {
+        throw redirect({ to: firstRoute });
+      }
       return { slug: "", document: null, routeTitle: null, rawDoc: null };
     }
     try {
