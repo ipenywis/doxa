@@ -8,8 +8,7 @@ A beautiful, fast documentation template that **writes and updates itself**. Pow
 
 Doxa gives you a production-ready documentation site out of the box — with edge deployment, AI-powered chat, rich MDX components, and a polished reading experience.
 
-Built on **TanStack Start** for full-stack React with SSR, deployed to **Cloudflare Workers**, **Vercel** and many more providers coming soon.
-
+Built on **TanStack Start** for full-stack React with SSR, deployable to **Cloudflare Workers**, **Vercel**, and **Docker** for any VPS or container host.
 
 ## Features
 
@@ -19,7 +18,7 @@ The **Doxa agent** is built specifically to generate and auto-update documentati
 
 It integrates natively with this template: generated pages drop straight into `src/contents/docs/`, use the registered MDX components, and respect your section layout and frontmatter conventions out of the box.
 
-Two ways to run it, both keep your docs current on every PR: 
+Two ways to run it, both keep your docs current on every PR:
 
 - **Doxa GitHub App (Coming very soon)** — install once on your repo. Every new PR is reviewed by the agent, which opens a follow-up PR (or commit) updating the affected docs pages so `main` is never out of sync with shipped code.
 - **Open-source CLI (Coming very soon)** — run the same agent locally or in your own CI. Wire it into a GitHub Action, pre-merge hook, or scheduled job — same behavior, your infrastructure.
@@ -62,7 +61,8 @@ The result: docs that stay accurate by default, without anyone remembering to up
 
 - **Cloudflare Workers** — edge deployment with Wrangler
 - **Vercel** — one-click deploy with pre-configured setup
-- Optimized for edge runtime performance
+- **Docker** — one-command VPS deployment with a minimal Node distroless image
+- Optimized for edge and container runtime performance
 
 ---
 
@@ -111,6 +111,20 @@ pnpm deploy:vercel
 ```
 
 `VITE_SITE_URL` should match your public docs URL so canonical tags, sitemap, robots, and social metadata use the correct host.
+
+### Docker
+
+```bash
+docker build \
+  --build-arg VITE_SITE_URL=https://docs.example.com \
+  -t doxa-docs .
+
+docker run --rm -p 6000:3000 \
+  -e AI_API_KEY=your-provider-key \
+  doxa-docs
+```
+
+Open [http://localhost:6000](http://localhost:6000) after the container starts. The Docker image builds the app with Nitro's Node server preset and runs the generated `.output/server/index.mjs` server from a non-root distroless Node 24 runtime. The app listens on port `3000` inside the container; `-p 6000:3000` exposes it on port `6000` on your machine or VPS. Pass public `VITE_*` values as build arguments, and pass secrets such as `AI_API_KEY` or `DOXA_GITHUB_TOKEN` only at runtime.
 
 ---
 
@@ -178,7 +192,9 @@ All site settings live in `src/settings/main.ts`:
 | `pnpm dev`           | Start dev server (Cloudflare)               |
 | `pnpm dev:vercel`    | Start dev server (Vercel)                   |
 | `pnpm build`         | Production build (Cloudflare)               |
+| `pnpm build:docker`  | Production build for Docker / Node server   |
 | `pnpm build:vercel`  | Production build (Vercel)                   |
+| `pnpm start:docker`  | Run the Docker-targeted Node server locally |
 | `pnpm deploy`        | Deploy to Cloudflare Workers                |
 | `pnpm deploy:vercel` | Deploy to Vercel                            |
 | `pnpm generate:docs` | Regenerate navigation from folder structure |
@@ -193,13 +209,13 @@ Doxa ships a **unified content access layer** with pluggable adapters. The AI ch
 
 Two adapters ship out of the box:
 
-|                     | `vite` (**default and recommended**)                  | `github`                                                           |
-| ------------------- | --------------------------------- | ------------------------------------------------------------------ |
-| Where content lives | `src/contents/docs/` in this repo | Separate GitHub repo                                               |
-| Update model        | Redeploy to ship changes          | Edits appear within cache TTL                                      |
-| Latency             | Zero (bundled at build time)      | GitHub API + TTL cache                                             |
-| External calls      | None                              | GitHub REST API                                                    |
-| Best for            | Site + docs shipped together      | Content team edits in GitHub web UI; docs decoupled from site repo |
+|                     | `vite` (**default and recommended**) | `github`                                                           |
+| ------------------- | ------------------------------------ | ------------------------------------------------------------------ |
+| Where content lives | `src/contents/docs/` in this repo    | Separate GitHub repo                                               |
+| Update model        | Redeploy to ship changes             | Edits appear within cache TTL                                      |
+| Latency             | Zero (bundled at build time)         | GitHub API + TTL cache                                             |
+| External calls      | None                                 | GitHub REST API                                                    |
+| Best for            | Site + docs shipped together         | Content team edits in GitHub web UI; docs decoupled from site repo |
 
 ### Switching to GitHub mode
 

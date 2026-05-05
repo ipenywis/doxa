@@ -98,7 +98,7 @@ Configured in `src/settings/sections.ts`. Exactly one section is `default: true`
 
 ### Content store
 
-`src/lib/content/store.ts` exposes an async, edge-safe API (`getAllPaths`, `getEntry`, `readRaw`, `searchContent`). The adapter is selected from `src/settings/content.ts` via `CONTENT_SOURCE` (`vite` or `github`). The agent tools (`grep`, `cat`), `/llms.txt`, `/llms-full.txt`, and the search indexer all consume `contentStore` — they never call `fs` directly. This is what makes the template runnable on Cloudflare Workers and Vercel Edge.
+`src/lib/content/store.ts` exposes an async, edge-safe API (`getAllPaths`, `getEntry`, `readRaw`, `searchContent`). The adapter is selected from `src/settings/content.ts` via `CONTENT_SOURCE` (`vite` or `github`). The agent tools (`grep`, `cat`), `/llms.txt`, `/llms-full.txt`, and the search indexer all consume `contentStore` — they never call `fs` directly. This is what makes the template runnable on Cloudflare Workers, Vercel Edge, and Docker's Node server target.
 
 ### Page routes
 

@@ -65,7 +65,7 @@ function mdxSourceCapturePlugin(): PluginOption {
   };
 }
 
-type DeploymentTarget = "cloudflare" | "vercel";
+type DeploymentTarget = "cloudflare" | "vercel" | "docker";
 
 interface DocumentRoute {
   title?: string;
@@ -166,12 +166,23 @@ function getSitemapPages() {
 }
 
 function getDeploymentTarget(): DeploymentTarget {
-  return process.env.DOXA_DEPLOY_TARGET === "vercel" ? "vercel" : "cloudflare";
+  switch (process.env.DOXA_DEPLOY_TARGET) {
+    case "docker":
+      return "docker";
+    case "vercel":
+      return "vercel";
+    default:
+      return "cloudflare";
+  }
 }
 
 function getHostingPlugins(target: DeploymentTarget): PluginOption[] {
   if (target === "vercel") {
     return [nitro({ preset: "vercel" })];
+  }
+
+  if (target === "docker") {
+    return [nitro({ preset: "node-server" })];
   }
 
   return [cloudflare({ viteEnvironment: { name: "ssr" } })];
@@ -198,29 +209,19 @@ export default defineConfig(({ mode }) => {
         }
       : undefined;
 
-  const startConfig =
-    deploymentTarget === "cloudflare"
-      ? {
-          server: {
-            entry: "./server.ts",
-          },
-          pages: getSitemapPages(),
-          prerender: prerenderConfig,
-          sitemap: {
-            enabled: true,
-            host: sitemapHost,
-          },
-        }
-      : {
-          server: {
-            entry: "./server.ts",
-          },
-          pages: getSitemapPages(),
-          sitemap: {
-            enabled: true,
-            host: sitemapHost,
-          },
-        };
+  const startConfig = {
+    server: {
+      entry: "./server.ts",
+    },
+    pages: getSitemapPages(),
+    ...(deploymentTarget === "cloudflare"
+      ? { prerender: prerenderConfig }
+      : {}),
+    sitemap: {
+      enabled: true,
+      host: sitemapHost,
+    },
+  };
 
   return {
     base: "/",

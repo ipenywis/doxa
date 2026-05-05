@@ -165,18 +165,20 @@ internally linked pages.
   <Tabs defaultValue="cloudflare" className="pt-5 pb-1">
     <TabsList>
       <TabsTrigger value="cloudflare">Cloudflare</TabsTrigger>
+      <TabsTrigger value="docker">Docker</TabsTrigger>
       <TabsTrigger value="vercel">Vercel</TabsTrigger>
     </TabsList>
     <TabsContent value="cloudflare">
       ```bash pnpm build:cloudflare ```
     </TabsContent>
+    <TabsContent value="docker">```bash pnpm build:docker ```</TabsContent>
     <TabsContent value="vercel">```bash pnpm build:vercel ```</TabsContent>
   </Tabs>
 </StepItem>
 
   <StepItem title="Check generated sitemap output">
     ```bash
-    test -f dist/client/sitemap.xml
+    test -f dist/client/sitemap.xml || test -f .output/public/sitemap.xml
     ```
   </StepItem>
 </Step>

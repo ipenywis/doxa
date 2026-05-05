@@ -1,17 +1,18 @@
 ---
 title: Deployment
-description: Deploy Doxa Docs to Cloudflare Workers or Vercel with the right build target, environment variables, and validation steps.
+description: Deploy Doxa Docs to Cloudflare Workers, Vercel, or Docker with the right build target, environment variables, and validation steps.
 keywords:
   [
     "deployment",
     "cloudflare workers",
     "vercel",
+    "docker",
     "build",
     "environment variables",
   ]
 ---
 
-Doxa includes scripts for Cloudflare Workers and Vercel. Cloudflare is the default target, and Vercel has dedicated build and deploy commands.
+Doxa includes scripts for Cloudflare Workers, Vercel, and Docker. Cloudflare is the default target, Vercel has dedicated build and deploy commands, and the included Dockerfile makes Doxa Docs deployable to any VPS or server that supports Docker with a single build-and-run flow.
 
 ## Deployment Targets
 
@@ -19,12 +20,20 @@ Doxa includes scripts for Cloudflare Workers and Vercel. Cloudflare is the defau
   <TabsList>
     <TabsTrigger value="cloudflare">Cloudflare Workers</TabsTrigger>
     <TabsTrigger value="vercel">Vercel</TabsTrigger>
+    <TabsTrigger value="docker">Docker</TabsTrigger>
   </TabsList>
   <TabsContent value="cloudflare">
-    ```bash pnpm build:cloudflare pnpm deploy:cloudflare ```
+    <code>{"pnpm build:cloudflare && pnpm deploy:cloudflare"}</code>
   </TabsContent>
   <TabsContent value="vercel">
-    ```bash pnpm build:vercel pnpm deploy:vercel ```
+    <code>{"pnpm build:vercel && pnpm deploy:vercel"}</code>
+  </TabsContent>
+  <TabsContent value="docker">
+    <code>
+      {
+        "docker build --build-arg VITE_SITE_URL=https://docs.example.com -t doxa-docs ."
+      }
+    </code>
   </TabsContent>
 </Tabs>
 
@@ -86,6 +95,49 @@ Doxa includes scripts for Cloudflare Workers and Vercel. Cloudflare is the defau
   </StepItem>
 </Step>
 
+## Docker
+
+Because the repository ships with a production Dockerfile, Doxa Docs can be
+deployed to any VPS or container host that supports Docker without writing a
+custom server wrapper. Build the image, run it behind your provider's reverse
+proxy, and point your domain at the host.
+
+<Step>
+  <StepItem title="Build the image">
+    Pass public site settings as build arguments so generated client assets,
+    canonical tags, sitemap entries, robots, and AI-native source URLs match
+    your production host.
+
+    ```bash
+    docker build \
+      --build-arg VITE_SITE_URL=https://docs.example.com \
+      -t doxa-docs .
+    ```
+
+  </StepItem>
+
+  <StepItem title="Run the container">
+    Pass private values as runtime environment variables. The app listens on
+    port `3000` inside the container; map any public host port to that internal
+    port. This example exposes the app at `http://localhost:6000`.
+
+    ```bash
+    docker run --rm -p 6000:3000 \
+      -e AI_API_KEY=your-provider-key \
+      doxa-docs
+    ```
+
+  </StepItem>
+</Step>
+
+<Note title="Minimal runtime" type="info">
+  Docker uses Nitro's Node server preset and a non-root distroless Node 24
+  runtime image. The final image contains only Nitro's generated `.output`
+  directory, not source files, package manager state, or development
+  dependencies. Seeing `Listening on: http://localhost:3000/` in the container
+  logs is expected when the host is mapped with `-p 6000:3000`.
+</Note>
+
 ## Preflight Checklist
 
 - [x] `pnpm generate-content-json` has been run after content changes.
@@ -95,6 +147,7 @@ Doxa includes scripts for Cloudflare Workers and Vercel. Cloudflare is the defau
 - [x] `/sitemap.xml` is generated and uses the production docs host.
 - [x] `/llms.txt` and `/llms-full.txt` return the expected content.
 - [x] Search opens with `Command+K` or `Ctrl+K`.
+- [x] Docker deployments map a host port to container port `3000` and pass secrets as runtime environment variables.
 
 <Note title="Build before deploy" type="success">
   Run the same build target in CI that you deploy in production. That catches

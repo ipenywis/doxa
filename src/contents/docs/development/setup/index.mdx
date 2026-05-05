@@ -106,7 +106,7 @@ The generator is **append-only** — it never reorders or deletes nav entries. I
 
 Most local development needs none. The two that affect behaviour:
 
-- `DOXA_DEPLOY_TARGET` — `cloudflare` (default) or `vercel`. Picked up by `pnpm dev:*` and `pnpm build:*`.
+- `DOXA_DEPLOY_TARGET` — `cloudflare` (default), `docker`, or `vercel`. Picked up by `pnpm dev:*` and `pnpm build:*`.
 - `CONTENT_SOURCE` — `vite` (default) or `github`. Selects the content adapter in `src/settings/content.ts`.
 
 ## Next

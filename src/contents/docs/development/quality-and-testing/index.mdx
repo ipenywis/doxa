@@ -17,11 +17,11 @@ pnpm quality
 
 `pnpm quality` chains:
 
-| Step             | Command                       | What it catches                                       |
-| :--------------- | :---------------------------- | :---------------------------------------------------- |
-| Format check     | `pnpm format:check`           | Prettier drift, unsorted imports                      |
-| Lint             | `pnpm lint`                   | Unused symbols, banned APIs, accessibility lapses     |
-| Typecheck        | `pnpm typecheck`              | Cross-file type errors (`tsc --noEmit`)               |
+| Step         | Command             | What it catches                                   |
+| :----------- | :------------------ | :------------------------------------------------ |
+| Format check | `pnpm format:check` | Prettier drift, unsorted imports                  |
+| Lint         | `pnpm lint`         | Unused symbols, banned APIs, accessibility lapses |
+| Typecheck    | `pnpm typecheck`    | Cross-file type errors (`tsc --noEmit`)           |
 
 If `format:check` fails, run `pnpm clean` (autofix lint + format) and try again.
 
@@ -45,19 +45,19 @@ The build prerenders all static doc pages. Any glob mismatch, SSR-only `fs` usag
 For non-trivial UI changes, walk through the golden paths in the running app:
 
 <Step>
-  <StepItem title="Run the dev server">
-    ```bash
-    pnpm dev
-    ```
-  </StepItem>
+  <StepItem title="Run the dev server">```bash pnpm dev ```</StepItem>
   <StepItem title="Navigate the docs">
-    Visit `/overview`, click into a few sub-pages, use the sidebar, breadcrumbs, prev/next, and `Cmd+K` search. Verify nothing 404s.
+    Visit `/overview`, click into a few sub-pages, use the sidebar, breadcrumbs,
+    prev/next, and `Cmd+K` search. Verify nothing 404s.
   </StepItem>
   <StepItem title="Try multiple sections">
-    If you're touching section-aware code, add a temporary section to `src/settings/sections.ts`, drop a sample MDX page, run `pnpm generate:docs`, and confirm tabs + sidebar swap correctly.
+    If you're touching section-aware code, add a temporary section to
+    `src/settings/sections.ts`, drop a sample MDX page, run `pnpm
+    generate:docs`, and confirm tabs + sidebar swap correctly.
   </StepItem>
-  <StepItem title="Test both targets">
-    `pnpm build:cloudflare` and `pnpm build:vercel` should both succeed. Adapter-specific bugs surface in only one.
+  <StepItem title="Test deployment targets">
+    `pnpm build:cloudflare`, `pnpm build:docker`, and `pnpm build:vercel` should
+    all succeed. Adapter-specific bugs surface in only one.
   </StepItem>
 </Step>
 
