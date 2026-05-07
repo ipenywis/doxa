@@ -153,16 +153,7 @@ function getDocsPages(routes: DocumentRoute[], parentHref = ""): SitemapPage[] {
 }
 
 function getSitemapPages() {
-  const docPages = getDocsPages(Documents as DocumentRoute[]);
-  const firstDoc = docPages[0];
-
-  return [
-    {
-      path: "/",
-      sitemap: firstDoc?.sitemap,
-    } satisfies SitemapPage,
-    ...docPages,
-  ];
+  return getDocsPages(Documents as DocumentRoute[]);
 }
 
 function getDeploymentTarget(): DeploymentTarget {
