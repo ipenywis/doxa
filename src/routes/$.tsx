@@ -1,12 +1,16 @@
 import { useEffect, useMemo, type ComponentType } from "react";
-import { createFileRoute, redirect } from "@tanstack/react-router";
+import { createFileRoute, notFound, redirect } from "@tanstack/react-router";
 import { z } from "zod";
 
 import { Settings } from "@/src/settings/main";
-import { getSectionFromPath } from "@/src/settings/sections";
+import {
+  getSectionFromPath,
+  isSectionSlug,
+  visibleSections,
+} from "@/src/settings/sections";
 import type { ChatPageContext } from "@/src/lib/chat-page-context";
 import { components } from "@/src/lib/components";
-import { fetchDocumentFromServer, fetchRawDocument } from "@/src/lib/markdown";
+import { fetchRawDocument, getDocument } from "@/src/lib/markdown";
 import {
   getPageRoutesForSection,
   getRoutesForSection,
@@ -48,20 +52,43 @@ export const Route = createFileRoute("/$")({
   }),
   loader: async ({ location, params }) => {
     const slug = params._splat ?? "";
+    const demoSearch = isDemoSearch(location.search)
+      ? { search: { demo: true as const } }
+      : {};
     if (!slug) {
-      const firstRoute = PageRoutes[0]?.href;
+      // Prefer the first default-section route; fall through to the first
+      // route of any visible section if default is empty (mis-configured or
+      // pre-build state). Keeps `/` from ever leaving the user stranded.
+      const firstRoute =
+        PageRoutes[0]?.href ??
+        visibleSections
+          .map((s) => getPageRoutesForSection(s.slug)[0]?.href)
+          .find(Boolean);
+
       if (firstRoute) {
-        throw redirect({
-          to: firstRoute,
-          ...(isDemoSearch(location.search)
-            ? { search: { demo: true as const } }
-            : {}),
-        });
+        throw redirect({ to: firstRoute, ...demoSearch });
       }
       return { slug: "", document: null, routeTitle: null, rawDoc: null };
     }
+    // `default/` is an organizational folder name on disk only — the
+    // canonical URL for default-section pages is rootless (`/<page>`).
+    // Reject the prefixed form so we have a single canonical URL per
+    // page (good for SEO + bookmarks).
+    if (slug === "default" || slug.startsWith("default/")) {
+      throw notFound();
+    }
+    // Section-root URL (`/<section-slug>` with no page) → redirect to that
+    // section's first page. If the first page is the section root itself,
+    // render it directly to avoid a self-redirect loop.
+    if (isSectionSlug(slug)) {
+      const sectionFirst = getPageRoutesForSection(slug)[0]?.href;
+
+      if (sectionFirst && sectionFirst !== `/${slug}`) {
+        throw redirect({ to: sectionFirst, ...demoSearch });
+      }
+    }
     try {
-      const document = await fetchDocumentFromServer({ data: slug });
+      const document = await getDocument(slug);
       const section = getSectionFromPath(`/${slug}`);
       const sectionPages = getPageRoutesForSection(section.slug);
       const routeTitle =
@@ -113,7 +140,18 @@ export const Route = createFileRoute("/$")({
 });
 
 function MdxContent({ slug }: { slug: string }) {
-  const MDXContent = mdxModules[`/src/contents/docs/${slug}/index.mdx`];
+  // Two-pass lookup mirrors the content adapters' canonicalization
+  // (see src/lib/content/adapters/vite-adapter.ts:toCanonicalPath).
+  // Default-section pages live physically under `default/<page>/index.mdx`
+  // but are served at rootless URLs `/<page>`. Non-default sections keep
+  // their slug prefix on disk and in the URL.
+  //
+  // Order matters: rootless first wins so that a slug like "configuration"
+  // resolves to the file at `default/configuration/index.mdx` after the
+  // canonical-location lookup misses.
+  const MDXContent =
+    mdxModules[`/src/contents/docs/${slug}/index.mdx`] ??
+    mdxModules[`/src/contents/docs/default/${slug}/index.mdx`];
 
   if (!MDXContent) {
     return (

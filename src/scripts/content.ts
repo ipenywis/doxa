@@ -1,5 +1,6 @@
 import { promises as fs } from "fs";
 import path from "path";
+import { fileURLToPath } from "url";
 
 import Documents from "@/src/contents/settings/documents.json";
 import grayMatter from "gray-matter";
@@ -38,9 +39,25 @@ function isRoute(
   return "href" in node && "title" in node;
 }
 
+/**
+ * Strip the optional `default/` folder prefix so URLs for default-section
+ * pages stay rootless (`/quickstart`, not `/default/quickstart`). Mirrors
+ * the contract enforced by the content adapters.
+ */
+const DEFAULT_SECTION_DIR = "default";
+
+function stripDefaultSectionPrefix(relativePath: string): string {
+  const segments = relativePath.split(/[\\/]/);
+  if (segments[0] === DEFAULT_SECTION_DIR) {
+    return segments.slice(1).join("/");
+  }
+  return relativePath.replace(/\\/g, "/");
+}
+
 function createSlug(filePath: string): string {
   const relativePath = path.relative(docsDir, filePath);
-  const parsed = path.parse(relativePath);
+  const canonical = stripDefaultSectionPrefix(relativePath);
+  const parsed = path.parse(canonical);
 
   const slugPath = parsed.dir ? `${parsed.dir}/${parsed.name}` : parsed.name;
   const normalizedSlug = slugPath.replace(/\\/g, "/");
@@ -311,7 +328,7 @@ async function getMdxFiles(dir: string): Promise<string[]> {
   return files;
 }
 
-async function convertMdxToJson() {
+export async function buildSearchData(): Promise<void> {
   try {
     await ensureDirectoryExists(outputDir);
 
@@ -321,19 +338,41 @@ async function convertMdxToJson() {
       const partial = buildBreadcrumbMap(docs);
       partial.forEach((value, key) => breadcrumbMap.set(key, value));
     }
-    const mdxFiles = await getMdxFiles(docsDir);
+    // Walk every .mdx under contents/docs. When the same canonical slug
+    // exists both rootless and under `default/`, the `default/` copy wins.
+    // We achieve that by ordering: rootless files first, default/ last, and
+    // deduping the resulting entries by slug — the later occurrence
+    // overrides the earlier one.
+    const allMdxFiles = await getMdxFiles(docsDir);
+    const mdxFiles = [...allMdxFiles].sort((a, b) => {
+      const aDefault = path
+        .relative(docsDir, a)
+        .startsWith(`${DEFAULT_SECTION_DIR}${path.sep}`);
+      const bDefault = path
+        .relative(docsDir, b)
+        .startsWith(`${DEFAULT_SECTION_DIR}${path.sep}`);
+      if (aDefault === bDefault) return a.localeCompare(b);
+      return aDefault ? 1 : -1;
+    });
 
-    const entries: SearchIndexEntry[] = [];
-    const legacyDocs: LegacyDocument[] = [];
+    const entriesBySlug = new Map<string, SearchIndexEntry>();
+    const legacyBySlug = new Map<string, LegacyDocument>();
     for (const file of mdxFiles) {
       const { entry, legacy } = await processMdxFile(
         file,
         breadcrumbMap,
         docsBySection
       );
-      entries.push(entry);
-      legacyDocs.push(legacy);
+      if (entriesBySlug.has(entry.slug)) {
+        console.warn(
+          `[search] duplicate slug ${entry.slug}: ${file} overrides earlier rootless copy`
+        );
+      }
+      entriesBySlug.set(entry.slug, entry);
+      legacyBySlug.set(legacy.slug, legacy);
     }
+    const entries = Array.from(entriesBySlug.values());
+    const legacyDocs = Array.from(legacyBySlug.values());
 
     const index = buildIndex(entries);
     const indexPath = path.join(outputDir, "index.json");
@@ -351,4 +390,10 @@ async function convertMdxToJson() {
   }
 }
 
-convertMdxToJson();
+// Auto-run when invoked directly (`tsx src/scripts/content.ts`); skip when
+// imported (e.g. by the vite plugin in vite.config.ts).
+const invokedDirectly =
+  process.argv[1] && process.argv[1] === fileURLToPath(import.meta.url);
+if (invokedDirectly) {
+  buildSearchData();
+}

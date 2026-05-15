@@ -1,14 +1,32 @@
 /**
  * Sections — Top-level docs surfaces (Documentation, API Reference, Development, …).
  *
- * Exactly one section must be marked `default: true`. The default section is
- * "rootless": its pages live at `/<slug>` and its content sits at the
- * root of `src/contents/docs/`. Non-default sections own a top-level folder
- * named after their slug — `src/contents/docs/<slug>/...` — and their URLs
- * are `/<slug>/...`.
+ * The canonical section list lives at `src/contents/settings/sections.json`,
+ * keeping it in the same shape and folder as `documents.json` and
+ * `theme.json`. This module is a thin loader: it imports the JSON,
+ * validates it once at module init, and exposes the public API every
+ * consumer (router, sidebar, content adapters, search) already uses.
  *
- * Edit the `sections` array to add / rename / reorder sections.
+ * Exactly one section must be marked `default: true`. The default section
+ * is "rootless": its pages live at `/<slug>` (no URL prefix). Non-default
+ * sections own a URL prefix matching their slug — `/<slug>/...`.
+ *
+ * On-disk layout (default-section content):
+ *   - Canonical: `src/contents/docs/default/<page>/index.mdx` (the layout
+ *     written by the Doxa CLI's docs generator).
+ *   - Legacy fallback: `src/contents/docs/<page>/index.mdx` (older sites
+ *     and hand-authored content). Both layouts resolve to the same URL —
+ *     the content adapters (vite / github) and the content-build script
+ *     transparently strip the `default/` prefix when building canonical
+ *     paths, and the canonical layout wins when both exist for the same
+ *     page.
+ *
+ * Non-default section content always lives under `src/contents/docs/<slug>/`.
+ *
+ * Edit `sections.json` to add / rename / reorder sections.
  */
+
+import sectionsData from "@/src/contents/settings/sections.json" with { type: "json" };
 
 import type { IconName } from "@/src/settings/icons";
 
@@ -32,20 +50,8 @@ export interface SectionConfig {
 
 const KEBAB_RE = /^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$/;
 
-export const sections: readonly SectionConfig[] = [
-  {
-    slug: "documentation",
-    label: "Documentation",
-    default: true,
-  },
-  {
-    slug: "development",
-    label: "Development",
-    icon: "wrench",
-    description:
-      "Set up the Doxa template locally, learn the codebase, and contribute changes.",
-  },
-];
+export const sections: readonly SectionConfig[] =
+  sectionsData as readonly SectionConfig[];
 
 function validateSections(list: readonly SectionConfig[]): void {
   if (list.length === 0) {

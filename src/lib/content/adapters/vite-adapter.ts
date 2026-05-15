@@ -18,6 +18,7 @@
  * Don't use when: you need runtime content updates without redeploys.
  */
 
+import { nonDefaultSections } from "@/src/settings/sections";
 import type { ContentAdapter } from "@/src/lib/content/types";
 
 /**
@@ -39,6 +40,7 @@ const mdxModules = import.meta.glob<MdxModule>(
 );
 
 const DOCS_ROOT_PREFIX = "/src/contents/docs/";
+const DEFAULT_SECTION_PREFIX = "default/";
 
 /**
  * Normalize a Vite glob key to a docs-root-relative path.
@@ -51,8 +53,44 @@ function toRelativePath(viteKey: string): string {
     : viteKey;
 }
 
-const fileMap = new Map<string, string>(
-  Object.entries(mdxModules).map(([viteKey, mod]) => {
+/**
+ * Strip the `default/` folder prefix when present so the canonical path the
+ * store sees never contains it. Pages physically located at
+ * `default/<slug>/index.mdx` resolve to URL `/<slug>` — the rootless layout
+ * is the public contract.
+ */
+function toCanonicalPath(relativePath: string): string {
+  return relativePath.startsWith(DEFAULT_SECTION_PREFIX)
+    ? relativePath.slice(DEFAULT_SECTION_PREFIX.length)
+    : relativePath;
+}
+
+/**
+ * True when the canonical path belongs to the default section — i.e. its
+ * first segment is NOT a non-default section slug.
+ */
+function isDefaultSectionPath(canonicalPath: string): boolean {
+  const firstSegment = canonicalPath.split("/", 1)[0];
+  return !nonDefaultSections.some((section) => section.slug === firstSegment);
+}
+
+/**
+ * Build the file map.
+ *
+ * Default-section content may live in either of two layouts:
+ *   1. Under `default/<page>/index.mdx` (canonical, written by the CLI).
+ *   2. Rootless at `<page>/index.mdx` (legacy template / hand-authored sites).
+ *
+ * Both resolve to the same canonical key (`<page>/index.mdx`). When both
+ * exist for the same page, the `default/` copy wins — that's the new source
+ * of truth — and we log a warning.
+ */
+const fileMap = (() => {
+  const map = new Map<string, string>();
+  const defaultEntries: [string, string][] = [];
+  const otherEntries: [string, string][] = [];
+
+  for (const [viteKey, mod] of Object.entries(mdxModules)) {
     const source = mod?.__rawSource;
     if (typeof source !== "string") {
       throw new Error(
@@ -60,9 +98,28 @@ const fileMap = new Map<string, string>(
           `mdxSourceCapturePlugin is not wired correctly in vite.config.ts.`
       );
     }
-    return [toRelativePath(viteKey), source];
-  })
-);
+    const relativePath = toRelativePath(viteKey);
+    if (relativePath.startsWith(DEFAULT_SECTION_PREFIX)) {
+      defaultEntries.push([toCanonicalPath(relativePath), source]);
+    } else {
+      otherEntries.push([relativePath, source]);
+    }
+  }
+
+  // Seed legacy/non-default entries first; default/ entries override later.
+  for (const [path, source] of otherEntries) map.set(path, source);
+  for (const [path, source] of defaultEntries) {
+    if (map.has(path) && isDefaultSectionPath(path)) {
+      console.warn(
+        `[vite-adapter] Both default/${path} and ${path} exist; preferring default/${path}. ` +
+          `Delete the rootless copy once migration is complete.`
+      );
+    }
+    map.set(path, source);
+  }
+
+  return map;
+})();
 
 const filePaths = Array.from(fileMap.keys()).sort();
 

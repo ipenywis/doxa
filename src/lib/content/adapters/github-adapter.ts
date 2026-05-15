@@ -24,7 +24,28 @@
  *   Cache TTL protects against bursts.
  */
 
+import { nonDefaultSections } from "@/src/settings/sections";
 import type { ContentAdapter } from "@/src/lib/content/types";
+
+const DEFAULT_SECTION_PREFIX = "default/";
+
+/**
+ * Strip the `default/` folder prefix when present so the canonical path the
+ * store sees never contains it. Mirrors the contract in the vite adapter:
+ * default-section content may live under `default/<page>/index.mdx` (the
+ * canonical layout the CLI writes) or rootless `<page>/index.mdx` (legacy);
+ * both resolve to the same canonical key. When both exist, `default/` wins.
+ */
+function toCanonicalPath(relativePath: string): string {
+  return relativePath.startsWith(DEFAULT_SECTION_PREFIX)
+    ? relativePath.slice(DEFAULT_SECTION_PREFIX.length)
+    : relativePath;
+}
+
+function isDefaultSectionPath(canonicalPath: string): boolean {
+  const firstSegment = canonicalPath.split("/", 1)[0];
+  return !nonDefaultSections.some((section) => section.slug === firstSegment);
+}
 
 export interface GitHubAdapterConfig {
   owner: string;
@@ -109,8 +130,12 @@ export function createGitHubAdapter(
     }
 
     const prefix = basePath ? `${basePath}/` : "";
-    const paths: string[] = [];
+    const paths = new Set<string>();
     const shaByPath = new Map<string, string>();
+    // Two passes so that default/<page> always overrides a legacy rootless
+    // <page> when both exist.
+    const defaultEntries: { canonical: string; sha: string }[] = [];
+    const otherEntries: { canonical: string; sha: string }[] = [];
 
     for (const entry of data.tree) {
       if (entry.type !== "blob") continue;
@@ -120,12 +145,33 @@ export function createGitHubAdapter(
       const relativePath = prefix
         ? entry.path.slice(prefix.length)
         : entry.path;
-      paths.push(relativePath);
-      shaByPath.set(relativePath, entry.sha);
+
+      if (relativePath.startsWith(DEFAULT_SECTION_PREFIX)) {
+        defaultEntries.push({
+          canonical: toCanonicalPath(relativePath),
+          sha: entry.sha,
+        });
+      } else {
+        otherEntries.push({ canonical: relativePath, sha: entry.sha });
+      }
+    }
+
+    for (const { canonical, sha } of otherEntries) {
+      paths.add(canonical);
+      shaByPath.set(canonical, sha);
+    }
+    for (const { canonical, sha } of defaultEntries) {
+      if (paths.has(canonical) && isDefaultSectionPath(canonical)) {
+        console.warn(
+          `[github-adapter] Both default/${canonical} and ${canonical} exist; preferring default/${canonical}.`
+        );
+      }
+      paths.add(canonical);
+      shaByPath.set(canonical, sha);
     }
 
     treeCache = {
-      paths: paths.sort(),
+      paths: Array.from(paths).sort(),
       shaByPath,
       expiresAt: now + ttlMs,
     };

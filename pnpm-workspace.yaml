@@ -1,0 +1,7 @@
+minimumReleaseAge: 10080 # 7 days, in minutes
+blockExoticSubdeps: true # default in pnpm 11, but be explicit # https://github.com/some-random-account/whatever
+allowBuilds:
+  "@openrouter/sdk": true
+  esbuild: true
+  sharp: true
+  workerd: true

@@ -1,0 +1,13 @@
+[
+  {
+    "slug": "documentation",
+    "label": "Documentation",
+    "default": true
+  },
+  {
+    "slug": "development",
+    "label": "Development",
+    "icon": "wrench",
+    "description": "Set up the Doxa template locally, learn the codebase, and contribute changes."
+  }
+]
