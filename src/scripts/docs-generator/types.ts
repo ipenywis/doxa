@@ -64,6 +64,8 @@ export interface MdxFrontmatter {
   order?: number;
   /** Optional: heading for this section */
   heading?: string;
+  /** Optional: icon name (key in src/settings/icons.ts iconMap) shown in the sidebar */
+  icon?: string;
   /** Optional: hide from menu */
   hidden?: boolean;
 }

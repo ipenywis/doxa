@@ -1,0 +1,340 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Doxa navigation icon",
+  "description": "Supported icon names for generated section navigation items. Choose the closest semantic match for the page title, route, and content.",
+  "type": "string",
+  "oneOf": [
+    {
+      "const": "alignJustify",
+      "title": "Text layout",
+      "description": "Use for navigation, page layout, formatting, menus, or structured text.",
+      "x-keywords": [
+        "navigation",
+        "layout",
+        "formatting",
+        "menu",
+        "text",
+        "sidebar"
+      ]
+    },
+    {
+      "const": "arrowUpRight",
+      "title": "External link",
+      "description": "Use for outbound links, redirects, external resources, or handoffs.",
+      "x-keywords": ["external", "link", "redirect", "open", "outbound"]
+    },
+    {
+      "const": "beaker",
+      "title": "Experiment",
+      "description": "Use for testing, experiments, labs, validation, previews, or advanced examples.",
+      "x-keywords": [
+        "test",
+        "testing",
+        "experiment",
+        "lab",
+        "preview",
+        "validation"
+      ]
+    },
+    {
+      "const": "book",
+      "title": "Documentation",
+      "description": "Use for general docs, guides, manuals, or written references.",
+      "x-keywords": ["documentation", "docs", "guide", "manual", "reference"]
+    },
+    {
+      "const": "bookOpen",
+      "title": "Learning",
+      "description": "Use for tutorials, learning paths, concepts, introductions, or educational pages.",
+      "x-keywords": [
+        "learn",
+        "tutorial",
+        "concept",
+        "introduction",
+        "education"
+      ]
+    },
+    {
+      "const": "box",
+      "title": "Component",
+      "description": "Use for components, packages, modules, building blocks, or bundled assets.",
+      "x-keywords": ["component", "package", "module", "asset", "block"]
+    },
+    {
+      "const": "circleHelp",
+      "title": "Help",
+      "description": "Use for troubleshooting, FAQs, support, errors, or help pages.",
+      "x-keywords": [
+        "help",
+        "faq",
+        "troubleshooting",
+        "support",
+        "error",
+        "issue"
+      ]
+    },
+    {
+      "const": "code",
+      "title": "Code",
+      "description": "Use for code examples, SDKs, APIs, source files, or programming references.",
+      "x-keywords": ["code", "sdk", "api", "source", "programming", "snippet"]
+    },
+    {
+      "const": "cog",
+      "title": "Configuration",
+      "description": "Use for configuration files, options, settings, preferences, or setup knobs.",
+      "x-keywords": [
+        "configuration",
+        "config",
+        "options",
+        "preferences",
+        "settings"
+      ]
+    },
+    {
+      "const": "compass",
+      "title": "Overview",
+      "description": "Use for overview, orientation, introduction, roadmap, or where-to-start pages.",
+      "x-keywords": [
+        "overview",
+        "orientation",
+        "introduction",
+        "start",
+        "roadmap"
+      ]
+    },
+    {
+      "const": "database",
+      "title": "Data",
+      "description": "Use for databases, storage, content sources, indexes, persistence, or datasets.",
+      "x-keywords": [
+        "database",
+        "data",
+        "storage",
+        "content",
+        "index",
+        "persistence"
+      ]
+    },
+    {
+      "const": "file",
+      "title": "File",
+      "description": "Use for markdown, files, documents, single pages, or generic written content.",
+      "x-keywords": ["file", "markdown", "document", "page", "content"]
+    },
+    {
+      "const": "flag",
+      "title": "Release",
+      "description": "Use for releases, milestones, goals, status, roadmaps, or launch steps.",
+      "x-keywords": [
+        "release",
+        "milestone",
+        "goal",
+        "status",
+        "launch",
+        "roadmap"
+      ]
+    },
+    {
+      "const": "folder",
+      "title": "Project structure",
+      "description": "Use for folder layouts, project structure, organization, or file trees.",
+      "x-keywords": [
+        "folder",
+        "structure",
+        "directory",
+        "project",
+        "organization",
+        "tree"
+      ]
+    },
+    {
+      "const": "globe",
+      "title": "Web",
+      "description": "Use for websites, deployment targets, hosting, networked services, or global settings.",
+      "x-keywords": [
+        "web",
+        "website",
+        "hosting",
+        "network",
+        "global",
+        "internet"
+      ]
+    },
+    {
+      "const": "house",
+      "title": "Home",
+      "description": "Use for home, landing, main entry, dashboard, or root pages.",
+      "x-keywords": ["home", "landing", "root", "dashboard", "main"]
+    },
+    {
+      "const": "key",
+      "title": "Authentication",
+      "description": "Use for authentication, authorization, secrets, API keys, tokens, or credentials.",
+      "x-keywords": [
+        "auth",
+        "authentication",
+        "authorization",
+        "secret",
+        "token",
+        "credential",
+        "key"
+      ]
+    },
+    {
+      "const": "layers",
+      "title": "Architecture",
+      "description": "Use for architecture, systems, layers, stacks, composition, or multi-part flows.",
+      "x-keywords": [
+        "architecture",
+        "system",
+        "layers",
+        "stack",
+        "composition",
+        "flow"
+      ]
+    },
+    {
+      "const": "list",
+      "title": "Reference list",
+      "description": "Use for lists, navigation references, indexes, catalogs, or ordered collections.",
+      "x-keywords": [
+        "list",
+        "reference",
+        "index",
+        "catalog",
+        "collection",
+        "navigation"
+      ]
+    },
+    {
+      "const": "package",
+      "title": "Package",
+      "description": "Use for installation, packages, dependencies, releases, or distribution.",
+      "x-keywords": [
+        "package",
+        "install",
+        "installation",
+        "dependency",
+        "distribution",
+        "release"
+      ]
+    },
+    {
+      "const": "play",
+      "title": "Quickstart",
+      "description": "Use for quickstarts, running commands, first steps, demos, or getting started.",
+      "x-keywords": [
+        "quickstart",
+        "run",
+        "demo",
+        "start",
+        "getting started",
+        "first steps"
+      ]
+    },
+    {
+      "const": "plug",
+      "title": "Integration",
+      "description": "Use for integrations, plugins, adapters, connectors, providers, or extensions.",
+      "x-keywords": [
+        "integration",
+        "plugin",
+        "adapter",
+        "connector",
+        "provider",
+        "extension"
+      ]
+    },
+    {
+      "const": "rocket",
+      "title": "Launch",
+      "description": "Use for setup, launch, onboarding, deployment starts, or fast first success.",
+      "x-keywords": [
+        "launch",
+        "setup",
+        "onboarding",
+        "quickstart",
+        "deploy",
+        "start"
+      ]
+    },
+    {
+      "const": "search",
+      "title": "Search",
+      "description": "Use for search, discovery, indexing, filtering, or lookup pages.",
+      "x-keywords": ["search", "discovery", "index", "filter", "lookup", "find"]
+    },
+    {
+      "const": "server",
+      "title": "Server",
+      "description": "Use for servers, APIs, backend services, deployment, hosting, or infrastructure.",
+      "x-keywords": [
+        "server",
+        "backend",
+        "api",
+        "deployment",
+        "hosting",
+        "infrastructure"
+      ]
+    },
+    {
+      "const": "settings",
+      "title": "Settings",
+      "description": "Use for customization, preferences, theme settings, feature flags, or controls.",
+      "x-keywords": [
+        "settings",
+        "customization",
+        "theme",
+        "preferences",
+        "controls",
+        "feature flags"
+      ]
+    },
+    {
+      "const": "shield",
+      "title": "Security",
+      "description": "Use for security, privacy, permissions, safeguards, policy, or protection.",
+      "x-keywords": [
+        "security",
+        "privacy",
+        "permissions",
+        "policy",
+        "protection",
+        "safe"
+      ]
+    },
+    {
+      "const": "terminal",
+      "title": "CLI",
+      "description": "Use for CLI commands, terminals, shells, scripts, command references, or developer tools.",
+      "x-keywords": ["cli", "terminal", "shell", "command", "script", "tool"]
+    },
+    {
+      "const": "wrench",
+      "title": "Development",
+      "description": "Use for development, maintenance, contributing, debugging, or operational tools.",
+      "x-keywords": [
+        "development",
+        "maintenance",
+        "contributing",
+        "debugging",
+        "tool",
+        "operations"
+      ]
+    },
+    {
+      "const": "zap",
+      "title": "Automation",
+      "description": "Use for AI, automation, performance, real-time features, or powerful shortcuts.",
+      "x-keywords": [
+        "ai",
+        "automation",
+        "performance",
+        "realtime",
+        "shortcut",
+        "fast"
+      ]
+    }
+  ]
+}
