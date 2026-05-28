@@ -24,6 +24,7 @@ export function Sidebar() {
   const location = useLocation();
   const section = getSectionFromPath(location.pathname);
   const routes = getRoutesForSection(section.slug);
+  const variant = section.layout === "reference" ? "reference" : "docs";
 
   return (
     <aside
@@ -31,7 +32,7 @@ export function Sidebar() {
       aria-label="Page navigation"
     >
       <ScrollArea className="pt-6 pr-3">
-        <PageMenu routes={routes} />
+        <PageMenu routes={routes} variant={variant} />
       </ScrollArea>
     </aside>
   );
@@ -41,6 +42,7 @@ export function SheetLeft() {
   const location = useLocation();
   const section = getSectionFromPath(location.pathname);
   const routes = getRoutesForSection(section.slug);
+  const variant = section.layout === "reference" ? "reference" : "docs";
 
   return (
     <Sheet>
@@ -64,7 +66,7 @@ export function SheetLeft() {
           <div className="mx-0 mt-3 flex flex-col gap-2.5 px-5">
             <NavMenu isSheet />
             <Separator className="my-2" />
-            <PageMenu isSheet routes={routes} />
+            <PageMenu isSheet routes={routes} variant={variant} />
           </div>
         </ScrollArea>
       </SheetContent>

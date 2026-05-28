@@ -1,0 +1,103 @@
+---
+title: "Create Message"
+description: "Reference for POST /v1/messages, including authentication, request fields, responses, and errors."
+keywords: ["post", "messages", "rest-api"]
+icon: "server"
+---
+
+## Endpoint
+
+```http
+POST /v1/messages
+```
+
+Creates a message record and returns the stored message with its generated identifier and creation timestamp.
+
+## Authentication
+
+| Header | Required | Description |
+| --- | --- | --- |
+| `Authorization` | Yes | Bearer token used to authenticate the request. |
+| `Content-Type` | Yes | Must be `application/json`. |
+
+## Request Body
+
+| Field | Type | Required | Description |
+| --- | --- | --- | --- |
+| `body` | `string` | Yes | Message text. Must not be empty. |
+| `metadata` | `object` | No | Optional caller-defined key-value data. |
+
+```json
+{
+  "body": "Ship reference docs as a separate section.",
+  "metadata": {
+    "source": "template-example"
+  }
+}
+```
+
+## Example
+
+<Tabs defaultValue="curl">
+  <TabsList>
+    <TabsTrigger value="curl">curl</TabsTrigger>
+    <TabsTrigger value="js">JavaScript</TabsTrigger>
+  </TabsList>
+  <TabsContent value="curl">
+
+```bash
+curl -X POST "https://api.example.com/v1/messages" \
+  -H "Authorization: Bearer doxa_test_token" \
+  -H "Content-Type: application/json" \
+  -d '{"body":"Ship reference docs as a separate section.","metadata":{"source":"template-example"}}'
+```
+
+  </TabsContent>
+  <TabsContent value="js">
+
+```ts
+const response = await fetch("https://api.example.com/v1/messages", {
+  method: "POST",
+  headers: {
+    Authorization: "Bearer doxa_test_token",
+    "Content-Type": "application/json",
+  },
+  body: JSON.stringify({
+    body: "Ship reference docs as a separate section.",
+    metadata: { source: "template-example" },
+  }),
+});
+
+const message = await response.json();
+```
+
+  </TabsContent>
+</Tabs>
+
+## Response
+
+```json
+{
+  "id": "msg_01JY8Z7A3Q8M9K2W4N6P0R1S2T",
+  "body": "Ship reference docs as a separate section.",
+  "metadata": {
+    "source": "template-example"
+  },
+  "createdAt": "2026-05-28T12:00:00.000Z"
+}
+```
+
+## Errors
+
+| Status | Code | Meaning |
+| --- | --- | --- |
+| `400` | `invalid_request` | The JSON body is malformed or `body` is empty. |
+| `401` | `unauthorized` | The bearer token is missing or invalid. |
+| `429` | `rate_limited` | The caller sent too many requests. |
+
+## Related
+
+<Card title="Retrieve Message" href="/rest-api/messages/retrieve-message">
+  Fetch the message returned by this endpoint using its generated `id`.
+</Card>
+

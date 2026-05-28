@@ -16,7 +16,7 @@ export default function SubLink(
     return null;
   }
 
-  const { title, href, icon, noLink, isSheet } = props;
+  const { title, href, icon, badge, noLink, isSheet } = props;
   const isActive = path === href;
   const IconComp = getIcon(icon);
 
@@ -33,6 +33,11 @@ export default function SubLink(
     >
       {IconComp && <IconComp className="h-4 w-4 shrink-0" aria-hidden="true" />}
       <span className="truncate">{title}</span>
+      {badge && (
+        <span className="ml-auto shrink-0 rounded border border-border bg-muted px-1.5 py-0.5 font-mono text-[0.65rem] leading-none text-muted-foreground">
+          {badge}
+        </span>
+      )}
     </Anchor>
   );
 

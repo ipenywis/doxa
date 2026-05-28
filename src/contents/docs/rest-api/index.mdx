@@ -1,0 +1,45 @@
+---
+title: "REST API"
+description: "Example REST API reference section for testing endpoint navigation, badges, request examples, and response documentation."
+keywords: ["rest-api", "reference", "endpoints", "example"]
+icon: "server"
+---
+
+## Overview
+
+This section is a small example REST API reference that ships with the template. It demonstrates how Doxa separates endpoint reference material from the default Documentation section and renders method badges in the reference sidebar.
+
+The sample API uses a messages resource with two endpoints:
+
+| Endpoint | Purpose |
+| --- | --- |
+| `POST /v1/messages` | Create a new message and return the stored record. |
+| `GET /v1/messages/{id}` | Retrieve a single message by its identifier. |
+
+## Base URL
+
+```text
+https://api.example.com
+```
+
+All examples use JSON request and response bodies. Production APIs should replace this placeholder host with the deployment-specific API URL.
+
+## Authentication
+
+Send a bearer token in the `Authorization` header.
+
+```http
+Authorization: Bearer doxa_test_token
+```
+
+<Note type="warning">
+  This is example documentation for the template. Do not ship test tokens or
+  placeholder credentials in production docs.
+</Note>
+
+## Resources
+
+<Card title="Messages" href="/rest-api/messages">
+  Create and retrieve message records through the example REST API.
+</Card>
+

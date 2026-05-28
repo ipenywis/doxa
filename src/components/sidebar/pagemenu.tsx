@@ -4,13 +4,19 @@ import SubLink from "@/src/components/sidebar/sublink";
 interface PageMenuProps {
   isSheet?: boolean;
   routes?: Paths[];
+  variant?: "docs" | "reference";
 }
 
-export function PageMenu({ isSheet = false, routes }: PageMenuProps) {
+export function PageMenu({
+  isSheet = false,
+  routes,
+  variant = "docs",
+}: PageMenuProps) {
   const list = routes ?? Routes;
+  const isReference = variant === "reference";
 
   return (
-    <div className="flex flex-col gap-1 pb-6">
+    <div className={`flex flex-col pb-6 ${isReference ? "gap-0.5" : "gap-1"}`}>
       {list.map((item, index) => {
         if ("spacer" in item) {
           return (
@@ -24,7 +30,7 @@ export function PageMenu({ isSheet = false, routes }: PageMenuProps) {
           return (
             <div
               key={`heading-${item.heading}-${index}`}
-              className="mt-2 mb-2 px-2 text-[0.7rem] font-semibold text-foreground/50 dark:text-foreground/45"
+              className={`${isReference ? "mt-3 mb-1" : "mt-2 mb-2"} px-2 text-[0.7rem] font-semibold text-foreground/50 dark:text-foreground/45`}
             >
               {item.heading}
             </div>

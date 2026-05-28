@@ -1131,6 +1131,155 @@
     }
   },
   {
+    "slug": "/rest-api",
+    "title": "REST API",
+    "description": "Example REST API reference section for testing endpoint navigation, badges, request examples, and response documentation.",
+    "content": "## Overview\n\nThis section is a small example REST API reference that ships with the template. It demonstrates how Doxa separates endpoint reference material from the default Documentation section and renders method badges in the reference sidebar.\n\nThe sample API uses a messages resource with two endpoints:\n\n| Endpoint | Purpose |\n| --- | --- |\n| `POST /v1/messages` | Create a new message and return the stored record. |\n| `GET /v1/messages/{id}` | Retrieve a single message by its identifier. |\n\n## Base URL\n\n```text\nhttps://api.example.com\n```\n\nAll examples use JSON request and response bodies. Production APIs should replace this placeholder host with the deployment-specific API URL.\n\n## Authentication\n\nSend a bearer token in the `Authorization` header.\n\n```http\nAuthorization: Bearer doxa_test_token\n```\n\n## Resources\n",
+    "_searchMeta": {
+      "cleanContent": "overview this section is a small example rest api reference that ships with the template it demonstrates how doxa separates endpoint reference material from the default documentation section and renders method badges in the reference sidebar the sample api uses a messages resource with two endpoints: endpoint purpose--- ---post v1 messages create a new message and return the stored record get v1 messages id retrieve a single message by its identifier base url all examples use json request and response bodies production apis should replace this placeholder host with the deployment-specific api url authentication send a bearer token in the authorization header resources",
+      "headings": [
+        "Overview",
+        "Base URL",
+        "Authentication",
+        "Resources"
+      ],
+      "keywords": [
+        "rest-api",
+        "reference",
+        "endpoints",
+        "example",
+        "Overview",
+        "Base URL",
+        "Authentication",
+        "Resources",
+        "POST /v1/messages",
+        "GET /v1/messages/{id}",
+        "text\nhttps://api.example.com",
+        "All examples use JSON request and response bodies. Production APIs should replace this placeholder host with the deployment-specific API URL.\n\n## Authentication\n\nSend a bearer token in the",
+        "header.",
+        "http\nAuthorization: Bearer doxa_test_token"
+      ]
+    }
+  },
+  {
+    "slug": "/rest-api/messages/create-message",
+    "title": "Create Message",
+    "description": "Reference for POST /v1/messages, including authentication, request fields, responses, and errors.",
+    "content": "## Endpoint\n\n```http\nPOST /v1/messages\n```\n\nCreates a message record and returns the stored message with its generated identifier and creation timestamp.\n\n## Authentication\n\n| Header | Required | Description |\n| --- | --- | --- |\n| `Authorization` | Yes | Bearer token used to authenticate the request. |\n| `Content-Type` | Yes | Must be `application/json`. |\n\n## Request Body\n\n| Field | Type | Required | Description |\n| --- | --- | --- | --- |\n| `body` | `string` | Yes | Message text. Must not be empty. |\n| `metadata` | `object` | No | Optional caller-defined key-value data. |\n\n```json\n{\n  \"body\": \"Ship reference docs as a separate section.\",\n  \"metadata\": {\n    \"source\": \"template-example\"\n  }\n}\n```\n\n## Example\n\n## Response\n\n```json\n{\n  \"id\": \"msg_01JY8Z7A3Q8M9K2W4N6P0R1S2T\",\n  \"body\": \"Ship reference docs as a separate section.\",\n  \"metadata\": {\n    \"source\": \"template-example\"\n  },\n  \"createdAt\": \"2026-05-28T12:00:00.000Z\"\n}\n```\n\n## Errors\n\n| Status | Code | Meaning |\n| --- | --- | --- |\n| `400` | `invalid_request` | The JSON body is malformed or `body` is empty. |\n| `401` | `unauthorized` | The bearer token is missing or invalid. |\n| `429` | `rate_limited` | The caller sent too many requests. |\n\n## Related\n",
+    "_searchMeta": {
+      "cleanContent": "endpoint creates a message record and returns the stored message with its generated identifier and creation timestamp authentication header required description--- --- ---authorization yes bearer token used to authenticate the request content-type yes must be application json request body field type required description--- --- --- ---body string yes message text must not be empty metadata object no optional caller-defined key-value data example response errors status code meaning--- --- ---400 invalid_request the json body is malformed or body is empty 401 unauthorized the bearer token is missing or invalid 429 rate_limited the caller sent too many requests related",
+      "headings": [
+        "Endpoint",
+        "Authentication",
+        "Request Body",
+        "Example",
+        "Response",
+        "Errors",
+        "Related"
+      ],
+      "keywords": [
+        "post",
+        "messages",
+        "rest-api",
+        "Endpoint",
+        "Authentication",
+        "Request Body",
+        "Example",
+        "Response",
+        "Errors",
+        "Related",
+        "http\nPOST /v1/messages",
+        "Creates a message record and returns the stored message with its generated identifier and creation timestamp.\n\n## Authentication\n\n| Header | Required | Description |\n| --- | --- | --- |\n|",
+        "| Yes | Bearer token used to authenticate the request. |\n|",
+        "| Yes | Must be",
+        ". |\n\n## Request Body\n\n| Field | Type | Required | Description |\n| --- | --- | --- | --- |\n|",
+        "|",
+        "| Yes | Message text. Must not be empty. |\n|",
+        "| No | Optional caller-defined key-value data. |",
+        "json\n{\n  \"body\": \"Ship reference docs as a separate section.\",\n  \"metadata\": {\n    \"source\": \"template-example\"\n  }\n}",
+        "## Example\n\n## Response",
+        "json\n{\n  \"id\": \"msg_01JY8Z7A3Q8M9K2W4N6P0R1S2T\",\n  \"body\": \"Ship reference docs as a separate section.\",\n  \"metadata\": {\n    \"source\": \"template-example\"\n  },\n  \"createdAt\": \"2026-05-28T12:00:00.000Z\"\n}",
+        "## Errors\n\n| Status | Code | Meaning |\n| --- | --- | --- |\n|",
+        "| The JSON body is malformed or",
+        "is empty. |\n|",
+        "| The bearer token is missing or invalid. |\n|"
+      ]
+    }
+  },
+  {
+    "slug": "/rest-api/messages",
+    "title": "Messages",
+    "description": "Resource overview for the example REST API messages endpoints.",
+    "content": "## Overview\n\nMessages represent short pieces of text submitted through the example REST API. This resource page groups the endpoint reference pages that belong to the same public API surface.\n\n| Method | Path | Description |\n| --- | --- | --- |\n| `POST` | `/v1/messages` | Create a message record. |\n| `GET` | `/v1/messages/{id}` | Retrieve a message record. |\n\n## Schema\n\n| Field | Type | Required | Description |\n| --- | --- | --- | --- |\n| `id` | `string` | Response only | Stable message identifier. |\n| `body` | `string` | Yes | Message text submitted by the caller. |\n| `metadata` | `object` | No | Optional caller-defined metadata. |\n| `createdAt` | `string` | Response only | ISO timestamp for when the message was created. |\n\n## Endpoints\n\n<Card title=\"Retrieve Message\" href=\"/rest-api/messages/retrieve-message\">\n  Fetch an existing message record by its `id`.\n</Card>\n",
+    "_searchMeta": {
+      "cleanContent": "overview messages represent short pieces of text submitted through the example rest api this resource page groups the endpoint reference pages that belong to the same public api surface method path description--- --- ---post v1 messages create a message record get v1 messages id retrieve a message record schema field type required description--- --- --- ---id string response only stable message identifier body string yes message text submitted by the caller metadata object no optional caller-defined metadata createdat string response only iso timestamp for when the message was created endpoints fetch an existing message record by its id",
+      "headings": [
+        "Overview",
+        "Schema",
+        "Endpoints"
+      ],
+      "keywords": [
+        "messages",
+        "rest-api",
+        "endpoints",
+        "Overview",
+        "Schema",
+        "Endpoints",
+        "POST",
+        "/v1/messages",
+        "GET",
+        "/v1/messages/{id}",
+        "id",
+        "string",
+        "body",
+        "metadata",
+        "object",
+        "createdAt"
+      ]
+    }
+  },
+  {
+    "slug": "/rest-api/messages/retrieve-message",
+    "title": "Retrieve Message",
+    "description": "Reference for GET /v1/messages/{id}, including path parameters, responses, and errors.",
+    "content": "## Endpoint\n\n```http\nGET /v1/messages/{id}\n```\n\nRetrieves a message record by its identifier.\n\n## Authentication\n\n| Header | Required | Description |\n| --- | --- | --- |\n| `Authorization` | Yes | Bearer token used to authenticate the request. |\n\n## Path Parameters\n\n| Name | Type | Required | Description |\n| --- | --- | --- | --- |\n| `id` | `string` | Yes | Message identifier returned by `POST /v1/messages`. |\n\n## Example\n\n## Response\n\n```json\n{\n  \"id\": \"msg_01JY8Z7A3Q8M9K2W4N6P0R1S2T\",\n  \"body\": \"Ship reference docs as a separate section.\",\n  \"metadata\": {\n    \"source\": \"template-example\"\n  },\n  \"createdAt\": \"2026-05-28T12:00:00.000Z\"\n}\n```\n\n## Errors\n\n| Status | Code | Meaning |\n| --- | --- | --- |\n| `401` | `unauthorized` | The bearer token is missing or invalid. |\n| `404` | `not_found` | No message exists for the supplied `id`. |\n| `429` | `rate_limited` | The caller sent too many requests. |\n\n## Related\n",
+    "_searchMeta": {
+      "cleanContent": "endpoint retrieves a message record by its identifier authentication header required description--- --- ---authorization yes bearer token used to authenticate the request path parameters name type required description--- --- --- ---id string yes message identifier returned by post v1 messages example response errors status code meaning--- --- ---401 unauthorized the bearer token is missing or invalid 404 not_found no message exists for the supplied id 429 rate_limited the caller sent too many requests related",
+      "headings": [
+        "Endpoint",
+        "Authentication",
+        "Path Parameters",
+        "Example",
+        "Response",
+        "Errors",
+        "Related"
+      ],
+      "keywords": [
+        "get",
+        "messages",
+        "rest-api",
+        "Endpoint",
+        "Authentication",
+        "Path Parameters",
+        "Example",
+        "Response",
+        "Errors",
+        "Related",
+        "http\nGET /v1/messages/{id}",
+        "Retrieves a message record by its identifier.\n\n## Authentication\n\n| Header | Required | Description |\n| --- | --- | --- |\n|",
+        "| Yes | Bearer token used to authenticate the request. |\n\n## Path Parameters\n\n| Name | Type | Required | Description |\n| --- | --- | --- | --- |\n|",
+        "|",
+        "| Yes | Message identifier returned by",
+        ". |\n\n## Example\n\n## Response",
+        "json\n{\n  \"id\": \"msg_01JY8Z7A3Q8M9K2W4N6P0R1S2T\",\n  \"body\": \"Ship reference docs as a separate section.\",\n  \"metadata\": {\n    \"source\": \"template-example\"\n  },\n  \"createdAt\": \"2026-05-28T12:00:00.000Z\"\n}",
+        "## Errors\n\n| Status | Code | Meaning |\n| --- | --- | --- |\n|",
+        "| The bearer token is missing or invalid. |\n|",
+        "| No message exists for the supplied",
+        ". |\n|"
+      ]
+    }
+  },
+  {
     "slug": "/search",
     "title": "Search",
     "description": "Understand Doxa's generated search index, fuzzy matching, highlighted snippets, and keyboard search flow.",

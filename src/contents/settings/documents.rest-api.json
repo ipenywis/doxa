@@ -1,0 +1,33 @@
+[
+  {
+    "heading": "Start Here"
+  },
+  {
+    "title": "REST API",
+    "href": "/rest-api",
+    "icon": "server"
+  },
+  {
+    "spacer": true
+  },
+  {
+    "heading": "Messages"
+  },
+  {
+    "title": "Messages",
+    "href": "/rest-api/messages",
+    "icon": "list"
+  },
+  {
+    "title": "Create Message",
+    "href": "/rest-api/messages/create-message",
+    "icon": "server",
+    "badge": "POST"
+  },
+  {
+    "title": "Retrieve Message",
+    "href": "/rest-api/messages/retrieve-message",
+    "icon": "server",
+    "badge": "GET"
+  }
+]

@@ -1,0 +1,86 @@
+---
+title: "Retrieve Message"
+description: "Reference for GET /v1/messages/{id}, including path parameters, responses, and errors."
+keywords: ["get", "messages", "rest-api"]
+icon: "server"
+---
+
+## Endpoint
+
+```http
+GET /v1/messages/{id}
+```
+
+Retrieves a message record by its identifier.
+
+## Authentication
+
+| Header | Required | Description |
+| --- | --- | --- |
+| `Authorization` | Yes | Bearer token used to authenticate the request. |
+
+## Path Parameters
+
+| Name | Type | Required | Description |
+| --- | --- | --- | --- |
+| `id` | `string` | Yes | Message identifier returned by `POST /v1/messages`. |
+
+## Example
+
+<Tabs defaultValue="curl">
+  <TabsList>
+    <TabsTrigger value="curl">curl</TabsTrigger>
+    <TabsTrigger value="js">JavaScript</TabsTrigger>
+  </TabsList>
+  <TabsContent value="curl">
+
+```bash
+curl "https://api.example.com/v1/messages/msg_01JY8Z7A3Q8M9K2W4N6P0R1S2T" \
+  -H "Authorization: Bearer doxa_test_token"
+```
+
+  </TabsContent>
+  <TabsContent value="js">
+
+```ts
+const response = await fetch(
+  "https://api.example.com/v1/messages/msg_01JY8Z7A3Q8M9K2W4N6P0R1S2T",
+  {
+    headers: {
+      Authorization: "Bearer doxa_test_token",
+    },
+  },
+);
+
+const message = await response.json();
+```
+
+  </TabsContent>
+</Tabs>
+
+## Response
+
+```json
+{
+  "id": "msg_01JY8Z7A3Q8M9K2W4N6P0R1S2T",
+  "body": "Ship reference docs as a separate section.",
+  "metadata": {
+    "source": "template-example"
+  },
+  "createdAt": "2026-05-28T12:00:00.000Z"
+}
+```
+
+## Errors
+
+| Status | Code | Meaning |
+| --- | --- | --- |
+| `401` | `unauthorized` | The bearer token is missing or invalid. |
+| `404` | `not_found` | No message exists for the supplied `id`. |
+| `429` | `rate_limited` | The caller sent too many requests. |
+
+## Related
+
+<Card title="Create Message" href="/rest-api/messages/create-message">
+  Create a message record before retrieving it by `id`.
+</Card>

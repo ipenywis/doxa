@@ -46,6 +46,10 @@ export interface SectionConfig {
   default?: boolean;
   /** Hide the tab without removing the section from disk. */
   hidden?: boolean;
+  /** Optional behavior hint for section-specific rendering. */
+  kind?: "documentation" | "reference" | "development";
+  /** Optional layout hint for section-specific rendering. */
+  layout?: "docs" | "reference";
 }
 
 const KEBAB_RE = /^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$/;

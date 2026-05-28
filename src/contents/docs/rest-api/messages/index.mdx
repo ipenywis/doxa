@@ -1,0 +1,35 @@
+---
+title: "Messages"
+description: "Resource overview for the example REST API messages endpoints."
+keywords: ["messages", "rest-api", "endpoints"]
+icon: "list"
+---
+
+## Overview
+
+Messages represent short pieces of text submitted through the example REST API. This resource page groups the endpoint reference pages that belong to the same public API surface.
+
+| Method | Path | Description |
+| --- | --- | --- |
+| `POST` | `/v1/messages` | Create a message record. |
+| `GET` | `/v1/messages/{id}` | Retrieve a message record. |
+
+## Schema
+
+| Field | Type | Required | Description |
+| --- | --- | --- | --- |
+| `id` | `string` | Response only | Stable message identifier. |
+| `body` | `string` | Yes | Message text submitted by the caller. |
+| `metadata` | `object` | No | Optional caller-defined metadata. |
+| `createdAt` | `string` | Response only | ISO timestamp for when the message was created. |
+
+## Endpoints
+
+<Card title="Create Message" href="/rest-api/messages/create-message">
+  Submit a JSON payload and receive the stored message record.
+</Card>
+
+<Card title="Retrieve Message" href="/rest-api/messages/retrieve-message">
+  Fetch an existing message record by its `id`.
+</Card>
+

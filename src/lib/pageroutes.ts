@@ -8,6 +8,7 @@ export type Paths =
       title: string;
       href: string;
       icon?: IconName;
+      badge?: string;
       noLink?: true;
       heading?: string;
       /**
@@ -27,6 +28,7 @@ export interface Page {
   title: string;
   href: string;
   icon?: IconName;
+  badge?: string;
 }
 
 function flattenRoutes(routes: Paths[], parentHref = ""): Paths[] {
@@ -87,6 +89,7 @@ function asPageRoutes(routes: Paths[]): Page[] {
       title: node.title,
       href: node.href,
       ...(node.icon ? { icon: node.icon } : {}),
+      ...(node.badge ? { badge: node.badge } : {}),
     }));
 }
 

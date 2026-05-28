@@ -5,6 +5,14 @@
     "default": true
   },
   {
+    "slug": "rest-api",
+    "label": "REST API",
+    "icon": "server",
+    "description": "Example endpoint reference section with request and response documentation.",
+    "kind": "reference",
+    "layout": "reference"
+  },
+  {
     "slug": "development",
     "label": "Development",
     "icon": "wrench",
