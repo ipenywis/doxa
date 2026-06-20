@@ -1,9 +1,13 @@
-import { describe, expect, test } from "vitest";
+import { afterEach, describe, expect, test, vi } from "vitest";
 
 import type { ContentAdapter } from "../lib/content/types";
 import { createDoxaDocsRuntime, renderRuntimeMdx } from "./index";
 
 describe("renderRuntimeMdx", () => {
+  afterEach(() => {
+    vi.unstubAllGlobals();
+  });
+
   test("renders frontmatter, gfm, code, links, and template components", async () => {
     const rendered = await renderRuntimeMdx(`---
 title: Runtime Page
@@ -37,6 +41,16 @@ const value = "ok";
     await expect(renderRuntimeMdx("<UnknownComponent />")).rejects.toThrow(
       "Failed to render MDX content:"
     );
+  });
+
+  test("does not require string code generation", async () => {
+    vi.stubGlobal("Function", () => {
+      throw new Error("codegen blocked");
+    });
+
+    const rendered = await renderRuntimeMdx("# Runtime Safe\n\nNo eval.");
+
+    expect(rendered.html).toContain("<h1>Runtime Safe</h1>");
   });
 });
 
