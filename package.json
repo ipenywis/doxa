@@ -1,8 +1,22 @@
 {
-  "name": "doxa-docs-template",
+  "name": "@doxahq/docs-template",
   "version": "1.0.1",
   "private": false,
   "type": "module",
+  "exports": {
+    "./runtime": {
+      "types": "./src/runtime/index.ts",
+      "import": "./src/runtime/index.ts"
+    },
+    "./content": {
+      "types": "./src/lib/content/types.ts",
+      "import": "./src/lib/content/types.ts"
+    },
+    "./components": {
+      "types": "./src/runtime/mdx-components.ts",
+      "import": "./src/runtime/mdx-components.ts"
+    }
+  },
   "scripts": {
     "dev": "pnpm run dev:cloudflare",
     "dev:cloudflare": "cross-env DOXA_DEPLOY_TARGET=cloudflare vite dev",
@@ -18,6 +32,7 @@
     "format": "pnpm exec prettier --write . --log-level warn",
     "format:check": "pnpm exec prettier --check .",
     "typecheck": "pnpm exec tsc --noEmit --incremental false --pretty false",
+    "test": "vitest run",
     "quality": "pnpm run format:check && pnpm run lint && pnpm run typecheck",
     "clean": "pnpm run lint:fix && pnpm run format && pnpm run format:check",
     "update": "pnpm update --latest --recursive && pnpm install && pnpm prune && pnpm dedupe && pnpm run clean",
@@ -111,6 +126,7 @@
     "typescript": "^5.9.3",
     "typescript-eslint": "^8.50.0",
     "vercel": "^51.3.0",
+    "vitest": "^2.1.9",
     "vite": "^7.3.0",
     "vite-tsconfig-paths": "^5.1.4",
     "wrangler": "4.82.2"
