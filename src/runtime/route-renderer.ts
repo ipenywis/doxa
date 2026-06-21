@@ -1,7 +1,7 @@
 import type { ContentAdapter } from "../lib/content/types";
 import { renderRuntimeMdx } from "./runtime-mdx";
+import type { RuntimeNavPage } from "./runtime-source";
 import type {
-  RuntimeNavPage,
   RuntimeRenderInput,
   RuntimeRenderResult,
   RuntimeSiteConfig,

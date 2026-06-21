@@ -4,11 +4,6 @@ export interface RuntimeSiteConfig {
   url: string;
 }
 
-export interface RuntimeNavPage {
-  title: string;
-  href: string;
-}
-
 export interface RuntimeRenderInput {
   docsPath: string;
   basePath?: string;
