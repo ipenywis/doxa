@@ -1,7 +1,15 @@
 import { afterEach, describe, expect, test, vi } from "vitest";
 
 import type { ContentAdapter } from "../lib/content/types";
+import * as runtimeModule from "./index";
 import { createDoxaDocsRuntime, renderRuntimeMdx } from "./index";
+
+describe("portable runtime entrypoint", () => {
+  test("does not expose Vite-only runtime source bindings", () => {
+    expect(runtimeModule).not.toHaveProperty("createViteRuntimeSource");
+    expect(runtimeModule).not.toHaveProperty("viteRuntimeSource");
+  });
+});
 
 describe("renderRuntimeMdx", () => {
   afterEach(() => {

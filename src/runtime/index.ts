@@ -2,10 +2,6 @@ export { createDoxaDocsRuntime } from "./create-runtime";
 export { renderDocsRoute, renderStatusPage } from "./route-renderer";
 export { renderRuntimeMdx } from "./runtime-mdx";
 export { runtimeComponents } from "./mdx-components";
-export {
-  createViteRuntimeSource,
-  viteRuntimeSource,
-} from "./vite-runtime-source";
 export type { DoxaDocsRuntime, DoxaDocsRuntimeConfig } from "./create-runtime";
 export type {
   RuntimeRenderInput,

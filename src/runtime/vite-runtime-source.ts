@@ -1,13 +1,9 @@
 import grayMatter from "gray-matter";
 
-import documentsData from "../../public/search-data/documents.json";
+import indexedDocumentsData from "../../public/search-data/documents.json";
 import searchIndexRaw from "../../public/search-data/index.json?raw";
-import {
-  getPageRoutesForSection,
-  getRoutesForSection,
-  type Page,
-  type Paths,
-} from "../lib/pageroutes";
+import defaultDocumentsData from "../contents/settings/documents.json";
+import type { Paths } from "../lib/pageroutes";
 import { Settings } from "../settings/main";
 import {
   defaultSection,
@@ -20,6 +16,7 @@ import {
 } from "../settings/sections";
 import themeSettings from "../settings/theme";
 import {
+  filterLinkableRuntimePages,
   normalizeRuntimeHref,
   normalizeRuntimeSlug,
   type DoxaDocsRuntimeSource,
@@ -69,16 +66,21 @@ const DOCS_ROOT_PREFIX = "/src/contents/docs/";
 const DEFAULT_SECTION_PREFIX = "default/";
 
 const indexedDocuments = new Map(
-  (documentsData as IndexedDocument[]).map((document) => [
+  (indexedDocumentsData as IndexedDocument[]).map((document) => [
     normalizeRuntimeHref(document.slug),
     document,
   ])
 );
 
+const sectionDocumentsModules = import.meta.glob<Paths[]>(
+  "/src/contents/settings/documents.*.json",
+  { eager: true, import: "default" }
+);
+
 const sourceEntries = buildSourceEntries();
 
 export function createViteRuntimeSource(): DoxaDocsRuntimeSource {
-  return {
+  const source: DoxaDocsRuntimeSource = {
     async getSiteConfig() {
       return {
         name: Settings.site.name,
@@ -112,11 +114,11 @@ export function createViteRuntimeSource(): DoxaDocsRuntimeSource {
     },
 
     async getNavigation(sectionSlug) {
-      return getRoutesForSection(sectionSlug).map(toRuntimeNavNode);
+      return getRuntimeNavigationForSection(sectionSlug);
     },
 
     async getRoutes(sectionSlug) {
-      return getPageRoutesForSection(sectionSlug).map(toRuntimeNavPage);
+      return getRuntimeRoutesForSection(sectionSlug);
     },
 
     async getHomeHref() {
@@ -124,7 +126,7 @@ export function createViteRuntimeSource(): DoxaDocsRuntimeSource {
     },
 
     async resolvePage(pathname) {
-      return resolveRuntimePage(pathname, this);
+      return resolveRuntimePage(pathname, source);
     },
 
     async getPage(slug) {
@@ -139,6 +141,8 @@ export function createViteRuntimeSource(): DoxaDocsRuntimeSource {
       return searchIndexRaw.trim() ? searchIndexRaw : null;
     },
   };
+
+  return source;
 }
 
 export const viteRuntimeSource = createViteRuntimeSource();
@@ -162,7 +166,7 @@ async function resolveRuntimePage(
   }
 
   if (isSectionSlug(slug)) {
-    const sectionFirstRoute = getPageRoutesForSection(slug)[0];
+    const sectionFirstRoute = getRuntimeRoutesForSection(slug)[0];
     const sectionFirstHref = sectionFirstRoute
       ? normalizeRuntimeHref(sectionFirstRoute.href)
       : null;
@@ -181,11 +185,11 @@ async function resolveRuntimePage(
 }
 
 function getHomeHref(): string | null {
-  const defaultHome = getPageRoutesForSection(defaultSection.slug)[0]?.href;
+  const defaultHome = getRuntimeRoutesForSection(defaultSection.slug)[0]?.href;
   if (defaultHome) return normalizeRuntimeHref(defaultHome);
 
   const visibleHome = visibleSections
-    .map((section) => getPageRoutesForSection(section.slug)[0]?.href)
+    .map((section) => getRuntimeRoutesForSection(section.slug)[0]?.href)
     .find((href): href is string => typeof href === "string");
 
   return visibleHome ? normalizeRuntimeHref(visibleHome) : null;
@@ -251,11 +255,11 @@ function getRuntimeHeadings(
 
 function findRouteForHref(href: string): RuntimeNavPage | null {
   const section = getSectionFromPath(href);
-  const route = getPageRoutesForSection(section.slug).find(
+  const route = getRuntimeRoutesForSection(section.slug).find(
     (page) => normalizeRuntimeHref(page.href) === href
   );
 
-  return route ? toRuntimeNavPage(route) : null;
+  return route ?? null;
 }
 
 function buildSourceEntries(): Map<string, SourceEntry> {
@@ -346,6 +350,38 @@ function toRuntimeSection(section: SectionConfig): RuntimeSection {
   };
 }
 
+export function createRuntimeNavigation(
+  nodes: readonly Paths[]
+): RuntimeNavNode[] {
+  return nodes.map(toRuntimeNavNode);
+}
+
+export function createRuntimeRoutes(
+  nodes: readonly RuntimeNavNode[]
+): RuntimeNavPage[] {
+  return filterLinkableRuntimePages(nodes);
+}
+
+function getRuntimeNavigationForSection(sectionSlug: string): RuntimeNavNode[] {
+  return createRuntimeNavigation(loadSectionDocuments(sectionSlug));
+}
+
+function getRuntimeRoutesForSection(sectionSlug: string): RuntimeNavPage[] {
+  return createRuntimeRoutes(getRuntimeNavigationForSection(sectionSlug));
+}
+
+function loadSectionDocuments(sectionSlug: string): Paths[] {
+  if (sectionSlug === defaultSection.slug) {
+    return defaultDocumentsData as Paths[];
+  }
+
+  const documents = sectionDocumentsModules[
+    `/src/contents/settings/documents.${sectionSlug}.json`
+  ] as Paths[] | undefined;
+
+  return documents ?? [];
+}
+
 function toRuntimeNavNode(node: Paths): RuntimeNavNode {
   if ("spacer" in node) {
     return { spacer: true };
@@ -362,18 +398,10 @@ function toRuntimeNavNode(node: Paths): RuntimeNavNode {
     ...(node.badge ? { badge: node.badge } : {}),
     ...(node.noLink ? { noLink: true } : {}),
     ...(node.heading ? { heading: node.heading } : {}),
+    ...(node.items ? { items: createRuntimeNavigation(node.items) } : {}),
   };
 
   return page;
-}
-
-function toRuntimeNavPage(page: Page): RuntimeNavPage {
-  return {
-    title: page.title,
-    href: normalizeRuntimeHref(page.href),
-    ...(page.icon ? { icon: page.icon } : {}),
-    ...(page.badge ? { badge: page.badge } : {}),
-  };
 }
 
 function cloneFeatureConfig(

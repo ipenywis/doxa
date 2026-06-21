@@ -8,11 +8,15 @@ import {
   normalizeRuntimeBasePath,
   normalizeRuntimeHref,
   normalizeRuntimeSlug,
-  viteRuntimeSource,
   type RuntimeNavNode,
   type RuntimeNavPage,
   type RuntimeSection,
 } from "./index";
+import { createViteRuntimeSource, viteRuntimeSource } from "./vite";
+import {
+  createRuntimeNavigation,
+  createRuntimeRoutes,
+} from "./vite-runtime-source";
 
 describe("runtime source helpers", () => {
   test("normalizes hrefs, slugs, base paths, and index-ish values", () => {
@@ -84,6 +88,18 @@ describe("viteRuntimeSource", () => {
     await expect(viteRuntimeSource.getHomeHref()).resolves.toMatch(/^\/.+/);
   });
 
+  test("resolves pages when resolvePage is destructured", async () => {
+    const source = createViteRuntimeSource();
+    const { resolvePage } = source;
+    const homeHref = await source.getHomeHref();
+
+    await expect(resolvePage("/")).resolves.toMatchObject({
+      type: "redirect",
+      href: homeHref,
+      status: 308,
+    });
+  });
+
   test("resolves the root path as a redirect", async () => {
     const homeHref = await viteRuntimeSource.getHomeHref();
     const resolution = await viteRuntimeSource.resolvePage("/");
@@ -92,6 +108,16 @@ describe("viteRuntimeSource", () => {
       type: "redirect",
       href: homeHref,
       status: 308,
+    });
+  });
+
+  test("does not expose default-prefixed pages as runtime routes", async () => {
+    await expect(
+      viteRuntimeSource.resolvePage("/default/overview")
+    ).resolves.toMatchObject({
+      type: "not_found",
+      href: "/default/overview",
+      slug: "default/overview",
     });
   });
 
@@ -117,6 +143,7 @@ describe("viteRuntimeSource", () => {
     expect(page?.title).toEqual(expect.any(String));
     expect(page?.title.length).toBeGreaterThan(0);
     expect(page?.body).toContain("#");
+    expect(page?.body.trimStart().startsWith("---")).toBe(true);
   });
 
   test("loads raw page content", async () => {
@@ -129,6 +156,7 @@ describe("viteRuntimeSource", () => {
     });
     expect(rawPage?.title.length).toBeGreaterThan(0);
     expect(rawPage?.body).toContain("#");
+    expect(rawPage?.body.trimStart().startsWith("---")).toBe(true);
   });
 
   test("returns the bundled search index as a JSON-ish string", async () => {
@@ -151,6 +179,80 @@ describe("viteRuntimeSource", () => {
 
     expect(pages.length).toBeGreaterThan(0);
     expect(pages.some((page) => page.href === "/overview")).toBe(true);
+  });
+
+  test("returns linkable routes derived from runtime navigation", async () => {
+    const sections = await viteRuntimeSource.getSections();
+    const defaultSection = getRuntimeDefaultSection(sections);
+    expect(defaultSection).not.toBeNull();
+
+    const navigation = await viteRuntimeSource.getNavigation(
+      defaultSection?.slug ?? ""
+    );
+    const routes = await viteRuntimeSource.getRoutes(
+      defaultSection?.slug ?? ""
+    );
+
+    expect(routes).toEqual(filterLinkableRuntimePages(navigation));
+    expect(routes.some((page) => page.href === "/overview")).toBe(true);
+  });
+
+  test("preserves nested raw document navigation and derives flat routes", () => {
+    const navigation = createRuntimeNavigation([
+      { heading: "Guides" },
+      {
+        title: "Guide",
+        href: "/guide",
+        icon: "book",
+        badge: "Beta",
+        heading: "Primary",
+        items: [
+          {
+            title: "Draft",
+            href: "/draft",
+            noLink: true,
+            items: [{ title: "Private Notes", href: "/notes" }],
+          },
+          { heading: "Nested" },
+          { spacer: true },
+          { title: "Install", href: "/install", icon: "rocket" },
+        ],
+      },
+    ]);
+
+    expect(navigation).toEqual([
+      { heading: "Guides" },
+      {
+        title: "Guide",
+        href: "/guide",
+        icon: "book",
+        badge: "Beta",
+        heading: "Primary",
+        items: [
+          {
+            title: "Draft",
+            href: "/draft",
+            noLink: true,
+            items: [{ title: "Private Notes", href: "/notes" }],
+          },
+          { heading: "Nested" },
+          { spacer: true },
+          { title: "Install", href: "/install", icon: "rocket" },
+        ],
+      },
+    ]);
+
+    expect(createRuntimeRoutes(navigation)).toEqual([
+      {
+        title: "Guide",
+        href: "/guide",
+        icon: "book",
+        badge: "Beta",
+        heading: "Primary",
+      },
+      { title: "Private Notes", href: "/guide/draft/notes" },
+      { title: "Install", href: "/guide/install", icon: "rocket" },
+    ]);
   });
 });
 

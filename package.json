@@ -8,6 +8,10 @@
       "types": "./src/runtime/index.ts",
       "import": "./src/runtime/index.ts"
     },
+    "./runtime/vite": {
+      "types": "./src/runtime/vite.ts",
+      "import": "./src/runtime/vite.ts"
+    },
     "./content": {
       "types": "./src/lib/content/types.ts",
       "import": "./src/lib/content/types.ts"
