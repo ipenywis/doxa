@@ -38,7 +38,35 @@ describe("runtime source selection", () => {
     });
   });
 
+  test("reads platform host-scoped config from canonical env vars", () => {
+    expect(
+      getPlatformRuntimeSourceConfig({
+        DOXA_DOCS_CONTENT_WORKER_URL: "https://content.example.com",
+        DOXA_DOCS_CONTENT_HOSTNAME: "docs.example.com",
+        DOXA_DOCS_CONTENT_TOKEN: "secret-token",
+      })
+    ).toMatchObject({
+      contentWorkerUrl: "https://content.example.com",
+      hostname: "docs.example.com",
+      accessToken: "secret-token",
+    });
+  });
+
   test("supports platform env aliases", () => {
+    expect(
+      getPlatformRuntimeSourceConfig({
+        DOXA_PLATFORM_CONTENT_URL: "https://content.example.com",
+        DOXA_PLATFORM_HOSTNAME: "docs.example.com",
+        DOXA_PLATFORM_CONTENT_TOKEN: "secret-token",
+      })
+    ).toMatchObject({
+      contentWorkerUrl: "https://content.example.com",
+      hostname: "docs.example.com",
+      accessToken: "secret-token",
+    });
+  });
+
+  test("supports legacy platform project id aliases", () => {
     expect(
       getPlatformRuntimeSourceConfig({
         DOXA_PLATFORM_CONTENT_URL: "https://content.example.com",

@@ -42,6 +42,35 @@ describe("platform runtime source", () => {
     expect(fetchMock).toHaveBeenCalledTimes(1);
   });
 
+  test("sends authenticated host-scoped runtime operations", async () => {
+    const fetchMock = vi.fn(async (_url: string, init?: RequestInit) => {
+      expect(init?.headers).toMatchObject({
+        authorization: "Bearer secret-token",
+        "content-type": "application/json",
+        "x-doxa-host": "docs.example.com",
+        "x-doxa-runtime-source-version": "1",
+      });
+      expect(init?.headers).not.toMatchObject({
+        "x-doxa-project-id": "project_123",
+      });
+
+      return jsonResponse({
+        ok: true,
+        data: "/overview",
+      });
+    });
+    const source = createPlatformRuntimeSource({
+      contentWorkerUrl: "https://content.example.com",
+      hostname: "docs.example.com",
+      projectId: "project_123",
+      accessToken: "secret-token",
+      fetch: fetchMock as unknown as typeof fetch,
+    });
+
+    await expect(source.getHomeHref()).resolves.toBe("/overview");
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+  });
+
   test("uses the configured runtime path and memoizes matching requests", async () => {
     let requestedUrl: string | undefined;
     const fetchMock = vi.fn(async (url: string) => {
@@ -84,7 +113,7 @@ describe("platform runtime source", () => {
     );
   });
 
-  test("requires endpoint, project, and token configuration", () => {
+  test("requires endpoint, runtime scope, and token configuration", () => {
     expect(() =>
       createPlatformRuntimeSource({
         contentWorkerUrl: "",
@@ -98,7 +127,7 @@ describe("platform runtime source", () => {
         projectId: "",
         accessToken: "secret-token",
       })
-    ).toThrow("Missing projectId");
+    ).toThrow("Missing hostname or projectId");
     expect(() =>
       createPlatformRuntimeSource({
         contentWorkerUrl: "https://content.example.com",

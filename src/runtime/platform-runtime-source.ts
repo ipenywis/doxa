@@ -33,11 +33,22 @@ type FetchLike = typeof fetch;
 
 export interface PlatformRuntimeSourceConfig {
   contentWorkerUrl: string;
-  projectId: string;
   accessToken: string;
+  hostname?: string;
+  projectId?: string;
   runtimePath?: string;
   fetch?: FetchLike;
 }
+
+type PlatformRuntimeScope =
+  | {
+      kind: "host";
+      value: string;
+    }
+  | {
+      kind: "project";
+      value: string;
+    };
 
 interface PlatformRuntimeRequest {
   operation: PlatformRuntimeOperation;
@@ -101,8 +112,8 @@ function createPlatformRuntimeClient(config: PlatformRuntimeSourceConfig) {
     requireConfigValue(config.contentWorkerUrl, "contentWorkerUrl"),
     config.runtimePath
   );
-  const projectId = requireConfigValue(config.projectId, "projectId");
   const accessToken = requireConfigValue(config.accessToken, "accessToken");
+  const scope = resolveRuntimeScope(config);
   const fetchImpl = config.fetch ?? globalThis.fetch;
   const cache = new Map<string, Promise<unknown>>();
 
@@ -117,8 +128,8 @@ function createPlatformRuntimeClient(config: PlatformRuntimeSourceConfig) {
       if (existing) return existing as Promise<T>;
 
       const promise = requestPlatformRuntime<T>(fetchImpl, endpoint, {
-        projectId,
         accessToken,
+        scope,
         operation,
         payload,
       });
@@ -132,8 +143,8 @@ async function requestPlatformRuntime<T>(
   fetchImpl: FetchLike,
   endpoint: string,
   input: PlatformRuntimeRequest & {
-    projectId: string;
     accessToken: string;
+    scope: PlatformRuntimeScope;
   }
 ): Promise<T> {
   const request: PlatformRuntimeRequest = {
@@ -146,8 +157,8 @@ async function requestPlatformRuntime<T>(
       accept: "application/json",
       authorization: `Bearer ${input.accessToken}`,
       "content-type": "application/json",
-      "x-doxa-project-id": input.projectId,
       "x-doxa-runtime-source-version": "1",
+      ...getRuntimeScopeHeaders(input.scope),
     },
     body: JSON.stringify(request),
   });
@@ -176,6 +187,30 @@ function resolvePlatformRuntimeEndpoint(
   const base = contentWorkerUrl.replace(/\/+$/, "");
   const path = runtimePath.startsWith("/") ? runtimePath : `/${runtimePath}`;
   return `${base}${path}`;
+}
+
+function resolveRuntimeScope(
+  config: Pick<PlatformRuntimeSourceConfig, "hostname" | "projectId">
+): PlatformRuntimeScope {
+  const hostname = config.hostname?.trim();
+  if (hostname) {
+    return { kind: "host", value: hostname };
+  }
+
+  const projectId = config.projectId?.trim();
+  if (projectId) {
+    return { kind: "project", value: projectId };
+  }
+
+  throw new Error("[platform-runtime-source] Missing hostname or projectId.");
+}
+
+function getRuntimeScopeHeaders(
+  scope: PlatformRuntimeScope
+): Record<string, string> {
+  return scope.kind === "host"
+    ? { "x-doxa-host": scope.value }
+    : { "x-doxa-project-id": scope.value };
 }
 
 function requireConfigValue(value: string | undefined, name: string): string {

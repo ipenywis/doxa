@@ -1,3 +1,5 @@
+import { getRequestHost } from "@tanstack/react-start/server";
+
 import type { PlatformRuntimeSourceConfig } from "./platform-runtime-source";
 import type { DoxaDocsRuntimeSource } from "./runtime-source";
 
@@ -41,32 +43,59 @@ export function getRuntimeSourceMode(
 export function getPlatformRuntimeSourceConfig(
   env: RuntimeSourceEnv = process.env
 ): PlatformRuntimeSourceConfig {
+  const hostname =
+    readRuntimeEnv(env, [
+      "DOXA_DOCS_CONTENT_HOSTNAME",
+      "DOXA_PLATFORM_HOSTNAME",
+    ]) ?? readRequestHostname();
+  const projectId = readRuntimeEnv(env, [
+    "DOXA_DOCS_CONTENT_PROJECT_ID",
+    "DOXA_PLATFORM_PROJECT_ID",
+  ]);
+
   return {
     contentWorkerUrl: requireRuntimeEnv(env, [
       "DOXA_DOCS_CONTENT_WORKER_URL",
       "DOXA_PLATFORM_CONTENT_URL",
     ]),
-    projectId: requireRuntimeEnv(env, [
-      "DOXA_DOCS_CONTENT_PROJECT_ID",
-      "DOXA_PLATFORM_PROJECT_ID",
-    ]),
     accessToken: requireRuntimeEnv(env, [
       "DOXA_DOCS_CONTENT_TOKEN",
       "DOXA_PLATFORM_CONTENT_TOKEN",
     ]),
+    ...(hostname ? { hostname } : {}),
+    ...(projectId ? { projectId } : {}),
     runtimePath:
       env.DOXA_DOCS_CONTENT_RUNTIME_PATH ??
       env.DOXA_PLATFORM_CONTENT_RUNTIME_PATH,
   };
 }
 
-function requireRuntimeEnv(env: RuntimeSourceEnv, names: string[]): string {
+function readRuntimeEnv(
+  env: RuntimeSourceEnv,
+  names: readonly string[]
+): string | undefined {
   for (const name of names) {
     const value = env[name]?.trim();
     if (value) return value;
   }
 
+  return undefined;
+}
+
+function requireRuntimeEnv(env: RuntimeSourceEnv, names: string[]): string {
+  const value = readRuntimeEnv(env, names);
+  if (value) return value;
+
   throw new Error(
     `Missing required platform runtime env var. Set one of: ${names.join(", ")}.`
   );
+}
+
+function readRequestHostname(): string | undefined {
+  try {
+    const hostname = getRequestHost({ xForwardedHost: false }).trim();
+    return hostname || undefined;
+  } catch {
+    return undefined;
+  }
 }
