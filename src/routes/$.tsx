@@ -1,9 +1,9 @@
 import { useEffect, useMemo, type ComponentType } from "react";
 import { getDemoRedirectSearch } from "@/src/runtime/demo-search";
 import {
-  loadViteDocsRawPage,
-  loadViteDocsRouteData,
-} from "@/src/runtime/vite-route-data";
+  loadDocsRawPage,
+  loadDocsRouteData,
+} from "@/src/runtime/runtime-route-data";
 import { createFileRoute, notFound, redirect } from "@tanstack/react-router";
 import { z } from "zod";
 
@@ -34,7 +34,7 @@ export const Route = createFileRoute("/$")({
   loader: async ({ location, params }) => {
     const pathname = params._splat ? `/${params._splat}` : location.pathname;
     const demoSearch = getDemoRedirectSearch(location.search);
-    const data = await loadViteDocsRouteData({ data: { pathname } });
+    const data = await loadDocsRouteData({ data: { pathname } });
 
     if (data.type === "redirect") {
       throw redirect({ to: data.href, ...demoSearch });
@@ -188,7 +188,7 @@ function DocsContent() {
                 options={loaderData.features.copyPage}
                 rawDoc={
                   loaderData.features.copyPage.markdown
-                    ? () => loadViteDocsRawPage({ data: pageDocument.href })
+                    ? () => loadDocsRawPage({ data: pageDocument.href })
                     : null
                 }
                 title={title}

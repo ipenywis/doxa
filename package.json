@@ -12,6 +12,10 @@
       "types": "./src/runtime/vite.ts",
       "import": "./src/runtime/vite.ts"
     },
+    "./runtime/platform": {
+      "types": "./src/runtime/platform.ts",
+      "import": "./src/runtime/platform.ts"
+    },
     "./content": {
       "types": "./src/lib/content/types.ts",
       "import": "./src/lib/content/types.ts"

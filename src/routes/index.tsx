@@ -1,10 +1,10 @@
 import { getDemoRedirectSearch } from "@/src/runtime/demo-search";
-import { loadViteDocsRootRouteData } from "@/src/runtime/vite-route-data";
+import { loadDocsRootRouteData } from "@/src/runtime/runtime-route-data";
 import { createFileRoute, redirect } from "@tanstack/react-router";
 
 export const Route = createFileRoute("/")({
   loader: async ({ location }) => {
-    const data = await loadViteDocsRootRouteData();
+    const data = await loadDocsRootRouteData();
 
     if (data.type === "redirect") {
       throw redirect({
