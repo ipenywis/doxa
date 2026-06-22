@@ -1,3 +1,4 @@
+import type { RuntimeSection } from "@/src/runtime";
 import { useLocation } from "@tanstack/react-router";
 
 import {
@@ -9,13 +10,32 @@ import { getPageRoutesForSection } from "@/src/lib/pageroutes";
 import { Link } from "@/src/lib/transition";
 import { cn } from "@/src/lib/utils";
 
-export function SectionTabs() {
+interface SectionTabsProps {
+  sections?: RuntimeSection[];
+  currentSectionSlug?: string | null;
+  sectionHomeHrefs?: Record<string, string>;
+}
+
+export function SectionTabs({
+  sections,
+  currentSectionSlug,
+  sectionHomeHrefs,
+}: SectionTabsProps = {}) {
   const location = useLocation();
+  const runtimeSections = sections?.filter((section) => !section.hidden);
 
   // Hide entirely on single-section sites — keeps the existing UI unchanged.
-  if (nonDefaultSections.length === 0) return null;
+  if (
+    runtimeSections
+      ? runtimeSections.filter((section) => !section.default).length === 0
+      : nonDefaultSections.length === 0
+  ) {
+    return null;
+  }
 
-  const current = getSectionFromPath(location.pathname);
+  const currentSlug =
+    currentSectionSlug ?? getSectionFromPath(location.pathname).slug;
+  const tabSections = runtimeSections ?? visibleSections;
 
   return (
     <div
@@ -24,10 +44,12 @@ export function SectionTabs() {
       aria-label="Documentation sections"
     >
       <div className="flex w-max items-center gap-4 px-4 sm:gap-6 sm:px-6 md:px-8">
-        {visibleSections.map((section) => {
-          const firstPage = getPageRoutesForSection(section.slug)[0];
-          const href = firstPage?.href ?? "/";
-          const active = current.slug === section.slug;
+        {tabSections.map((section) => {
+          const href =
+            sectionHomeHrefs?.[section.slug] ??
+            getPageRoutesForSection(section.slug)[0]?.href ??
+            "/";
+          const active = currentSlug === section.slug;
           return (
             <Link
               key={section.slug}

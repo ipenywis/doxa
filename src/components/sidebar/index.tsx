@@ -1,4 +1,5 @@
 import { useDemoMode } from "@/src/contexts/demo-mode";
+import type { RuntimeNavNode, RuntimeSection } from "@/src/runtime";
 import { useLocation } from "@tanstack/react-router";
 import { LuAlignLeft } from "react-icons/lu";
 
@@ -19,12 +20,18 @@ import { Logo } from "@/src/components/navigation/logo";
 import { NavMenu } from "@/src/components/navigation/navbar";
 import { PageMenu } from "@/src/components/sidebar/pagemenu";
 
-export function Sidebar() {
+interface RuntimeSidebarProps {
+  section?: RuntimeSection | null;
+  routes?: RuntimeNavNode[];
+}
+
+export function Sidebar({ section, routes }: RuntimeSidebarProps = {}) {
   const isDemoMode = useDemoMode();
   const location = useLocation();
-  const section = getSectionFromPath(location.pathname);
-  const routes = getRoutesForSection(section.slug);
-  const variant = section.layout === "reference" ? "reference" : "docs";
+  const fallbackSection = getSectionFromPath(location.pathname);
+  const sidebarSection = section ?? fallbackSection;
+  const sidebarRoutes = routes ?? getRoutesForSection(fallbackSection.slug);
+  const variant = sidebarSection?.layout === "reference" ? "reference" : "docs";
 
   return (
     <aside
@@ -32,17 +39,18 @@ export function Sidebar() {
       aria-label="Page navigation"
     >
       <ScrollArea className="pt-6 pr-3">
-        <PageMenu routes={routes} variant={variant} />
+        <PageMenu routes={sidebarRoutes} variant={variant} />
       </ScrollArea>
     </aside>
   );
 }
 
-export function SheetLeft() {
+export function SheetLeft({ section, routes }: RuntimeSidebarProps = {}) {
   const location = useLocation();
-  const section = getSectionFromPath(location.pathname);
-  const routes = getRoutesForSection(section.slug);
-  const variant = section.layout === "reference" ? "reference" : "docs";
+  const fallbackSection = getSectionFromPath(location.pathname);
+  const sidebarSection = section ?? fallbackSection;
+  const sidebarRoutes = routes ?? getRoutesForSection(fallbackSection.slug);
+  const variant = sidebarSection?.layout === "reference" ? "reference" : "docs";
 
   return (
     <Sheet>
@@ -66,7 +74,7 @@ export function SheetLeft() {
           <div className="mx-0 mt-3 flex flex-col gap-2.5 px-5">
             <NavMenu isSheet />
             <Separator className="my-2" />
-            <PageMenu isSheet routes={routes} variant={variant} />
+            <PageMenu isSheet routes={sidebarRoutes} variant={variant} />
           </div>
         </ScrollArea>
       </SheetContent>

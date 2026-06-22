@@ -1,5 +1,3 @@
-import grayMatter from "gray-matter";
-
 import indexedDocumentsData from "../../public/search-data/documents.json";
 import searchIndexRaw from "../../public/search-data/index.json?raw";
 import defaultDocumentsData from "../contents/settings/documents.json";
@@ -56,11 +54,14 @@ interface IndexedDocument {
   };
 }
 
-const mdxSources = import.meta.glob<string>("/src/contents/docs/**/index.mdx", {
-  eager: true,
-  import: "default",
-  query: "?raw",
-});
+const mdxSources = import.meta.glob<unknown>(
+  "/src/contents/docs/**/index.mdx",
+  {
+    eager: true,
+    import: "default",
+    query: "?raw",
+  }
+);
 
 const DOCS_ROOT_PREFIX = "/src/contents/docs/";
 const DEFAULT_SECTION_PREFIX = "default/";
@@ -267,7 +268,8 @@ function buildSourceEntries(): Map<string, SourceEntry> {
   const defaultEntries: [string, string][] = [];
   const otherEntries: [string, string][] = [];
 
-  for (const [viteKey, source] of Object.entries(mdxSources)) {
+  for (const [viteKey, rawModule] of Object.entries(mdxSources)) {
+    const source = getRawMdxSource(rawModule, viteKey);
     const relativePath = toRelativePath(viteKey);
 
     if (relativePath.startsWith(DEFAULT_SECTION_PREFIX)) {
@@ -296,17 +298,11 @@ function buildSourceEntries(): Map<string, SourceEntry> {
 }
 
 function parseSourceEntry(filePath: string, rawContent: string): SourceEntry {
-  const parsed = grayMatter(rawContent);
-  const frontmatter = parsed.data as Partial<{
-    title: unknown;
-    description: unknown;
-    keywords: unknown;
-  }>;
-  const href = filePathToHref(filePath);
+  const frontmatter = parseSourceFrontmatter(rawContent);
 
   return {
-    slug: normalizeRuntimeSlug(href),
-    href,
+    slug: normalizeRuntimeSlug(filePathToHref(filePath)),
+    href: filePathToHref(filePath),
     filePath,
     rawContent,
     frontmatter: {
@@ -318,6 +314,116 @@ function parseSourceEntry(filePath: string, rawContent: string): SourceEntry {
       keywords: parseKeywords(frontmatter.keywords),
     },
   };
+}
+
+function getRawMdxSource(value: unknown, viteKey: string): string {
+  if (typeof value === "string") return value;
+  if (value instanceof Uint8Array) return new TextDecoder().decode(value);
+  if (typeof value === "function") {
+    const source = getRawMdxSourceFromComponent(
+      value as (...args: unknown[]) => unknown
+    );
+    if (source) return source;
+  }
+
+  if (value && typeof value === "object") {
+    const record = value as Record<string, unknown>;
+    for (const key of ["default", "__rawSource", "raw", "source"]) {
+      if (typeof record[key] === "string") return record[key];
+    }
+  }
+
+  throw new Error(
+    `[vite-runtime-source] Expected raw MDX source string for ${viteKey}.`
+  );
+}
+
+function getRawMdxSourceFromComponent(
+  component: (...args: unknown[]) => unknown
+): string | null {
+  try {
+    return readRawMdxStringFromElement(component({}));
+  } catch {
+    return null;
+  }
+}
+
+function readRawMdxStringFromElement(value: unknown): string | null {
+  if (!value || typeof value !== "object") return null;
+
+  const element = value as Record<string, unknown>;
+  if (typeof element.type === "string" && element.type.startsWith("---")) {
+    return element.type;
+  }
+
+  const props = element.props;
+  if (!props || typeof props !== "object") return null;
+
+  const children = (props as Record<string, unknown>).children;
+  return typeof children === "string" && children.startsWith("---")
+    ? children
+    : null;
+}
+
+function parseSourceFrontmatter(rawContent: string): Partial<{
+  title: unknown;
+  description: unknown;
+  keywords: unknown;
+}> {
+  const block = readFrontmatterBlock(rawContent);
+  if (!block) return {};
+
+  const frontmatter: Record<string, unknown> = {};
+  const lines = block.split(/\r?\n/);
+
+  for (let index = 0; index < lines.length; index++) {
+    const line = lines[index];
+    const match = line.match(/^([A-Za-z0-9_-]+):(?:\s*(.*))?$/);
+    if (!match) continue;
+
+    let value = match[2]?.trim() ?? "";
+    const nextLine = lines[index + 1];
+    if (!value && nextLine && /^\s+/.test(nextLine)) {
+      value = nextLine.trim();
+      index++;
+    }
+
+    frontmatter[match[1]] = parseFrontmatterValue(value);
+  }
+
+  return frontmatter;
+}
+
+function readFrontmatterBlock(rawContent: string): string | null {
+  if (!rawContent.startsWith("---")) return null;
+  const match = rawContent.match(/^---(?:\r?\n)([\s\S]*?)(?:\r?\n)---/);
+  return match?.[1] ?? null;
+}
+
+function parseFrontmatterValue(value: string): unknown {
+  if (!value) return "";
+  if (value.startsWith("[") && value.endsWith("]")) {
+    try {
+      return JSON.parse(value) as unknown;
+    } catch {
+      return value;
+    }
+  }
+
+  return stripYamlQuotes(value);
+}
+
+function stripYamlQuotes(value: string): string {
+  const quote = value[0];
+  if (
+    (quote === '"' || quote === "'") &&
+    value.endsWith(quote) &&
+    value.length >= 2
+  ) {
+    return value.slice(1, -1);
+  }
+
+  return value;
 }
 
 function parseKeywords(value: unknown): string[] {

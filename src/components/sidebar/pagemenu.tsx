@@ -1,9 +1,13 @@
-import { isHeading, isRoute, Routes, type Paths } from "@/src/lib/pageroutes";
-import SubLink from "@/src/components/sidebar/sublink";
+import type { RuntimeNavNode, RuntimeNavPage } from "@/src/runtime";
+
+import { Routes, type Paths } from "@/src/lib/pageroutes";
+import SubLink, { type SubLinkRoute } from "@/src/components/sidebar/sublink";
+
+type MenuRoute = Paths | RuntimeNavNode;
 
 interface PageMenuProps {
   isSheet?: boolean;
-  routes?: Paths[];
+  routes?: MenuRoute[];
   variant?: "docs" | "reference";
 }
 
@@ -26,7 +30,7 @@ export function PageMenu({
             />
           );
         }
-        if (isHeading(item)) {
+        if (isMenuHeading(item)) {
           return (
             <div
               key={`heading-${item.heading}-${index}`}
@@ -36,7 +40,7 @@ export function PageMenu({
             </div>
           );
         }
-        if (isRoute(item)) {
+        if (isMenuPage(item)) {
           return (
             <SubLink
               key={item.href}
@@ -52,4 +56,14 @@ export function PageMenu({
       })}
     </div>
   );
+}
+
+function isMenuHeading(
+  item: MenuRoute
+): item is Extract<MenuRoute, { heading: string }> {
+  return "heading" in item && !("title" in item);
+}
+
+function isMenuPage(item: MenuRoute): item is RuntimeNavPage & SubLinkRoute {
+  return "title" in item && "href" in item;
 }

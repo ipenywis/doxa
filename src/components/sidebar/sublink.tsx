@@ -1,20 +1,22 @@
 import { useLocation } from "@tanstack/react-router";
 
+import type { IconName } from "@/src/settings/icons";
 import { getIcon } from "@/src/settings/icons";
-import { isRoute, Paths } from "@/src/lib/pageroutes";
 import { cn } from "@/src/lib/utils";
 import { SheetClose } from "@/src/components/ui/sheet";
 import Anchor from "@/src/components/anchor";
 
-export default function SubLink(
-  props: Extract<Paths, { title: string; href: string }> & { isSheet: boolean }
-) {
+export interface SubLinkRoute {
+  title: string;
+  href: string;
+  icon?: IconName;
+  badge?: string;
+  noLink?: true;
+}
+
+export default function SubLink(props: SubLinkRoute & { isSheet: boolean }) {
   const location = useLocation();
   const path = location.pathname;
-
-  if (!isRoute(props)) {
-    return null;
-  }
 
   const { title, href, icon, badge, noLink, isSheet } = props;
   const isActive = path === href;

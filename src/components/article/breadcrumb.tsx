@@ -14,7 +14,13 @@ import {
 } from "@/src/components/ui/breadcrumb";
 import { toTitleCase } from "@/utils/toTitleCase";
 
-export function ArticleBreadcrumb({ paths }: { paths: string[] }) {
+export function ArticleBreadcrumb({
+  paths,
+  homeHref,
+}: {
+  paths: string[];
+  homeHref?: string | null;
+}) {
   return (
     <div className="pb-5">
       <Breadcrumb>
@@ -24,7 +30,7 @@ export function ArticleBreadcrumb({ paths }: { paths: string[] }) {
               <Link
                 title="Documentation Home"
                 aria-label="Documentation Home"
-                href={PageRoutes[0]?.href ?? "/"}
+                href={homeHref ?? PageRoutes[0]?.href ?? "/"}
               >
                 <LuHouse className="h-3.5 w-3.5" />
               </Link>

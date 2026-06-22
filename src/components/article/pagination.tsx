@@ -4,6 +4,11 @@ import { getSectionFromPath } from "@/src/settings/sections";
 import { getPageRoutesForSection } from "@/src/lib/pageroutes";
 import { Link } from "@/src/lib/transition";
 
+interface PageLink {
+  title: string;
+  href: string;
+}
+
 function getPreviousNext(path: string) {
   const targetHref = `/${path.replace(/^\/+/, "")}`;
   const section = getSectionFromPath(targetHref);
@@ -20,8 +25,19 @@ function getPreviousNext(path: string) {
   return { prev, next };
 }
 
-export function Pagination({ pathname }: { pathname: string }) {
-  const res = getPreviousNext(pathname);
+export function Pagination({
+  pathname,
+  previous,
+  next,
+}: {
+  pathname: string;
+  previous?: PageLink | null;
+  next?: PageLink | null;
+}) {
+  const res =
+    previous !== undefined || next !== undefined
+      ? { prev: previous ?? null, next: next ?? null }
+      : getPreviousNext(pathname);
 
   return (
     <div className="mt-12 flex items-center justify-between gap-4 border-t pt-6 pb-4">
