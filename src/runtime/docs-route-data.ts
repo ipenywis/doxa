@@ -79,12 +79,16 @@ export interface ResolveDocsRouteDataOptions {
   includeRawDocument?: boolean;
 }
 
+interface DocsRouteMatchLike {
+  loaderData?: unknown;
+}
+
 export async function resolveDocsRouteData(
   source: DoxaDocsRuntimeSource,
   pathname: string,
   options: ResolveDocsRouteDataOptions = {}
 ): Promise<DocsRouteData> {
-  const includeRawDocument = options.includeRawDocument ?? true;
+  const includeRawDocument = options.includeRawDocument ?? false;
   const resolution = await source.resolvePage(pathname);
 
   if (resolution.type === "redirect") {
@@ -118,9 +122,10 @@ export async function resolveDocsRouteData(
     resolution.type === "page" ? resolution.slug : normalizeRuntimeSlug(href);
   const currentSection = getRuntimeSectionFromHref(sections, href);
   const sectionSlug = currentSection?.slug ?? "";
-  const sectionNavigation = sectionSlug
+  const rawSectionNavigation = sectionSlug
     ? await source.getNavigation(sectionSlug)
     : [];
+  const sectionNavigation = flattenRuntimeNavigation(rawSectionNavigation);
   const sectionRoutes = sectionSlug ? await source.getRoutes(sectionSlug) : [];
   const sectionHomeHrefs = await getSectionHomeHrefs(source, sections);
   const routeTitle =
@@ -191,8 +196,39 @@ export async function getDocsRouteRawDocument(
   source: Pick<DoxaDocsRuntimeSource, "getRawPage">,
   slugOrHref: string
 ): Promise<DocsRouteRawDocument | null> {
-  const rawPage = await source.getRawPage(slugOrHref);
-  return rawPage ? toCopyPageRawDocument(rawPage) : null;
+  try {
+    const rawPage = await source.getRawPage(slugOrHref);
+    return rawPage ? toCopyPageRawDocument(rawPage) : null;
+  } catch {
+    return null;
+  }
+}
+
+export function getDocsRouteDataFromMatches(
+  matches: readonly DocsRouteMatchLike[]
+): DocsRoutePageData | null {
+  for (let index = matches.length - 1; index >= 0; index--) {
+    const loaderData = matches[index]?.loaderData;
+    if (isDocsRoutePageData(loaderData)) {
+      return loaderData;
+    }
+  }
+
+  return null;
+}
+
+export function isDocsRoutePageData(
+  value: unknown
+): value is DocsRoutePageData {
+  if (!value || typeof value !== "object") return false;
+
+  const data = value as Record<string, unknown>;
+  return (
+    (data.type === "page" || data.type === "not_found") &&
+    Array.isArray(data.sectionNavigation) &&
+    Array.isArray(data.sectionRoutes) &&
+    "currentSection" in data
+  );
 }
 
 export function findSectionHeadingFromRuntimeNavigation(

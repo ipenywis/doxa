@@ -1,3 +1,5 @@
+import grayMatter from "gray-matter";
+
 import indexedDocumentsData from "../../public/search-data/documents.json";
 import searchIndexRaw from "../../public/search-data/index.json?raw";
 import defaultDocumentsData from "../contents/settings/documents.json";
@@ -370,60 +372,11 @@ function parseSourceFrontmatter(rawContent: string): Partial<{
   description: unknown;
   keywords: unknown;
 }> {
-  const block = readFrontmatterBlock(rawContent);
-  if (!block) return {};
-
-  const frontmatter: Record<string, unknown> = {};
-  const lines = block.split(/\r?\n/);
-
-  for (let index = 0; index < lines.length; index++) {
-    const line = lines[index];
-    const match = line.match(/^([A-Za-z0-9_-]+):(?:\s*(.*))?$/);
-    if (!match) continue;
-
-    let value = match[2]?.trim() ?? "";
-    const nextLine = lines[index + 1];
-    if (!value && nextLine && /^\s+/.test(nextLine)) {
-      value = nextLine.trim();
-      index++;
-    }
-
-    frontmatter[match[1]] = parseFrontmatterValue(value);
+  try {
+    return grayMatter(rawContent).data;
+  } catch {
+    return {};
   }
-
-  return frontmatter;
-}
-
-function readFrontmatterBlock(rawContent: string): string | null {
-  if (!rawContent.startsWith("---")) return null;
-  const match = rawContent.match(/^---(?:\r?\n)([\s\S]*?)(?:\r?\n)---/);
-  return match?.[1] ?? null;
-}
-
-function parseFrontmatterValue(value: string): unknown {
-  if (!value) return "";
-  if (value.startsWith("[") && value.endsWith("]")) {
-    try {
-      return JSON.parse(value) as unknown;
-    } catch {
-      return value;
-    }
-  }
-
-  return stripYamlQuotes(value);
-}
-
-function stripYamlQuotes(value: string): string {
-  const quote = value[0];
-  if (
-    (quote === '"' || quote === "'") &&
-    value.endsWith(quote) &&
-    value.length >= 2
-  ) {
-    return value.slice(1, -1);
-  }
-
-  return value;
 }
 
 function parseKeywords(value: unknown): string[] {

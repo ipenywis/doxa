@@ -3,6 +3,7 @@ import { describe, expect, test } from "vitest";
 import { getDemoRedirectSearch } from "./demo-search";
 import {
   findSectionHeadingFromRuntimeNavigation,
+  getDocsRouteDataFromMatches,
   getPreviousNextFromRuntimeRoutes,
   resolveDocsRootRouteData,
   resolveDocsRouteData,
@@ -71,7 +72,8 @@ describe("docs route data", () => {
   test("resolves page metadata, toc, canonical URL, routes, and raw copy data", async () => {
     const data = await resolveDocsRouteData(
       createFakeRuntimeSource(),
-      "/overview"
+      "/overview",
+      { includeRawDocument: true }
     );
 
     expect(data.type).toBe("page");
@@ -100,6 +102,95 @@ describe("docs route data", () => {
       "/guide",
       "/advanced",
     ]);
+  });
+
+  test("excludes raw document data from normal route data by default", async () => {
+    let rawPageCalls = 0;
+    const source = createFakeRuntimeSource({
+      async getRawPage(slugOrHref) {
+        rawPageCalls++;
+        return rawPages[normalizeRuntimeHref(slugOrHref)] ?? null;
+      },
+    });
+
+    const data = await resolveDocsRouteData(source, "/overview");
+
+    expect(data.type).toBe("page");
+    if (data.type !== "page") return;
+    expect(data.rawDoc).toBeNull();
+    expect(rawPageCalls).toBe(0);
+  });
+
+  test("keeps page data available when raw copy loading fails", async () => {
+    const source = createFakeRuntimeSource({
+      async getRawPage() {
+        throw new Error("raw copy unavailable");
+      },
+    });
+
+    const data = await resolveDocsRouteData(source, "/overview", {
+      includeRawDocument: true,
+    });
+
+    expect(data.type).toBe("page");
+    if (data.type !== "page") return;
+    expect(data.document?.href).toBe("/overview");
+    expect(data.rawDoc).toBeNull();
+  });
+
+  test("flattens nested section navigation for sidebar consumers", async () => {
+    const nestedNavigation: RuntimeNavNode[] = [
+      { heading: "Start" },
+      {
+        title: "Guide",
+        href: "/guide",
+        items: [{ title: "Install", href: "/install" }],
+      },
+    ];
+    const source = createFakeRuntimeSource({
+      async getNavigation(sectionSlug) {
+        return sectionSlug === "docs" ? nestedNavigation : [];
+      },
+      async getRoutes(sectionSlug) {
+        return filterLinkableRuntimePages(
+          sectionSlug === "docs" ? nestedNavigation : []
+        );
+      },
+    });
+
+    const data = await resolveDocsRouteData(source, "/guide");
+
+    expect(data.type).toBe("page");
+    if (data.type !== "page") return;
+    expect(data.sectionNavigation).toEqual([
+      { heading: "Start" },
+      { title: "Guide", href: "/guide" },
+      { title: "Install", href: "/guide/install" },
+    ]);
+    expect(data.sectionRoutes.map((route) => route.href)).toEqual([
+      "/guide",
+      "/guide/install",
+    ]);
+  });
+
+  test("selects docs route data from router matches for root-level navigation", async () => {
+    const data = await resolveDocsRouteData(
+      createFakeRuntimeSource(),
+      "/overview"
+    );
+
+    expect(
+      getDocsRouteDataFromMatches([
+        { loaderData: { type: "empty" } },
+        { loaderData: data },
+      ])
+    ).toBe(data);
+    expect(
+      getDocsRouteDataFromMatches([
+        { loaderData: null },
+        { loaderData: { type: "redirect", href: "/overview", status: 308 } },
+      ])
+    ).toBeNull();
   });
 
   test("derives section headings and pagination from runtime navigation/routes", async () => {
@@ -178,8 +269,10 @@ const rawPages: Record<string, RuntimeRawPage> = Object.fromEntries(
   ])
 );
 
-function createFakeRuntimeSource(): DoxaDocsRuntimeSource {
-  return {
+function createFakeRuntimeSource(
+  overrides: Partial<DoxaDocsRuntimeSource> = {}
+): DoxaDocsRuntimeSource {
+  const source: DoxaDocsRuntimeSource = {
     async getSiteConfig() {
       return {
         name: "Doxa Test",
@@ -258,6 +351,8 @@ function createFakeRuntimeSource(): DoxaDocsRuntimeSource {
       return null;
     },
   };
+
+  return { ...source, ...overrides };
 }
 
 function createPage({

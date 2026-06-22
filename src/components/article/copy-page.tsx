@@ -19,6 +19,7 @@ import {
 type DeferredRawDoc =
   | RawDocument
   | Promise<RawDocument | null>
+  | (() => RawDocument | Promise<RawDocument | null> | null | undefined)
   | null
   | undefined;
 
@@ -41,6 +42,17 @@ function composeText(title: string, description?: string) {
   if (description) parts.push(description);
   if (body) parts.push(body);
   return parts.join("\n\n");
+}
+
+async function resolveDeferredRawDoc(
+  rawDoc: DeferredRawDoc
+): Promise<RawDocument | null> {
+  try {
+    const doc = typeof rawDoc === "function" ? rawDoc() : rawDoc;
+    return (await Promise.resolve(doc)) ?? null;
+  } catch {
+    return null;
+  }
 }
 
 export function CopyPage({
@@ -68,7 +80,7 @@ export function CopyPage({
   }
 
   async function copyMarkdown() {
-    const doc = await Promise.resolve(rawDoc);
+    const doc = await resolveDeferredRawDoc(rawDoc);
     if (!doc) return;
     await navigator.clipboard.writeText(composeMarkdown(doc));
     flashCopied();

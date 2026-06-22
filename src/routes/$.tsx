@@ -1,6 +1,9 @@
 import { useEffect, useMemo, type ComponentType } from "react";
 import { getDemoRedirectSearch } from "@/src/runtime/demo-search";
-import { loadViteDocsRouteData } from "@/src/runtime/vite-route-data";
+import {
+  loadViteDocsRawPage,
+  loadViteDocsRouteData,
+} from "@/src/runtime/vite-route-data";
 import { createFileRoute, notFound, redirect } from "@tanstack/react-router";
 import { z } from "zod";
 
@@ -110,7 +113,7 @@ function MdxContent({ slug }: { slug: string }) {
 function DocsContent() {
   const { isOpen: chatOpen, setCurrentPageContext } = useChatContext();
   const loaderData = Route.useLoaderData();
-  const { slug, document: pageDocument, rawDoc } = loaderData;
+  const { slug, document: pageDocument } = loaderData;
   const paths = slug.split("/");
   const pathName = slug;
 
@@ -183,7 +186,11 @@ function DocsContent() {
             {copyPageEnabled && (
               <CopyPage
                 options={loaderData.features.copyPage}
-                rawDoc={rawDoc}
+                rawDoc={
+                  loaderData.features.copyPage.markdown
+                    ? () => loadViteDocsRawPage({ data: pageDocument.href })
+                    : null
+                }
                 title={title}
                 description={description}
               />

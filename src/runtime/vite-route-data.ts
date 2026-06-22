@@ -15,7 +15,9 @@ export const loadViteDocsRouteData = createServerFn({ method: "GET" })
   .handler(async ({ data }) => {
     const { viteRuntimeSource } = await import("./vite");
 
-    return resolveDocsRouteData(viteRuntimeSource, data.pathname);
+    return resolveDocsRouteData(viteRuntimeSource, data.pathname, {
+      includeRawDocument: false,
+    });
   });
 
 export const loadViteDocsRawPage = createServerFn({ method: "GET" })

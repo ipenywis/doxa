@@ -1,6 +1,7 @@
 import { useDemoMode } from "@/src/contexts/demo-mode";
 import type { RuntimeNavNode, RuntimeSection } from "@/src/runtime";
-import { useLocation } from "@tanstack/react-router";
+import { getDocsRouteDataFromMatches } from "@/src/runtime/docs-route-data";
+import { useLocation, useRouterState } from "@tanstack/react-router";
 import { LuAlignLeft } from "react-icons/lu";
 
 import { getSectionFromPath } from "@/src/settings/sections";
@@ -28,9 +29,14 @@ interface RuntimeSidebarProps {
 export function Sidebar({ section, routes }: RuntimeSidebarProps = {}) {
   const isDemoMode = useDemoMode();
   const location = useLocation();
+  const runtimeSidebarData = useRuntimeSidebarData();
   const fallbackSection = getSectionFromPath(location.pathname);
-  const sidebarSection = section ?? fallbackSection;
-  const sidebarRoutes = routes ?? getRoutesForSection(fallbackSection.slug);
+  const sidebarSection =
+    section ?? runtimeSidebarData?.currentSection ?? fallbackSection;
+  const sidebarRoutes =
+    routes ??
+    runtimeSidebarData?.sectionNavigation ??
+    getRoutesForSection(fallbackSection.slug);
   const variant = sidebarSection?.layout === "reference" ? "reference" : "docs";
 
   return (
@@ -47,9 +53,14 @@ export function Sidebar({ section, routes }: RuntimeSidebarProps = {}) {
 
 export function SheetLeft({ section, routes }: RuntimeSidebarProps = {}) {
   const location = useLocation();
+  const runtimeSidebarData = useRuntimeSidebarData();
   const fallbackSection = getSectionFromPath(location.pathname);
-  const sidebarSection = section ?? fallbackSection;
-  const sidebarRoutes = routes ?? getRoutesForSection(fallbackSection.slug);
+  const sidebarSection =
+    section ?? runtimeSidebarData?.currentSection ?? fallbackSection;
+  const sidebarRoutes =
+    routes ??
+    runtimeSidebarData?.sectionNavigation ??
+    getRoutesForSection(fallbackSection.slug);
   const variant = sidebarSection?.layout === "reference" ? "reference" : "docs";
 
   return (
@@ -80,4 +91,10 @@ export function SheetLeft({ section, routes }: RuntimeSidebarProps = {}) {
       </SheetContent>
     </Sheet>
   );
+}
+
+function useRuntimeSidebarData() {
+  return useRouterState({
+    select: (state) => getDocsRouteDataFromMatches(state.matches),
+  });
 }
