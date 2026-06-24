@@ -24,5 +24,12 @@ export function getHostingPlugins(target: DeploymentTarget): PluginOption[] {
     return [nitro({ preset: "node-server" })];
   }
 
-  return [cloudflare({ viteEnvironment: { name: "ssr" } })];
+  return [
+    cloudflare({
+      ...(process.env.CLOUDFLARE_VITE_WRANGLER_CONFIG_PATH
+        ? { configPath: process.env.CLOUDFLARE_VITE_WRANGLER_CONFIG_PATH }
+        : {}),
+      viteEnvironment: { name: "ssr" },
+    }),
+  ];
 }

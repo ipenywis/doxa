@@ -46,3 +46,6 @@ tmp
 .env*
 
 .doxa
+
+# local Cloudflare renderer target; generated/deployment-specific config
+/wrangler.renderer.json

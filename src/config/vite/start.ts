@@ -25,7 +25,7 @@ export function createStartConfig(
       entry: "./server.ts",
     },
     pages: getSitemapPages(),
-    ...(deploymentTarget === "cloudflare"
+    ...(deploymentTarget === "cloudflare" && shouldPrerenderCloudflareBuild()
       ? { prerender: prerenderConfig }
       : {}),
     sitemap: {
@@ -33,4 +33,11 @@ export function createStartConfig(
       host: sitemapHost,
     },
   };
+}
+
+function shouldPrerenderCloudflareBuild() {
+  const wranglerConfigPath = process.env.CLOUDFLARE_VITE_WRANGLER_CONFIG_PATH;
+  if (wranglerConfigPath?.includes("renderer")) return false;
+
+  return process.env.DOXA_DOCS_RUNTIME_SOURCE !== "platform";
 }
